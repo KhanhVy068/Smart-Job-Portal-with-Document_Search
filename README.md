@@ -102,8 +102,10 @@ Người dùng
 
 ## Sơ đồ kiến trúc tổng thể
 [Frontend React/Vue]
+
          │
          ▼
+         
 [API Gateway / Backend API]
          │
 ──┐──────├─────────┐
