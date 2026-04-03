@@ -107,18 +107,26 @@ Người dùng
          ▼
          
 [API Gateway / Backend API]
+
          │
 ──┐──────├─────────┐
   ▼                ▼
+  
 [PostgreSQL] [Redis Queue]
+
          │
          ▼
+         
 [Worker (PDF Extractor)]
+
          │
          ▼
+         
 [MinIO/S3 Storage]
+
          │
          ▼
+         
 [Elasticsearch/Meilisearch]
 
 
