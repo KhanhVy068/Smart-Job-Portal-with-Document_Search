@@ -110,6 +110,7 @@ Người dùng
 
          │
 ──┐──────├─────────┐
+
   ▼                ▼
   
 [PostgreSQL] [Redis Queue]
