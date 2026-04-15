@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Build
+dist/
+build/
+*.zip
+
+# Database
+*.sqlite
+*.db
+
+# Uploads
+uploads/
+temp/
+storage/
+
+# Redis
+dump.rdb
+
+# Testing
+coverage/
+.nyc_output/
+
+# Performance
+benchmark-results/
