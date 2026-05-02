@@ -1,0 +1,171 @@
+<!-- Trang dashboard -->
+<section class="min-w-[980px] p-8 space-y-8">
+  <!-- Phần tiêu đề -->
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <h1 class="text-4xl font-black tracking-tight text-slate-950">Tổng quan Dashboard</h1>
+      <p class="mt-2 text-lg font-medium text-slate-500">Chào mừng trở lại.</p>
+    </div>
+    <button class="inline-flex w-fit items-center gap-3 rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm">
+      <span class="material-symbols-outlined">calendar_today</span>
+      01 Th06, 2024 - Hiện tại
+    </button>
+  </div>
+
+  <!-- Thẻ thống kê -->
+  <div class="grid grid-cols-4 gap-6">
+    <!-- Tổng số tin -->
+    <article class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div class="mb-6 flex items-start justify-between">
+        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <span class="material-symbols-outlined text-3xl">business_center</span>
+        </div>
+      </div>
+      <p class="text-base font-medium text-slate-500">Tổng số tin</p>
+      <p id="totalJobs" class="mt-2 text-4xl font-black text-slate-950">--</p>
+    </article>
+
+    <!-- Tổng ứng viên -->
+    <article class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div class="mb-6 flex items-start justify-between">
+        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+          <span class="material-symbols-outlined text-3xl">groups</span>
+        </div>
+      </div>
+      <p class="text-base font-medium text-slate-500">Tổng ứng viên</p>
+      <p id="totalCandidates" class="mt-2 text-4xl font-black text-slate-950">--</p>
+    </article>
+
+    <!-- CV đã xử lý -->
+    <article class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div class="mb-6 flex items-start justify-between">
+        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+          <span class="material-symbols-outlined text-3xl">assignment_turned_in</span>
+        </div>
+      </div>
+      <p class="text-base font-medium text-slate-500">CV đã xử lý</p>
+      <p id="processedCV" class="mt-2 text-4xl font-black text-slate-950">--</p>
+    </article>
+
+    <!-- CV bị loại -->
+    <article class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div class="mb-6 flex items-start justify-between">
+        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+          <span class="material-symbols-outlined text-3xl">cancel</span>
+        </div>
+      </div>
+      <p class="text-base font-medium text-slate-500">CV bị loại</p>
+      <p id="rejectedCV" class="mt-2 text-4xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- Nội dung chính -->
+  <div class="grid grid-cols-[2fr_1fr] gap-8">
+    <!-- Biểu đồ ứng tuyển -->
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-100 p-8">
+        <h2 class="text-2xl font-black text-slate-950">Biểu đồ lượng ứng tuyển</h2>
+        <!-- Bộ lọc thời gian -->
+        <div class="flex items-center gap-3">
+          <button class="rounded-lg bg-blue-50 px-4 py-2 text-sm font-bold text-blue-600">Tuần này</button>
+          <button class="rounded-lg px-4 py-2 text-sm font-bold text-slate-400">Tháng trước</button>
+        </div>
+      </div>
+      <!-- Vùng biểu đồ -->
+      <div id="applicationChart" class="relative min-h-[360px] p-8">
+        <!-- SVG biểu đồ -->
+        <svg id="applicationChartSvg" class="absolute inset-x-8 bottom-14 h-64 w-[calc(100%-4rem)]" preserveAspectRatio="none" viewBox="0 0 1000 300" role="img" aria-label="Bieu do luong ung tuyen"></svg>
+        <!-- Tooltip -->
+        <div id="applicationChartTooltip" class="pointer-events-none absolute z-10 hidden rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white shadow-lg"></div>
+        <!-- Nhãn ngày -->
+        <div id="applicationChartLabels" class="absolute inset-x-8 bottom-8 flex justify-between text-sm font-black text-slate-400"></div>
+      </div>
+    </section>
+
+    <!-- Hoạt động gần đây -->
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-100 p-8">
+        <h2 class="text-2xl font-black text-slate-950">Hoạt động gần đây</h2>
+        <a class="text-sm font-black text-blue-600" href="#">Tất cả</a>
+      </div>
+      <!-- Danh sách hoạt động -->
+      <div id="recentActivities" class="space-y-2 p-4">
+        <!-- Dữ liệu chờ -->
+        <div class="flex items-center gap-4 rounded-lg p-4">
+          <div class="flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 font-black text-blue-600">A</div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-base font-black text-slate-950">Nguyễn Thị An</p>
+            <p class="truncate text-sm text-slate-500">Senior UI/UX Designer</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-black text-slate-400">2 phút trước</p>
+            <span class="rounded bg-green-50 px-2 py-1 text-[10px] font-black text-green-600">MỚI</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 rounded-lg p-4">
+          <div class="flex h-11 w-11 items-center justify-center rounded-full bg-cyan-50 font-black text-cyan-700">Đ</div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-base font-black text-slate-950">Phạm Minh Đức</p>
+            <p class="truncate text-sm text-slate-500">Backend Developer</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-black text-slate-400">1 giờ trước</p>
+            <span class="rounded bg-blue-50 px-2 py-1 text-[10px] font-black text-blue-600">ĐÃ XEM</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 rounded-lg p-4">
+          <div class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-200 font-black text-slate-500">L</div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-base font-black text-slate-950">Lê Hoàng Nam</p>
+            <p class="truncate text-sm text-slate-500">Marketing Manager</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-black text-slate-400">3 giờ trước</p>
+            <span class="rounded bg-green-50 px-2 py-1 text-[10px] font-black text-green-600">MỚI</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 rounded-lg p-4">
+          <div class="flex h-11 w-11 items-center justify-center rounded-full bg-purple-50 font-black text-purple-600">H</div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-base font-black text-slate-950">Trần Thu Hương</p>
+            <p class="truncate text-sm text-slate-500">Project Manager</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-black text-slate-400">Hôm qua</p>
+            <span class="rounded bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-600">PHỎNG VẤN</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Tin tuyển dụng mới nhất -->
+  <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="flex items-center justify-between border-b border-slate-100 p-8">
+      <div>
+        <h2 class="text-2xl font-black text-slate-950">Tin tuyển dụng mới nhất</h2>
+        <p class="mt-2 text-sm font-medium text-slate-500">Danh sách các vị trí bạn đang mở tuyển dụng trực tiếp.</p>
+      </div>
+      <button class="rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white" data-route="jobs">Xem tất cả tin</button>
+    </div>
+    <!-- Bảng tin tuyển dụng -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-slate-50 text-xs font-black uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="px-8 py-5">Vị trí tuyển dụng</th>
+            <th class="px-8 py-5">Lượng CV</th>
+            <th class="px-8 py-5">Ngày đăng</th>
+            <th class="px-8 py-5">Trạng thái</th>
+            <th class="px-8 py-5 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="recentJobs" class="divide-y divide-slate-100">
+          <tr>
+            <td class="px-8 py-6 text-sm font-semibold text-slate-400" colspan="5">Dang tai tin tuyen dung...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
