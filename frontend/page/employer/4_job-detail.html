@@ -1,0 +1,102 @@
+<section class="min-h-screen bg-slate-50 p-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <button class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600" data-route="jobs">
+      <span class="material-symbols-outlined text-lg">arrow_back</span>
+      Quay lại danh sách tin
+    </button>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-black text-green-700">
+            <span class="h-2 w-2 rounded-full bg-green-600"></span>
+            <span id="jobStatus">Đăng tuyển</span>
+          </div>
+          <h1 id="jobTitle" class="text-4xl font-black tracking-tight text-slate-950">Senior UI/UX Designer</h1>
+          <p id="jobMeta" class="mt-3 text-base font-medium text-slate-500">Toàn thời gian - Ho Chi Minh</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button id="btnEditJob" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
+            <span class="material-symbols-outlined text-lg">edit</span>
+            Chỉnh sửa
+          </button>
+          <button class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700" data-route="candidates">
+            <span class="material-symbols-outlined text-lg">group</span>
+            Xem ứng viên
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div class="rounded-xl bg-slate-50 p-5">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Ngay dang</p>
+          <p id="jobCreatedAt" class="mt-2 text-lg font-black text-slate-900">15/05/2024</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-5">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">So ung vien</p>
+          <p id="jobCandidates" class="mt-2 text-lg font-black text-slate-900">17</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-5">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Luot xem</p>
+          <p id="jobViews" class="mt-2 text-lg font-black text-slate-900">420</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-5">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Han nop</p>
+          <p class="mt-2 text-lg font-black text-slate-900">30/06/2024</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+      <article class="space-y-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section>
+          <h2 class="text-2xl font-black text-slate-950">Mô tả công việc</h2>
+          <p id="jobDescription" class="mt-4 leading-8 text-slate-600">
+            Tham gia xây dựng và tối ưu trải nghiệm người dùng cho công thông tin tuyển dụng.
+            Phối hợp với Product, Engineering và Recruitment team để thiết kế các chức năng quản lý tin tuyển dụng,
+            tìm kiếm CV và theo dõi ứng viên.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-black text-slate-950">Yêu cầu ứng viên</h2>
+          <ul id="jobRequirements" class="mt-4 space-y-3 text-slate-600">
+            <li class="flex gap-3"><span class="material-symbols-outlined text-blue-600">check_circle</span> Có kinh nghiệm với sản phẩm web và dashboard quản trị.</li>
+            <li class="flex gap-3"><span class="material-symbols-outlined text-blue-600">check_circle</span> Hiểu biết về UI system, responsive layout và khả năng làm việc với team kỹ thuật.</li>
+            <li class="flex gap-3"><span class="material-symbols-outlined text-blue-600">check_circle</span> Chủ động phân tích vấn đề và đề xuất cải tiến trải nghiệm người dùng.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-black text-slate-950">Quyền lợi</h2>
+          <p id="jobBenefits" class="mt-4 leading-8 text-slate-600">
+            ôi trường làm việc linh hoạt, có cơ hội tham gia phát triển sản phẩm từ giai đoạn đầu,
+            review lương định kỳ và các chính sách đào tạo nội bộ.
+          </p>
+        </section>
+      </article>
+
+      <aside class="space-y-6">
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 class="text-lg font-black text-slate-950">Kỹ năng chính</h3>
+          <div id="jobSkills" class="mt-4 flex flex-wrap gap-2">
+            <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">UI/UX</span>
+            <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Figma</span>
+            <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Research</span>
+            <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Prototype</span>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 class="text-lg font-black text-slate-950">Thông tin tuyển dụng</h3>
+          <div class="mt-4 space-y-4 text-sm font-medium text-slate-600">
+            <p class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-400">payments</span> 20 - 35 trieu</p>
+            <p class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-400">work</span> 2+ nam kinh nghiem</p>
+            <p id="jobLocation" class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-400">location_on</span> Ho Chi Minh</p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</section>

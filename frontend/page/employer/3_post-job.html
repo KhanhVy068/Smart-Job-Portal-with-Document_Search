@@ -1,0 +1,118 @@
+<section class="p-8">
+  <div class="mx-auto max-w-5xl space-y-8">
+    <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+      <div>
+        <nav class="mb-2 flex gap-2 text-xs font-bold text-slate-500">
+          <span>Việc làm</span>
+          <span class="text-slate-300">/</span>
+          <span class="text-blue-600">Tạo tin mới</span>
+        </nav>
+        <h1 class="text-4xl font-black tracking-tight text-slate-950">Đăng tin tuyển dụng mới</h1>
+        <p class="mt-2 text-base font-medium text-slate-500">Hoàn thành các thông tin dưới đây để tiếp cận ứng viên tiềm năng.</p>
+      </div>
+      <div class="flex gap-3">
+        <button id="btnSaveDraft" type="button" class="rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">Lưu bản nháp</button>
+        <button id="btnPublishTop" type="button" class="rounded-lg bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">Đăng tin ngay</button>
+      </div>
+    </div>
+
+    <form id="postJobForm" class="space-y-8">
+      <section class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div class="mb-8 flex items-center gap-3">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <span class="material-symbols-outlined">info</span>
+          </div>
+          <h2 class="text-2xl font-black text-slate-950">Thông tin cơ bản</h2>
+        </div>
+
+        <div class="space-y-6">
+          <label class="block space-y-2">
+            <span class="text-xs font-black uppercase tracking-wider text-slate-500">Tiêu đề công việc <span class="text-red-500">*</span></span>
+            <input id="jobTitle" name="title" required class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ: Senior Frontend Engineer (React/TypeScript)" type="text">
+          </label>
+
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-xs font-black uppercase tracking-wider text-slate-500">Vị trí</span>
+              <select id="jobPosition" name="position" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+                <option>Nhân viên</option>
+                <option>Trưởng nhóm</option>
+                <option>Quản lý</option>
+                <option>Giám đốc</option>
+              </select>
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-black uppercase tracking-wider text-slate-500">Thời gian làm việc</span>
+              <select id="jobType" name="type" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+                <option>Toàn thời gian</option>
+                <option>Bán thời gian</option>
+                <option>Freelance</option>
+                <option>Thực tập</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-xs font-black uppercase tracking-wider text-slate-500">Lĩnh vực</span>
+              <select id="jobCategory" name="category" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+                <option>Công nghệ thông tin</option>
+                <option>Marketing / Truyền thông</option>
+                <option>Tài chính / Ngân hàng</option>
+                <option>Nhân sự</option>
+              </select>
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-black uppercase tracking-wider text-slate-500">Chuyên môn</span>
+              <input id="jobSpecialization" name="specialization" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ: Phát triển phần mềm" type="text">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div class="mb-6 flex items-center gap-3">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <span class="material-symbols-outlined">psychology</span>
+          </div>
+          <h2 class="text-2xl font-black text-slate-950">Kỹ năng cần thiết</h2>
+        </div>
+        <div class="space-y-4">
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">add</span>
+            <input id="jobSkillInput" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Thêm kỹ năng..." type="text">
+          </div>
+          <div id="jobSkills" class="flex flex-wrap gap-2">
+            <span data-skill="React" class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600">React <button type="button" class="material-symbols-outlined text-sm">close</button></span>
+            <span data-skill="TypeScript" class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600">TypeScript <button type="button" class="material-symbols-outlined text-sm">close</button></span>
+            <span data-skill="Tailwind" class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600">Tailwind <button type="button" class="material-symbols-outlined text-sm">close</button></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-8 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+       
+        <label class="block space-y-2">
+          <span class="text-xm font-black uppercase tracking-wider text-slate-500">Mô tả công việc</span>
+          <textarea id="jobDescription" name="description" class="h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Yêu cầu về kinh nghiệm, bằng cấp, kỹ năng..."></textarea>
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-xm font-black uppercase tracking-wider text-slate-500">Yêu cầu công việc</span>
+          <textarea id="jobRequirements" name="requirements" class="h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Yêu cầu về kinh nghiệm, bằng cấp, kỹ năng..."></textarea>
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-xm font-black uppercase tracking-wider text-slate-500">Quyền lợi</span>
+          <textarea id="jobBenefits" name="benefits" class="h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Lương thưởng, bảo hiểm, môi trường làm việc..."></textarea>
+        </label>
+      </section>
+
+      <div class="flex flex-col gap-4 pb-8 sm:flex-row sm:items-center sm:justify-end">
+        <p id="postJobMessage" class="text-sm font-semibold text-slate-500"></p>
+        <button id="btnCancelPostJob" class="rounded-lg border border-slate-200 bg-white px-8 py-3 font-bold text-slate-600 hover:bg-slate-50" type="button">Hủy bỏ</button>
+        <button id="btnPublishBottom" class="rounded-lg bg-blue-600 px-10 py-3 font-bold text-white shadow-xl shadow-blue-600/20 hover:bg-blue-700" type="submit">Lưu & Đăng bài</button>
+      </div>
+    </form>
+  </div>
+</section>

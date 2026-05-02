@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.menu-item {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left border-l-4 border-transparent;
+}
+
+.menu-item:hover {
+  @apply bg-blue-50 text-blue-600;
+}
+
+.menu-item.active {
+  @apply bg-blue-50 text-blue-700 font-bold border-l-blue-600 rounded-none shadow-none;
+}
+
+.menu-item.active .menu-text,
+.menu-item.active .sidebar-subtitle {
+  @apply text-blue-700 font-bold;
+}
+
+.menu-text {
+  @apply flex-1;
+}
+
+.badge {
+  @apply text-xs bg-blue-100 text-blue-600 px-2 rounded-full;
+}
+
+/* collapse */
+.sidebar-collapsed .menu-text,
+.sidebar-collapsed .badge,
+.sidebar-collapsed .sidebar-text {
+  display: none;
+}
+
+.sidebar-collapsed .menu-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-collapsed .sidebar-header {
+  flex-direction: column;
+  align-items: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.company-panel {
+  @apply mt-auto;
+}
+
+.company-card {
+  min-width: 0;
+}
+
+.company-logo-wrap {
+  @apply flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 text-slate-500;
+}
+
+.company-logo-fallback {
+  @apply hidden text-2xl;
+}
+
+#companyLogo[src=""] {
+  display: none;
+}
+
+#companyLogo[src=""] + .company-logo-fallback {
+  @apply flex items-center justify-center;
+}
+
+.company-info {
+  min-width: 0;
+}
+
+.sidebar-collapsed .company-panel {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-collapsed .company-card {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-collapsed .company-info {
+  display: none;
+}
+
+.sidebar-collapsed #companyLogo {
+  display: block;
+  flex-shrink: 0;
+}
