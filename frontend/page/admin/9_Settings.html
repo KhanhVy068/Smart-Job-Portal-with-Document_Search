@@ -1,0 +1,186 @@
+﻿<section id="adminSettingsPage" class="w-full max-w-full space-y-6 overflow-hidden p-4 sm:p-6">
+  <!-- Header: tiêu đề, reload và save settings hiện tại. -->
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <p class="text-sm font-black uppercase tracking-wider text-blue-600">Settings quản trị</p>
+      <h1 class="mt-1 text-3xl font-black tracking-tight text-slate-950">Settings</h1>
+      <p id="settingsPageSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Cấu hình toàn bộ hệ thống cổng việc làm.</p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="btnReloadSettings" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">refresh</span>
+        Reload
+      </button>
+      <button id="btnSaveSettings" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-black text-white shadow-sm hover:bg-blue-700" type="button">
+        <span class="material-symbols-outlined text-xl">save</span>
+        <span id="btnSaveSettingsText">Lưu mục hiện tại</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="settingsLayout" class="grid grid-cols-1 gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+    <!-- Sidebar cài đặt: chia nhóm cấu hình theo module. -->
+    <aside id="settingsSidebar" class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+      <button id="toggleSettingsNav" class="mb-3 flex w-full items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-left text-sm font-black text-slate-700 transition-colors hover:bg-slate-100" type="button" aria-expanded="true">
+        <span class="flex min-w-0 items-center gap-3">
+          <span class="material-symbols-outlined text-xl">menu_open</span>
+          <span id="settingsNavToggleText" class="truncate">Settings menu</span>
+        </span>
+        <span id="settingsNavToggleIcon" class="material-symbols-outlined text-xl">expand_less</span>
+      </button>
+      <nav id="settingsNav" class="space-y-1" aria-label="Các mục cài đặt">
+        <button class="settings-nav-item active" type="button" data-section="general"><span class="material-symbols-outlined">tune</span><span>General</span></button>
+        <button class="settings-nav-item" type="button" data-section="auth"><span class="material-symbols-outlined">verified_user</span><span>Users & xác thực</span></button>
+        <button class="settings-nav-item" type="button" data-section="roles"><span class="material-symbols-outlined">admin_panel_settings</span><span>Role & quyền</span></button>
+        <button class="settings-nav-item" type="button" data-section="jobs"><span class="material-symbols-outlined">work</span><span>Jobs</span></button>
+        <button class="settings-nav-item" type="button" data-section="cv"><span class="material-symbols-outlined">description</span><span>CV / Tài liệu</span></button>
+        <button class="settings-nav-item" type="button" data-section="email"><span class="material-symbols-outlined">mail</span><span>Email</span></button>
+        <button class="settings-nav-item" type="button" data-section="notifications"><span class="material-symbols-outlined">notifications</span><span>Notifications</span></button>
+        <button class="settings-nav-item" type="button" data-section="storage"><span class="material-symbols-outlined">database</span><span>Storage</span></button>
+        <button class="settings-nav-item" type="button" data-section="security"><span class="material-symbols-outlined">shield</span><span>Security</span></button>
+        <button class="settings-nav-item" type="button" data-section="api"><span class="material-symbols-outlined">hub</span><span>API</span></button>
+        <button class="settings-nav-item" type="button" data-section="system"><span class="material-symbols-outlined">settings_applications</span><span>System</span></button>
+        <button class="settings-nav-item" type="button" data-section="ui"><span class="material-symbols-outlined">palette</span><span>UI</span></button>
+      </nav>
+    </aside>
+
+    <!-- Nội dung cài đặt: bên phải là form cấu hình của mục đang chọn. -->
+    <main class="min-w-0 rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-100 p-5">
+        <h2 id="settingsSectionTitle" class="text-xl font-black text-slate-950">Settings chung</h2>
+        <p id="settingsSectionDescription" class="mt-1 text-sm font-semibold text-slate-500">Info hệ thống cơ bản.</p>
+      </div>
+
+      <form id="settingsForm" class="space-y-6 p-5">
+        <!-- Settings chung: thông tin hệ thống, tên miền, mô tả, logo/favicon. -->
+        <section class="settings-section" data-panel="general">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <label class="settings-field"><span>Name website</span><input data-field="siteName" type="text" placeholder="Job Portal"></label>
+            <label class="settings-field"><span>Name miền</span><input data-field="domain" type="url" placeholder="https://job.com"></label>
+            <label class="settings-field lg:col-span-2"><span>Mô tả</span><textarea data-field="description" placeholder="Smart job portal..."></textarea></label>
+            <label class="settings-field"><span>URL logo</span><input data-field="logoUrl" type="url" placeholder="https://.../logo.png"></label>
+            <label class="settings-field"><span>URL favicon</span><input data-field="faviconUrl" type="url" placeholder="https://.../favicon.ico"></label>
+          </div>
+        </section>
+
+        <!-- Settings người dùng & xác thực: đăng ký, xác thực email, social login, reset password. -->
+        <section class="settings-section hidden" data-panel="auth">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <label class="settings-toggle"><span>Cho phép đăng ký</span><input data-field="allowRegistration" type="checkbox"></label>
+            <label class="settings-toggle"><span>Xác thực email</span><input data-field="emailVerification" type="checkbox"></label>
+            <label class="settings-toggle"><span>Đăng nhập Google</span><input data-field="googleLogin" type="checkbox"></label>
+            <label class="settings-toggle"><span>Đăng nhập Facebook</span><input data-field="facebookLogin" type="checkbox"></label>
+            <label class="settings-toggle"><span>Reset mật khẩu</span><input data-field="resetPassword" type="checkbox"></label>
+          </div>
+        </section>
+
+        <!-- Role & quyền: phân quyền admin/employer/user và tạo role mới. -->
+        <section class="settings-section hidden" data-panel="roles">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <label class="settings-field"><span>Quyền admin</span><textarea data-field="adminPermissions" placeholder="users:read, jobs:write"></textarea></label>
+            <label class="settings-field"><span>Nhà tuyển dụng permissions</span><textarea data-field="employerPermissions" placeholder="jobs:create, candidates:read"></textarea></label>
+            <label class="settings-field"><span>Users permissions</span><textarea data-field="userPermissions" placeholder="jobs:apply, cv:upload"></textarea></label>
+            <label class="settings-field lg:col-span-3"><span>Mẫu vai trò mới</span><input data-field="newRoleTemplate" type="text" placeholder="role_name: permission1, permission2"></label>
+          </div>
+        </section>
+
+        <!-- Settings việc làm: hạn job, duyệt job, giới hạn số job/employer. -->
+        <section class="settings-section hidden" data-panel="jobs">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <label class="settings-field"><span>Số ngày hết hạn việc làm</span><input data-field="jobExpiryDays" type="number" min="1" placeholder="30"></label>
+            <label class="settings-field"><span>Chế độ duyệt việc làm</span><select data-field="jobApprovalMode"><option value="manual">Manual</option><option value="auto">Auto</option></select></label>
+            <label class="settings-field"><span>Giới hạn việc làm / nhà tuyển dụng</span><input data-field="jobLimitPerEmployer" type="number" min="0" placeholder="50"></label>
+          </div>
+        </section>
+
+        <!-- Settings CV / ứng tuyển: size tối đa, định dạng, số CV mỗi user. -->
+        <section class="settings-section hidden" data-panel="cv">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <label class="settings-field"><span>Size CV tối đa</span><input data-field="maxCvFileSize" type="text" placeholder="10MB"></label>
+            <label class="settings-field"><span>Định dạng cho phép</span><input data-field="allowedCvFormats" type="text" placeholder="pdf, docx"></label>
+            <label class="settings-field"><span>Giới hạn CV / người dùng</span><input data-field="cvLimitPerUsers" type="number" min="0" placeholder="10"></label>
+          </div>
+        </section>
+
+        <!-- Settings email: SMTP và email templates. -->
+        <section class="settings-section hidden" data-panel="email">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <label class="settings-field"><span>SMTP host</span><input data-field="smtpHost" type="text"></label>
+            <label class="settings-field"><span>SMTP port</span><input data-field="smtpPort" type="number"></label>
+            <label class="settings-field"><span>Tài khoản SMTP</span><input data-field="smtpUsers" type="text"></label>
+            <label class="settings-field"><span>Mật khẩu SMTP</span><input data-field="smtpPassword" type="password"></label>
+            <label class="settings-field"><span>Mẫu email chào mừng</span><textarea data-field="welcomeTemplate"></textarea></label>
+            <label class="settings-field"><span>Mẫu email ứng tuyển</span><textarea data-field="applyJobTemplate"></textarea></label>
+            <label class="settings-field lg:col-span-2"><span>Mẫu email đặt lại mật khẩu</span><textarea data-field="resetPasswordTemplate"></textarea></label>
+          </div>
+        </section>
+
+        <!-- Settings thông báo: email, in-app, push notification. -->
+        <section class="settings-section hidden" data-panel="notifications">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <label class="settings-toggle"><span>Notifications qua email</span><input data-field="emailNotification" type="checkbox"></label>
+            <label class="settings-toggle"><span>Notifications trong ứng dụng</span><input data-field="inAppNotification" type="checkbox"></label>
+            <label class="settings-toggle"><span>Notifications đẩy</span><input data-field="pushNotification" type="checkbox"></label>
+          </div>
+        </section>
+
+        <!-- Settings lưu trữ: max upload size và lưu trữ cục bộ/đám mây. -->
+        <section class="settings-section hidden" data-panel="storage">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <label class="settings-field"><span>Size tải lên tối đa</span><input data-field="maxUploadSize" type="text" placeholder="20MB"></label>
+            <label class="settings-field"><span>Storage type</span><select data-field="storageType"><option value="local">Local</option><option value="s3">Cloud S3</option><option value="cloudinary">Cloudinary</option></select></label>
+            <label class="settings-field"><span>Bucket / folder</span><input data-field="storageBucket" type="text"></label>
+          </div>
+        </section>
+
+        <!-- Settings bảo mật: đổi password admin, 2FA, login limit, Danh sách IP cho phép. -->
+        <section class="settings-section hidden" data-panel="security">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <label class="settings-field"><span>Password admin mới</span><input data-field="newAdminPassword" type="password"></label>
+            <label class="settings-toggle"><span>2FA</span><input data-field="twoFactorAuth" type="checkbox"></label>
+            <label class="settings-field"><span>Giới hạn số lần đăng nhập</span><input data-field="loginAttemptLimit" type="number" min="1"></label>
+            <label class="settings-field"><span>Danh sách IP cho phép</span><textarea data-field="ipWhitelist" placeholder="127.0.0.1, 10.0.0.1"></textarea></label>
+          </div>
+        </section>
+
+        <!-- API / Tích hợp: Khóa API, third-party services, webhooks. -->
+        <section class="settings-section hidden" data-panel="api">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <label class="settings-field"><span>Khóa API</span><textarea data-field="apiKeys"></textarea></label>
+            <label class="settings-field"><span>Dịch vụ bên thứ ba</span><textarea data-field="thirdPartyServices"></textarea></label>
+            <label class="settings-field lg:col-span-2"><span>Webhook</span><textarea data-field="webhooks"></textarea></label>
+          </div>
+        </section>
+
+        <!-- Settings hệ thống: tác vụ nền, cache, chế độ bảo trì. -->
+        <section class="settings-section hidden" data-panel="system">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <label class="settings-field"><span>Cấu hình tác vụ nền</span><textarea data-field="backgroundJobsConfig"></textarea></label>
+            <label class="settings-field"><span>Cấu hình cache</span><textarea data-field="cacheConfig"></textarea></label>
+            <label class="settings-toggle"><span>Chế độ bảo trì</span><input data-field="maintenanceMode" type="checkbox"></label>
+          </div>
+        </section>
+
+        <!-- Settings giao diện: dark mode và theme color. -->
+        <section class="settings-section hidden" data-panel="ui">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <label class="settings-toggle"><span>Chế độ tối</span><input data-field="darkMode" type="checkbox"></label>
+            <label class="settings-field"><span>Màu giao diện</span><input data-field="themeColor" type="color" value="#2563eb"></label>
+          </div>
+        </section>
+      </form>
+    </main>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+

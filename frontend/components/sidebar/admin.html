@@ -1,0 +1,73 @@
+﻿<aside id="sidebarEl" class="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col overflow-hidden bg-white p-4 shadow-sm transition-all duration-300">
+  <div class="sidebar-header mb-6 flex items-center gap-3 px-2 py-4">
+    <button id="toggleSidebar" type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950" aria-label="Toggle sidebar" aria-expanded="true">
+      <span class="material-symbols-outlined text-2xl">menu</span>
+    </button>
+    <div class="sidebar-text min-w-0">
+      <p class="truncate text-sm font-black text-slate-950">Bảng quản trị</p>
+      <p class="truncate text-xs font-semibold text-slate-400">Smart Job Portal</p>
+    </div>
+  </div>
+
+  <nav class="flex-1 space-y-1" aria-label="Điều hướng quản trị">
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#dashboard" data-route="dashboard" title="Dashboard">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="menu-text font-sans text-sm font-semibold">Tổng quan</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#users" data-route="users" title="Users">
+      <span class="material-symbols-outlined">group</span>
+      <span class="menu-text font-sans text-sm font-semibold">Người dùng</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#jobs" data-route="jobs" title="Jobs">
+      <span class="material-symbols-outlined">work</span>
+      <span class="menu-text font-sans text-sm font-semibold">Tin tuyển dụng</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#cv-documents" data-route="cv-documents" title="CV / Tài liệu">
+      <span class="material-symbols-outlined">description</span>
+      <span class="menu-text font-sans text-sm font-semibold">CV</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#search-analytics" data-route="search-analytics" title="Analytics tìm kiếm">
+      <span class="material-symbols-outlined">query_stats</span>
+      <span class="menu-text font-sans text-sm font-semibold">Xu hướng tìm kiếm</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#background-jobs" data-route="background-jobs" title="Background Jobs">
+      <span class="material-symbols-outlined">sync</span>
+      <span class="menu-text font-sans text-sm font-semibold">Tác vụ nền</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#storage" data-route="storage" title="Storage">
+      <span class="material-symbols-outlined">database</span>
+      <span class="menu-text font-sans text-sm font-semibold">Lưu trữ</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#reports" data-route="reports" title="Reports">
+      <span class="material-symbols-outlined">analytics</span>
+      <span class="menu-text font-sans text-sm font-semibold">Báo cáo</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#settings" data-route="settings" title="Settings">
+      <span class="material-symbols-outlined">settings</span>
+      <span class="menu-text font-sans text-sm font-semibold">Cài đặt</span>
+    </a>
+  </nav>
+
+  <div class="admin-panel border-t border-slate-200 p-4">
+    <a class="admin-card flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50" href="#settings" data-route="settings" title="Settings quản trị">
+      <div id="adminAvatar" class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-sm font-black text-slate-600">
+        <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
+      </div>
+      <div class="admin-info min-w-0 overflow-hidden">
+        <p id="adminName" class="truncate text-sm font-bold leading-tight text-slate-900">Dang tai...</p>
+        <p id="adminRole" class="mt-1 truncate text-xs font-bold uppercase tracking-wide text-slate-400">Admin</p>
+      </div>
+    </a>
+  </div>
+</aside>
+
+
+
+
+
+
+
+
+
+
+

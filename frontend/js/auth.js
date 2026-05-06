@@ -1,7 +1,11 @@
 export function getUser() {
-  return JSON.parse(localStorage.getItem('user'));
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  } catch {
+    return null;
+  }
 }
 
 export function getRole() {
-  return getUser()?.role || 'employer';
+  return String(getUser()?.role || 'employer').toLowerCase();
 }

@@ -1,0 +1,157 @@
+﻿<section id="adminBackgroundJobsPage" class="w-full max-w-full space-y-6 overflow-hidden p-4 sm:p-6">
+  <!-- Header: tiêu đề, auto refresh và điều khiển queue tổng thể. -->
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <p class="text-sm font-black uppercase tracking-wider text-blue-600">Admin System</p>
+      <h1 class="mt-1 text-3xl font-black tracking-tight text-slate-950">Background Jobs</h1>
+      <p id="backgroundJobsSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Theo dõi hàng đợi, worker, thử lại và lỗi hệ thống.</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <label class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 shadow-sm">
+        <input id="autoRefreshJobs" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" type="checkbox" checked>
+        Auto làm mới
+      </label>
+      <button id="btnPauseQueue" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">pause</span>
+        Tạm dừng hàng đợi
+      </button>
+      <button id="btnResumeQueue" class="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-sm font-black text-white shadow-sm hover:bg-slate-800" type="button">
+        <span class="material-symbols-outlined text-xl">play_arrow</span>
+        Tiếp tục hàng đợi
+      </button>
+    </div>
+  </div>
+
+  <!-- Overview: tổng quan nhanh các trạng thái background jobs. -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Total Jobs</p>
+        <span class="material-symbols-outlined text-blue-600">settings</span>
+      </div>
+      <p id="statTotalBackgroundJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Pending Jobs</p>
+        <span class="material-symbols-outlined text-amber-600">schedule</span>
+      </div>
+      <p id="statPendingBackgroundJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Running Jobs</p>
+        <span class="material-symbols-outlined text-cyan-600">play_circle</span>
+      </div>
+      <p id="statRunningBackgroundJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Failed Jobs</p>
+        <span class="material-symbols-outlined text-red-600">error</span>
+      </div>
+      <p id="statFailedBackgroundJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- Queue monitoring: số job chờ, tốc độ xử lý, worker status và retry system. -->
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+    <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-black uppercase tracking-wider text-slate-400">Pending Jobs</p>
+      <p id="queueWaitingCount" class="mt-3 text-2xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-black uppercase tracking-wider text-slate-400">Tốc độ xử lý</p>
+      <p id="processingRate" class="mt-3 text-2xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-black uppercase tracking-wider text-slate-400">Status worker</p>
+      <p id="workerStatus" class="mt-3 text-2xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-black uppercase tracking-wider text-slate-400">Cơ chế thử lại</p>
+      <p id="retrySystemStatus" class="mt-3 text-2xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- Filters + Search: lọc theo status, job type và time. -->
+  <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(220px,1fr)_160px_180px_160px_auto]">
+      <label class="relative block">
+        <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xl text-slate-400">search</span>
+        <input id="backgroundJobSearchInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm font-semibold text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100" type="search" placeholder="Tìm mã tác vụ, tên, lỗi..." autocomplete="off">
+      </label>
+
+      <select id="backgroundJobStatusFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Status: Tất cả</option>
+        <option value="pending">Pending</option>
+        <option value="running">Đang chạy</option>
+        <option value="completed">Hoàn thành</option>
+        <option value="failed">Thất bại</option>
+        <option value="retried">Đã thử lại</option>
+      </select>
+
+      <input id="backgroundJobTypeFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Loại tác vụ">
+
+      <select id="backgroundJobTimeFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Thời gian: Tất cả</option>
+        <option value="today">Hôm nay</option>
+        <option value="24h">24 giờ gần nhất</option>
+        <option value="7d">7 ngày gần nhất</option>
+      </select>
+
+      <button id="btnReloadBackgroundJobs" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">refresh</span>
+        Reload
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1.4fr)_minmax(380px,0.8fr)]">
+    <!-- Job Queue List: bảng chính chính của background jobs. -->
+    <section class="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[1040px] text-left">
+          <thead class="bg-slate-50 text-xs font-black uppercase tracking-wider text-slate-500">
+            <tr>
+              <th class="px-4 py-4">Job ID</th>
+              <th class="px-4 py-4">Name tác vụ</th>
+              <th class="px-4 py-4">Status</th>
+              <th class="px-4 py-4">Created At</th>
+              <th class="px-4 py-4">Started At</th>
+              <th class="px-4 py-4">Duration</th>
+              <th class="px-4 py-4">Attempts</th>
+              <th class="px-4 py-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="backgroundJobsTableBody" class="divide-y divide-slate-100">
+            <tr><td class="px-4 py-8 text-center text-sm font-bold text-slate-400" colspan="8">Loading tác vụ nền...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Job Detail Panel: hiển thị payload, logs, error message và retry history. -->
+    <aside class="min-w-0 rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-100 p-5">
+        <h2 class="text-lg font-black text-slate-950">Job Detail Panel</h2>
+        <p class="mt-1 text-sm font-semibold text-slate-500">Nhấn Xem để xem dữ liệu đầu vào, nhật ký và lịch sử thử lại.</p>
+      </div>
+      <div id="backgroundJobDetailPanel" class="max-h-[720px] overflow-auto p-5">
+        <p class="rounded-lg bg-slate-50 p-6 text-center text-sm font-bold text-slate-400">Chưa chọn job.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,17 +1,70 @@
-import { hasRoute, navigate } from "./router.js";
+import { getRole } from "./auth.js";
+import { hasRoute, navigate, setRoutes } from "./router.js";
+import { initAdminHeader } from "./components/header/admin.js";
 import { initHeader } from "./components/header/employer.js";
+import { initAdminSidebar } from "./components/sidebar/admin.js";
 
-const pageScripts = {
-  dashboard: "./pages/employer/1_dashboard.js",
-  jobs: "./pages/employer/2_jobs.js",
-  candidates: "./pages/employer/5_candidate-list.js",
-  "cv-detail": "./pages/employer/6_CV-detail.js",
-  search: "./pages/employer/7_search.js",
-  saved: "./pages/employer/8_saved.js",
-  settings: "./pages/employer/9_settings.js",
-  "job-detail": "./pages/employer/4_job-detaill.js",
-  "post-job": "./pages/employer/3_postjob.js",
+const roleConfigs = {
+  admin: {
+    header: "./components/header/admin.html",
+    sidebar: "./components/sidebar/admin.html",
+    routes: {
+      dashboard: "./page/admin/1_Dashboard.html",
+      users: "./page/admin/2_Users.html",
+      jobs: "./page/admin/3_Jobs.html",
+      "cv-documents": "./page/admin/4_CV.html",
+      "search-analytics": "./page/admin/5_Search-Analytics.html",
+      "background-jobs": "./page/admin/6_Background-Jobs.html",
+      storage: "./page/admin/7_Storage.html",
+      reports: "./page/admin/8_Reports.html",
+      settings: "./page/admin/9_Settings.html",
+    },
+    pageScripts: {
+      dashboard: "./pages/admin/1_Dashboard.js",
+      users: "./pages/admin/2_Users.js",
+      jobs: "./pages/admin/3_Jobs.js",
+      "cv-documents": "./pages/admin/4_CV.js",
+      "search-analytics": "./pages/admin/5_Search-Analytics.js",
+      "background-jobs": "./pages/admin/6_Background-Jobs.js",
+      storage: "./pages/admin/7_Storage.js",
+      reports: "./pages/admin/8_Reports.js",
+      settings: "./pages/admin/9_Settings.js",
+    },
+    afterLoad: () => {
+      initAdminHeader();
+      initAdminSidebar();
+    },
+  },
+  employer: {
+    header: "./components/header/employer.html",
+    sidebar: "./components/sidebar/employer.html",
+    routes: {
+      dashboard: "./page/employer/1_dashboard.html",
+      jobs: "./page/employer/2_jobs.html",
+      "job-detail": "./page/employer/4_job-detail.html",
+      candidates: "./page/employer/5_candidate-list.html",
+      "cv-detail": "./page/employer/6_CV-detail.html",
+      search: "./page/employer/7_search.html",
+      saved: "./page/employer/8_saved.html",
+      "post-job": "./page/employer/3_post-job.html",
+      settings: "./page/employer/9_settings.html",
+    },
+    pageScripts: {
+      dashboard: "./pages/employer/1_dashboard.js",
+      jobs: "./pages/employer/2_jobs.js",
+      candidates: "./pages/employer/5_candidate-list.js",
+      "cv-detail": "./pages/employer/6_CV-detail.js",
+      search: "./pages/employer/7_search.js",
+      saved: "./pages/employer/8_saved.js",
+      settings: "./pages/employer/9_settings.js",
+      "job-detail": "./pages/employer/4_job-detaill.js",
+      "post-job": "./pages/employer/3_postjob.js",
+    },
+    afterLoad: initHeader,
+  },
 };
+
+let appConfig = roleConfigs.employer;
 
 async function loadComponent(id, path) {
   const separator = path.includes("?") ? "&" : "?";
@@ -25,11 +78,14 @@ async function loadComponent(id, path) {
 }
 
 async function init() {
-  await loadComponent("header", "./components/header/employer.html");
-  await loadComponent("sidebar", "./components/sidebar/employer.html");
+  appConfig = roleConfigs[getRole()] || roleConfigs.employer;
+  setRoutes(appConfig.routes);
+
+  await loadComponent("header", appConfig.header);
+  await loadComponent("sidebar", appConfig.sidebar);
   await loadComponent("footer", "./components/footer.html");
 
-  initHeader();
+  appConfig.afterLoad?.();
   setupSidebarToggle();
   setupRouter();
 }
@@ -37,19 +93,19 @@ async function init() {
 init();
 
 function setupSidebarToggle() {
-  const btn = document.getElementById("toggleSidebar");
+  const buttons = document.querySelectorAll("#toggleSidebar");
   const sidebar = document.getElementById("sidebarEl");
-  if (!btn || !sidebar) return;
+  if (!buttons.length || !sidebar) return;
 
   applySidebarState(false);
 
-  btn.addEventListener("click", () => {
+  buttons.forEach((btn) => btn.addEventListener("click", () => {
     applySidebarState(!sidebar.classList.contains("sidebar-collapsed"));
-  });
+  }));
 }
 
 function applySidebarState(isCollapsed) {
-  const btn = document.getElementById("toggleSidebar");
+  const buttons = document.querySelectorAll("#toggleSidebar");
   const sidebar = document.getElementById("sidebarEl");
   const header = document.getElementById("headerEl");
   const contentShell = document.getElementById("contentShell");
@@ -68,7 +124,7 @@ function applySidebarState(isCollapsed) {
   footer?.classList.toggle("ml-64", !isCollapsed);
   footer?.classList.toggle("ml-20", isCollapsed);
 
-  btn?.setAttribute("aria-expanded", String(!isCollapsed));
+  buttons.forEach((btn) => btn.setAttribute("aria-expanded", String(!isCollapsed)));
 }
 
 function setupRouter() {
@@ -125,7 +181,7 @@ async function navigateTo(route, updateHash = false) {
 }
 
 async function initPage(route) {
-  const script = pageScripts[route];
+  const script = appConfig.pageScripts[route];
   if (!script) return;
 
   try {

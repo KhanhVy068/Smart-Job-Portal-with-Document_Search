@@ -5,6 +5,12 @@ import { api } from '../../api.js';
 // -> trả về { company, user, notifications, messages } hoặc object tương đương.
 // Header không dùng dữ liệu giả; nếu backend chưa có, UI giữ trạng thái trống/đang chờ.
 const endpoint = '/employer/header';
+let currentHeaderData = {
+  userName: '',
+  userRole: '',
+  userEmail: '',
+  userAvatarUrl: ''
+};
 
 // Khởi tạo header sau khi component HTML đã được load vào DOM.
 export function initHeader() {
@@ -29,10 +35,31 @@ function bindHeaderEvents() {
     });
   });
 
+  document.getElementById('headerProfileButton')?.addEventListener('click', () => {
+    toggleProfileDropdown();
+  });
+
+  document.getElementById('headerMenuNotificationsButton')?.addEventListener('click', () => {
+    closeProfileDropdown();
+    toggleHeaderDropdown({
+      icon: 'notifications',
+      title: 'Thông báo',
+      message: 'Chưa có dữ liệu thông báo từ backend. Khi endpoint sẵn sàng, các thông báo mới sẽ hiển thị tại đây.'
+    });
+  });
+
+  document.getElementById('headerLogoutButton')?.addEventListener('click', () => {
+    logout();
+  });
+
   document.addEventListener('click', (event) => {
     const dropdown = document.getElementById('headerDropdown');
+    const profileDropdown = document.getElementById('headerProfileDropdown');
     const clickedInsideHeader = event.target.closest('#headerEl');
-    if (dropdown && !clickedInsideHeader) dropdown.classList.add('hidden');
+    if (!clickedInsideHeader) {
+      dropdown?.classList.add('hidden');
+      profileDropdown?.classList.add('hidden');
+    }
   });
 }
 
@@ -62,6 +89,7 @@ function normalizeHeaderData(payload = {}) {
     companyLogoUrl: company.logoUrl || company.logo || company.logo_url || '',
     userName: user.name || user.fullName || user.contactName || '',
     userRole: user.roleLabel || user.role || user.position || '',
+    userEmail: user.email || user.contactEmail || '',
     userAvatarUrl: user.avatarUrl || user.avatar || user.photoUrl || '',
     unreadMessages: Number(messages.unread ?? payload.unreadMessages ?? 0),
     unreadNotifications: Number(notifications.unread ?? payload.unreadNotifications ?? 0)
@@ -73,22 +101,35 @@ function renderLoadingState() {
   setText('headerUserName', 'Đang tải...');
   setText('headerUserRole', 'Nhà tuyển dụng');
   renderAvatar('');
+  renderMenuAvatar('', '');
+  setText('headerMenuUserName', 'Đang tải...');
+  setText('headerMenuUserMeta', 'Nhà tuyển dụng');
   setBadge('headerMessagesBadge', 0);
   setBadge('headerNotificationsBadge', 0);
 }
 
 function renderHeader(data) {
+  currentHeaderData = data;
   setText('headerCompanyName', data.companyName || 'Chưa có thông tin công ty');
   setText('headerUserName', data.userName || 'Chưa có tên người dùng');
   setText('headerUserRole', data.userRole || 'Nhà tuyển dụng');
+  setText('headerMenuUserName', data.userName || 'Chưa có tên người dùng');
+  setText('headerMenuUserMeta', data.userEmail || data.userRole || 'Nhà tuyển dụng');
 
   renderCompanyLogo(data.companyLogoUrl);
   renderAvatar(data.userAvatarUrl, data.userName);
+  renderMenuAvatar(data.userAvatarUrl, data.userName);
   setBadge('headerMessagesBadge', data.unreadMessages);
   setBadge('headerNotificationsBadge', data.unreadNotifications);
 }
 
 function renderEmptyState(err) {
+  currentHeaderData = {
+    userName: '',
+    userRole: 'Nhà tuyển dụng',
+    userEmail: '',
+    userAvatarUrl: ''
+  };
   const message = err?.status === 404
     ? 'Backend chưa có endpoint /employer/header'
     : 'Chưa tải được dữ liệu header';
@@ -96,8 +137,11 @@ function renderEmptyState(err) {
   setText('headerCompanyName', message);
   setText('headerUserName', 'Chưa có dữ liệu');
   setText('headerUserRole', 'Nhà tuyển dụng');
+  setText('headerMenuUserName', 'Chưa có dữ liệu');
+  setText('headerMenuUserMeta', 'Nhà tuyển dụng');
   renderCompanyLogo('');
   renderAvatar('');
+  renderMenuAvatar('', '');
   setBadge('headerMessagesBadge', 0);
   setBadge('headerNotificationsBadge', 0);
 }
@@ -129,6 +173,21 @@ function renderAvatar(url, name = '') {
     : '<span class="material-symbols-outlined text-lg">person</span>';
 }
 
+function renderMenuAvatar(url, name = '') {
+  const target = document.getElementById('headerMenuAvatar');
+  if (!target) return;
+
+  if (url) {
+    target.innerHTML = `<img class="h-full w-full object-cover" src="${escapeHtml(url)}" alt="${escapeHtml(name || 'Ảnh đại diện')}">`;
+    return;
+  }
+
+  const initials = getInitials(name);
+  target.innerHTML = initials
+    ? escapeHtml(initials)
+    : '<span class="material-symbols-outlined">person</span>';
+}
+
 function setBadge(id, count) {
   const badge = document.getElementById(id);
   if (!badge) return;
@@ -143,6 +202,8 @@ function toggleHeaderDropdown({ icon, title, message }) {
 
   if (!dropdown) return;
 
+  closeProfileDropdown();
+
   if (iconTarget) {
     iconTarget.innerHTML = `<span class="material-symbols-outlined text-xl">${escapeHtml(icon)}</span>`;
   }
@@ -150,6 +211,31 @@ function toggleHeaderDropdown({ icon, title, message }) {
   setText('headerDropdownMessage', message);
 
   dropdown.classList.remove('hidden');
+}
+
+function toggleProfileDropdown() {
+  const dropdown = document.getElementById('headerProfileDropdown');
+  const infoDropdown = document.getElementById('headerDropdown');
+  if (!dropdown) return;
+
+  infoDropdown?.classList.add('hidden');
+  setText('headerMenuUserName', currentHeaderData.userName || 'Chưa có dữ liệu');
+  setText('headerMenuUserMeta', currentHeaderData.userEmail || currentHeaderData.userRole || 'Nhà tuyển dụng');
+  renderMenuAvatar(currentHeaderData.userAvatarUrl, currentHeaderData.userName);
+  dropdown.classList.toggle('hidden');
+}
+
+function closeProfileDropdown() {
+  document.getElementById('headerProfileDropdown')?.classList.add('hidden');
+}
+
+// Đăng xuất phía frontend: xóa token hiện có và quay về home khách.
+// Nếu backend có đường dẫn home riêng, đặt localStorage.guestHomeUrl trước khi đăng xuất.
+function logout() {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('token');
+  sessionStorage.clear();
+  window.location.href = localStorage.getItem('guestHomeUrl') || '/';
 }
 
 function getInitials(name = '') {

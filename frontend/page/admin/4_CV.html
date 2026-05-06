@@ -1,0 +1,182 @@
+﻿<section id="adminDocumentsPage" class="w-full max-w-full space-y-6 overflow-hidden p-4 sm:p-6">
+  <!-- Header + thanh thao tác: tìm kiếm CV, lọc trạng thái/tệp/việc làm và tải tài liệu lên. -->
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <h1 class="mt-1 text-3xl font-black tracking-tight text-slate-950">Quản lý CV</h1>
+      <p id="documentsPageSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Theo dõi, duyệt, tải xuống và quản lý lưu trữ CV.</p>
+    </div>
+
+    <button id="btnUploadDocument" class="inline-flex w-fit items-center gap-2 rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-black text-white transition-colors hover:bg-slate-800" type="button">
+      <span class="material-symbols-outlined text-xl">upload_file</span>
+      Tải lên CV
+    </button>
+  </div>
+
+  <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(220px,1fr)_160px_150px_180px_auto]">
+      <label class="relative block">
+        <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xl text-slate-400">search</span>
+        <input id="documentSearchInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm font-semibold text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100" type="search" placeholder="Search theo tên, email, kỹ năng..." autocomplete="off">
+      </label>
+
+      <select id="documentStatusFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Trạng thái: Tất cả</option>
+        <option value="approved">Đã duyệt</option>
+        <option value="pending">Đang chờ</option>
+        <option value="rejected">Bị từ chối</option>
+        <option value="spam">Spam</option>
+        <option value="reported">Bị báo cáo</option>
+      </select>
+
+      <select id="documentTypeFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Loại file</option>
+        <option value="pdf">PDF</option>
+        <option value="docx">DOCX</option>
+        <option value="doc">DOC</option>
+      </select>
+
+      <input id="documentJobFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Jobs đã ứng tuyển">
+
+      <button id="btnReloadDocuments" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition-colors hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">refresh</span>
+        Tải lại
+      </button>
+    </div>
+  </div>
+
+  <!-- Analytics nhẹ và storage tracking cho admin. -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Tổng lượng CV</p>
+      <p id="statTotalDocuments" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">CV hôm nay</p>
+      <p id="statTodayDocuments" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">CV đang chờ duyệt</p>
+      <p id="statPendingDocuments" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">CV bị từ chối</p>
+      <p id="statRejectedDocuments" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Dung lượng đã sử dụng</p>
+      <p id="statStorageUsed" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- Danh sách CV: phần chính chính của trang Documents. -->
+  <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[1060px] text-left">
+        <thead class="bg-slate-50 text-xs font-black uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="px-4 py-4">Họ tên ứng viên</th>
+            <th class="px-4 py-4">Email</th>
+            <th class="px-4 py-4">Công việc đã ứng tuyển</th>
+            <th class="px-4 py-4">Tệp</th>
+            <th class="px-4 py-4">Dung lượng tệp</th>
+            <th class="px-4 py-4">Trạng thái</th>
+            <th class="px-4 py-4">Ngày tải lên</th>
+            <th class="px-4 py-4 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="documentsTableBody" class="divide-y divide-slate-100">
+          <tr><td class="px-4 py-8 text-center text-sm font-bold text-slate-400" colspan="8">Loading danh sách CV...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Phân trang: chia trang để không load toàn bộ file một lần. -->
+  <div class="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex items-center gap-3">
+      <span id="documentsPaginationSummary" class="text-sm font-bold text-slate-500">--</span>
+      <select id="documentsItemsPerPage" class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="10">10 / trang</option>
+        <option value="20">20 / trang</option>
+        <option value="50">50 / trang</option>
+      </select>
+    </div>
+    <div id="documentsPaginationButtons" class="flex flex-wrap items-center gap-2"></div>
+  </div>
+
+  <!-- Modal tải lên CV: admin upload file nếu cần. -->
+  <div id="documentUploadModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 p-4">
+    <div class="w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 p-5">
+        <div>
+          <h2 class="text-xl font-black text-slate-950">Tải lên CV</h2>
+          <p class="mt-1 text-sm font-semibold text-slate-500">Tải PDF/DOC/DOCX lên và gán vào job ứng tuyển.</p>
+        </div>
+        <button class="closeDocumentUploadModal flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-50" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="documentUploadForm" class="space-y-4 p-5">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Họ tên ứng viên</span>
+            <input id="uploadCandidateName" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text" required>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Email</span>
+            <input id="uploadCandidateEmail" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="email" required>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Công việc đã ứng tuyển</span>
+            <input id="uploadJobApplied" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text">
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Trạng thái</span>
+            <select id="uploadDocumentStatus" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+              <option value="pending">Đang chờ</option>
+              <option value="approved">Đã duyệt</option>
+              <option value="rejected">Bị từ chối</option>
+            </select>
+          </label>
+          <label class="space-y-2 md:col-span-2">
+            <span class="text-sm font-black text-slate-700">File CV</span>
+            <input id="uploadDocumentFile" class="block w-full rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 file:mr-4 file:border-0 file:bg-slate-100 file:px-4 file:py-3 file:text-sm file:font-black file:text-slate-700" type="file" accept=".pdf,.doc,.docx" required>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+          <button class="closeDocumentUploadModal rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 hover:bg-slate-50" type="button">Hủy</button>
+          <button class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-black text-white hover:bg-blue-700" type="submit">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal chi tiết CV: thông tin ứng viên, tệp, việc làm đã ứng tuyển, lịch sử và xem trước. -->
+  <div id="documentDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 p-4">
+    <div class="w-full max-w-5xl overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 p-5">
+        <div>
+          <h2 class="text-xl font-black text-slate-950">Chi tiết ứng viên</h2>
+          <p class="mt-1 text-sm font-semibold text-slate-500">Info ứng viên, tệp CV, việc làm đã ứng tuyển và lịch sử.</p>
+        </div>
+        <button class="closeDocumentDetailModal flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-50" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="documentDetailContent" class="max-h-[74vh] overflow-auto p-5"></div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+

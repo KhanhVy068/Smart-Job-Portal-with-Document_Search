@@ -1,6 +1,8 @@
+// Cấu hình URL API và chế độ mock từ localStorage.
 const API_BASE_URL = localStorage.getItem('apiBaseUrl') || '/api';
 const USE_MOCK = localStorage.getItem('useMockApi') === 'true';
 
+// Gom các hàm gọi API thường dùng để các trang import lại.
 export const api = {
   get: (url) => request(url),
   post: (url, body) => request(url, { method: 'POST', body }),
@@ -9,6 +11,7 @@ export const api = {
   delete: (url) => request(url, { method: 'DELETE' })
 };
 
+// Gọi API tùy chọn: nếu 404 thì trả về giá trị dự phòng.
 export async function getOptional(url, fallback = null) {
   try {
     return await api.get(url);
@@ -18,6 +21,7 @@ export async function getOptional(url, fallback = null) {
   }
 }
 
+// Hàm gọi API chính: gắn token, gửi body JSON và xử lý response.
 async function request(url, options = {}) {
   if (USE_MOCK) {
     return mockRequest(url, options);
@@ -51,6 +55,7 @@ async function request(url, options = {}) {
   return payload;
 }
 
+// Chuẩn hóa lỗi từ backend thành Error có status và payload.
 function createApiError(res, payload) {
   const message =
     payload?.message ||
@@ -64,6 +69,7 @@ function createApiError(res, payload) {
   return err;
 }
 
+// Dữ liệu giả dùng khi bật useMockApi để test giao diện không cần backend.
 function mockRequest(url, options = {}) {
   if ((options.method || 'GET') !== 'GET') {
     console.log('MOCK API:', options.method, url, options.body);
@@ -190,6 +196,7 @@ function mockRequest(url, options = {}) {
   return [];
 }
 
+// Kiểm tra trạng thái tin tuyển dụng còn đang hoạt động.
 function isActiveJobStatus(status = '') {
   const normalized = String(status).toLowerCase();
   return ['active', 'open', 'published', 'dang tuyen', 'dang hien thi'].includes(normalized);
