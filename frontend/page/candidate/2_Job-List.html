@@ -1,0 +1,82 @@
+<!-- Candidate Job List -->
+<section class="p-6">
+  <div class="flex flex-col md:flex-row gap-6">
+
+    <!-- Filter Sidebar -->
+    <aside class="w-full md:w-72 flex-shrink-0">
+      <div class="bg-white border border-slate-100 rounded-xl p-5 sticky top-20 space-y-6 shadow-sm">
+        <h3 class="text-sm font-bold text-blue-900 uppercase tracking-wider">Bộ lọc tìm kiếm</h3>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-2">Từ khóa</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+            <input id="filterKeyword" type="text" placeholder="Tên công việc, kỹ năng..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-2 focus:ring-blue-900/20 focus:outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-2">Địa điểm</label>
+          <select id="filterLocation"
+            class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 px-3 text-sm focus:ring-2 focus:ring-blue-900/20 focus:outline-none">
+            <option value="">Tất cả địa điểm</option>
+            <option value="hcm">TP. Hồ Chí Minh</option>
+            <option value="hanoi">Hà Nội</option>
+            <option value="danang">Đà Nẵng</option>
+            <option value="remote">Remote</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-2">Loại hình</label>
+          <div class="flex flex-wrap gap-2">
+            <button data-type="full-time" class="job-type-btn px-3 py-1.5 text-xs font-bold rounded-full bg-slate-100 text-slate-600 hover:bg-blue-900 hover:text-white transition-all">Toàn thời gian</button>
+            <button data-type="part-time" class="job-type-btn px-3 py-1.5 text-xs font-bold rounded-full bg-slate-100 text-slate-600 hover:bg-blue-900 hover:text-white transition-all">Bán thời gian</button>
+            <button data-type="remote"    class="job-type-btn px-3 py-1.5 text-xs font-bold rounded-full bg-slate-100 text-slate-600 hover:bg-blue-900 hover:text-white transition-all">Remote</button>
+            <button data-type="contract"  class="job-type-btn px-3 py-1.5 text-xs font-bold rounded-full bg-slate-100 text-slate-600 hover:bg-blue-900 hover:text-white transition-all">Hợp đồng</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-2">Ngành nghề</label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="it" class="rounded text-blue-900 border-slate-300"/><span class="text-sm text-slate-600">Lập trình / IT</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="design" class="rounded text-blue-900 border-slate-300"/><span class="text-sm text-slate-600">Thiết kế UI/UX</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="data" class="rounded text-blue-900 border-slate-300"/><span class="text-sm text-slate-600">Dữ liệu / AI</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="pm" class="rounded text-blue-900 border-slate-300"/><span class="text-sm text-slate-600">Product / Project</span></label>
+          </div>
+        </div>
+
+        <button id="btnApplyFilter" class="w-full py-2.5 bg-blue-900 text-white font-bold rounded-xl text-sm hover:bg-blue-800 active:scale-95 transition-all">Áp dụng bộ lọc</button>
+        <button id="btnClearFilter" class="w-full py-2 text-slate-500 font-semibold text-sm hover:underline">Xóa bộ lọc</button>
+      </div>
+    </aside>
+
+    <!-- Job Listings -->
+    <div class="flex-1 space-y-4 min-w-0">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-bold text-blue-900">Việc làm dành cho bạn</h1>
+          <p id="jobListCount" class="text-sm text-slate-500 mt-0.5">Đang tải...</p>
+        </div>
+        <select id="sortJobs" class="bg-white border border-slate-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/20">
+          <option value="newest">Mới nhất</option>
+          <option value="salary">Lương cao nhất</option>
+        </select>
+      </div>
+
+      <div id="jobListContainer" class="space-y-3">
+        <div class="bg-white border border-slate-100 rounded-xl p-5 animate-pulse h-28"></div>
+        <div class="bg-white border border-slate-100 rounded-xl p-5 animate-pulse h-28"></div>
+        <div class="bg-white border border-slate-100 rounded-xl p-5 animate-pulse h-28"></div>
+      </div>
+
+      <nav id="jobListPagination" class="hidden flex justify-center items-center gap-2 pt-4">
+        <button id="prevPage" class="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:bg-blue-900 hover:text-white hover:border-blue-900 transition-all"><span class="material-symbols-outlined text-lg">chevron_left</span></button>
+        <div id="pageNumbers" class="flex gap-1"></div>
+        <button id="nextPage" class="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:bg-blue-900 hover:text-white hover:border-blue-900 transition-all"><span class="material-symbols-outlined text-lg">chevron_right</span></button>
+      </nav>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,122 @@
+<!-- Candidate Profile View -->
+<section class="p-6 space-y-6">
+
+  <!-- Profile Header Card -->
+  <div class="bg-white border border-slate-100 rounded-xl shadow-sm overflow-hidden">
+    <div class="h-28 bg-gradient-to-r from-blue-900 to-blue-700"></div>
+    <div class="px-8 pb-8">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-12 mb-6">
+        <div id="profileAvatarWrap"
+          class="w-24 h-24 rounded-2xl bg-blue-900 border-4 border-white shadow-lg flex items-center justify-center text-white text-3xl font-black overflow-hidden flex-shrink-0">
+          ?
+        </div>
+        <button data-route="profile-setting"
+          class="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white text-sm font-bold rounded-xl hover:bg-blue-800 active:scale-95 transition-all self-start sm:self-auto">
+          <span class="material-symbols-outlined text-base">edit</span> Chỉnh sửa hồ sơ
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <h1 id="profileName" class="text-2xl font-extrabold text-blue-900">...</h1>
+        <p id="profileTitle" class="text-base text-slate-600 font-medium"></p>
+        <div class="flex flex-wrap gap-4 text-sm text-slate-500">
+          <span class="flex items-center gap-1.5" id="profileLocationWrap">
+            <span class="material-symbols-outlined text-base">location_on</span>
+            <span id="profileLocation"></span>
+          </span>
+          <span class="flex items-center gap-1.5" id="profileEmailWrap">
+            <span class="material-symbols-outlined text-base">mail</span>
+            <span id="profileEmail"></span>
+          </span>
+          <span class="flex items-center gap-1.5" id="profilePhoneWrap">
+            <span class="material-symbols-outlined text-base">call</span>
+            <span id="profilePhone"></span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Profile strength -->
+      <div class="mt-6 bg-slate-50 rounded-xl p-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">Độ hoàn thiện hồ sơ</span>
+          <span id="profileStrengthPct" class="text-xs font-bold text-teal-700">0%</span>
+        </div>
+        <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div id="profileStrengthBar" class="h-full bg-teal-600 rounded-full transition-all" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2-column layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Bio -->
+      <div class="bg-white border border-slate-100 rounded-xl p-6 shadow-sm">
+        <h2 class="text-base font-bold text-blue-900 mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-teal-700">info</span> Giới thiệu
+        </h2>
+        <p id="profileBio" class="text-sm text-slate-600 leading-relaxed"></p>
+      </div>
+
+      <!-- Skills -->
+      <div class="bg-white border border-slate-100 rounded-xl p-6 shadow-sm">
+        <h2 class="text-base font-bold text-blue-900 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-teal-700">label</span> Kỹ năng
+        </h2>
+        <div id="profileSkills" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- CVs preview -->
+      <div class="bg-white border border-slate-100 rounded-xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-bold text-blue-900 flex items-center gap-2">
+            <span class="material-symbols-outlined text-base text-teal-700">description</span> CV đã tải lên
+          </h2>
+          <button data-route="cv-management" class="text-xs font-bold text-teal-700 hover:underline">Xem tất cả →</button>
+        </div>
+        <div id="profileCvList" class="space-y-3">
+          <p class="text-sm text-slate-400">Đang tải...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right sidebar -->
+    <div class="space-y-4">
+      <div class="bg-white border border-slate-100 rounded-xl p-6 shadow-sm space-y-4">
+        <h2 class="text-sm font-bold text-blue-900 uppercase tracking-wide">Thông tin chung</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-slate-400 text-base mt-0.5">school</span>
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wide">Học vấn</p>
+              <p id="profileEducation" class="font-medium text-slate-700 mt-0.5"></p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-slate-400 text-base mt-0.5">timer</span>
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wide">Kinh nghiệm</p>
+              <p id="profileExp" class="font-medium text-slate-700 mt-0.5"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="bg-white border border-slate-100 rounded-xl p-6 shadow-sm space-y-3">
+        <h2 class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-1">Hành động</h2>
+        <button data-route="profile-setting" class="w-full flex items-center gap-3 px-4 py-2.5 bg-slate-50 hover:bg-blue-50 rounded-xl text-sm font-semibold text-slate-700 hover:text-blue-900 transition-all">
+          <span class="material-symbols-outlined text-base">manage_accounts</span> Chỉnh sửa hồ sơ
+        </button>
+        <button data-route="cv-upload" class="w-full flex items-center gap-3 px-4 py-2.5 bg-slate-50 hover:bg-blue-50 rounded-xl text-sm font-semibold text-slate-700 hover:text-blue-900 transition-all">
+          <span class="material-symbols-outlined text-base">upload_file</span> Upload CV mới
+        </button>
+        <button data-route="account-setting" class="w-full flex items-center gap-3 px-4 py-2.5 bg-slate-50 hover:bg-blue-50 rounded-xl text-sm font-semibold text-slate-700 hover:text-blue-900 transition-all">
+          <span class="material-symbols-outlined text-base">settings</span> Cài đặt tài khoản
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

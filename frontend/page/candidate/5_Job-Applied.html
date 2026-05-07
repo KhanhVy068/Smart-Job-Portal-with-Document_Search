@@ -1,0 +1,55 @@
+<!-- Candidate Job Applied -->
+<section class="p-6 space-y-6">
+
+  <!-- Header + Stats -->
+  <div>
+    <h1 class="text-2xl font-bold text-blue-900">Việc làm đã ứng tuyển</h1>
+    <p class="text-sm text-slate-500 mt-1">Theo dõi trạng thái tất cả hồ sơ bạn đã gửi.</p>
+  </div>
+
+  <!-- Stats grid -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white border border-slate-100 rounded-xl p-4 text-center shadow-sm">
+      <p id="statTotal" class="text-3xl font-black text-blue-900">–</p>
+      <p class="text-xs text-slate-500 font-medium mt-1">Tổng hồ sơ</p>
+    </div>
+    <div class="bg-teal-50 border border-teal-100 rounded-xl p-4 text-center">
+      <p id="statInterview" class="text-3xl font-black text-teal-700">–</p>
+      <p class="text-xs text-teal-700 font-medium mt-1">Phỏng vấn</p>
+    </div>
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
+      <p id="statReviewing" class="text-3xl font-black text-blue-700">–</p>
+      <p class="text-xs text-blue-700 font-medium mt-1">Đang xét duyệt</p>
+    </div>
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+      <p id="statRejected" class="text-3xl font-black text-slate-500">–</p>
+      <p class="text-xs text-slate-500 font-medium mt-1">Không đạt</p>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="flex gap-2 flex-wrap">
+    <button data-status="" class="apply-tab-btn px-4 py-2 text-xs font-bold rounded-full bg-blue-900 text-white transition-all">Tất cả</button>
+    <button data-status="submitted" class="apply-tab-btn px-4 py-2 text-xs font-bold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Đã nộp</button>
+    <button data-status="reviewing" class="apply-tab-btn px-4 py-2 text-xs font-bold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Đang xét duyệt</button>
+    <button data-status="interview" class="apply-tab-btn px-4 py-2 text-xs font-bold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Phỏng vấn</button>
+    <button data-status="rejected" class="apply-tab-btn px-4 py-2 text-xs font-bold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Không đạt</button>
+  </div>
+
+  <!-- Empty state -->
+  <div id="appliedEmpty" class="hidden flex flex-col items-center justify-center py-16 text-center">
+    <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+      <span class="material-symbols-outlined text-3xl text-slate-400">assignment_turned_in</span>
+    </div>
+    <h3 class="text-base font-bold text-slate-600 mb-2">Chưa có hồ sơ nào</h3>
+    <p class="text-sm text-slate-400 mb-6">Bắt đầu ứng tuyển để theo dõi tiến trình tại đây.</p>
+    <button data-route="job-list" class="px-6 py-2.5 bg-blue-900 text-white font-bold rounded-xl text-sm hover:bg-blue-800 transition-all">Tìm việc làm ngay</button>
+  </div>
+
+  <!-- Applications list -->
+  <div id="appliedList" class="space-y-4">
+    <div class="bg-white border border-slate-100 rounded-xl p-5 animate-pulse h-32"></div>
+    <div class="bg-white border border-slate-100 rounded-xl p-5 animate-pulse h-32"></div>
+    <div class="bg-white border border-slate-100 rounded-xl p-5 animate-pulse h-32"></div>
+  </div>
+</section>

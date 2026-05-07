@@ -3,6 +3,7 @@ import { hasRoute, navigate, setRoutes } from "./router.js";
 import { initAdminHeader } from "./components/header/admin.js";
 import { initHeader } from "./components/header/employer.js";
 import { initAdminSidebar } from "./components/sidebar/admin.js";
+import { initCandidateHeader } from "./components/header/candidate.js";
 
 const roleConfigs = {
   admin: {
@@ -61,6 +62,36 @@ const roleConfigs = {
       "post-job": "./pages/employer/3_postjob.js",
     },
     afterLoad: initHeader,
+  },
+
+  candidate: {
+    header: "./components/header/candidate.html",
+    sidebar: "./components/sidebar/candidate.html",
+    routes: {
+      dashboard:        "./page/candidate/1_Dashboard.html",
+      "job-list":       "./page/candidate/2_Job-List.html",
+      "job-detail":     "./page/candidate/3_Job-Details.html",
+      "job-saved":      "./page/candidate/4_Job-Saved.html",
+      "job-applied":    "./page/candidate/5_Job-Applied.html",
+      "cv-upload":      "./page/candidate/6_CV-Upload.html",
+      "cv-management":  "./page/candidate/7_CV-Management.html",
+      profile:          "./page/candidate/8_Profile.html",
+      "profile-setting":"./page/candidate/9_Profile-Setting.html",
+      "account-setting":"./page/candidate/10_Account-Setting.html",
+    },
+    pageScripts: {
+      dashboard:        "./pages/candidate/1_dashboard.js",
+      "job-list":       "./pages/candidate/2_job-list.js",
+      "job-detail":     "./pages/candidate/3_job-detail.js",
+      "job-saved":      "./pages/candidate/4_job-saved.js",
+      "job-applied":    "./pages/candidate/5_job-applied.js",
+      "cv-upload":      "./pages/candidate/6_cv-upload.js",
+      "cv-management":  "./pages/candidate/7_cv-management.js",
+      profile:          "./pages/candidate/8_profile.js",
+      "profile-setting":"./pages/candidate/9_profile-setting.js",
+      "account-setting":"./pages/candidate/10_account-setting.js",
+    },
+    afterLoad: initCandidateHeader,
   },
 };
 

@@ -8,7 +8,8 @@ export const api = {
   post: (url, body) => request(url, { method: 'POST', body }),
   put: (url, body) => request(url, { method: 'PUT', body }),
   patch: (url, body) => request(url, { method: 'PATCH', body }),
-  delete: (url) => request(url, { method: 'DELETE' })
+  delete: (url) => request(url, { method: 'DELETE' }),
+  upload: (url, formData) => request(url, { method: 'POST', _formData: formData })
 };
 
 // Gọi API tùy chọn: nếu 404 thì trả về giá trị dự phòng.
@@ -39,7 +40,10 @@ async function request(url, options = {}) {
     credentials: 'include'
   };
 
-  if (options.body !== undefined) {
+  if (options._formData !== undefined) {
+    fetchOptions.body = options._formData;
+    // Let browser set Content-Type with boundary for multipart
+  } else if (options.body !== undefined) {
     headers.set('Content-Type', 'application/json');
     fetchOptions.body = JSON.stringify(options.body);
   }
@@ -73,6 +77,20 @@ function createApiError(res, payload) {
 function mockRequest(url, options = {}) {
   if ((options.method || 'GET') !== 'GET') {
     console.log('MOCK API:', options.method, url, options.body);
+    if (url === '/auth/login') {
+      const role = options.body?.role || 'candidate';
+      return {
+        accessToken: 'mock-token-123',
+        role,
+        user: { id: 1, fullName: 'Nguyễn Văn An', email: options.body?.identifier || 'demo@nexus.com', role }
+      };
+    }
+    if (url === '/auth/register') return { success: true, message: 'Đăng ký thành công.' };
+    if (url === '/auth/forgot-password') return { success: true, message: 'Email đã được gửi.' };
+    if (/^\/jobs\/\d+\/apply$/.test(url)) return { success: true, message: 'Ứng tuyển thành công.' };
+    if (url === '/candidate/cv/upload' || url === '/candidate/cv/upload/') {
+      return { id: Date.now(), filename: 'uploaded_cv.pdf', status: 'processing', uploadedAt: new Date().toISOString() };
+    }
     return { success: true };
   }
 
@@ -191,6 +209,188 @@ function mockRequest(url, options = {}) {
       { id: 2, name: 'Pham Minh Duc', position: 'Backend Developer', status: 'viewed', cvStatus: 'processed', createdAt: '2024-06-04T08:20:00Z' },
       { id: 3, name: 'Le Hoang Nam', position: 'Marketing Manager', status: 'new', cvStatus: 'rejected', createdAt: '2024-06-03T13:05:00Z' }
     ];
+  }
+
+  // ── Candidate profile ──────────────────────────────────────────────────
+  if (url === '/user/profile') {
+    return {
+      id: 1,
+      fullName: 'Nguyễn Văn An',
+      email: 'an.nguyen@email.com',
+      phone: '090 123 4567',
+      title: 'Senior Frontend Developer',
+      location: 'TP. Hồ Chí Minh',
+      bio: 'Kỹ sư Frontend với 5 năm kinh nghiệm xây dựng ứng dụng web hiệu suất cao.',
+      skills: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js', 'Elasticsearch'],
+      experience: 5,
+      education: 'Đại học Bách Khoa TP.HCM – Kỹ thuật Phần mềm',
+      avatar: '',
+      profileStrength: 85,
+    };
+  }
+
+  // ── Candidate applications ─────────────────────────────────────────────
+  if (url === '/candidate/applications') {
+    return [
+      {
+        id: 1, jobId: 10,
+        jobTitle: 'Senior Frontend Developer',
+        companyName: 'Nexus Lab',
+        companyLogo: '',
+        location: 'Quận 1, TP.HCM',
+        salary: '$3.000 – $5.000',
+        jobType: 'Toàn thời gian',
+        status: 'interview',
+        appliedAt: '2024-05-10T09:00:00Z',
+        updatedAt: '2024-05-18T14:00:00Z',
+      },
+      {
+        id: 2, jobId: 11,
+        jobTitle: 'React Developer',
+        companyName: 'FinTech Solutions',
+        companyLogo: '',
+        location: 'Remote',
+        salary: '$2.500 – $4.000',
+        jobType: 'Remote',
+        status: 'reviewing',
+        appliedAt: '2024-05-12T11:00:00Z',
+        updatedAt: '2024-05-14T08:00:00Z',
+      },
+      {
+        id: 3, jobId: 12,
+        jobTitle: 'UI Engineer',
+        companyName: 'Grab Vietnam',
+        companyLogo: '',
+        location: 'Quận 7, TP.HCM',
+        salary: '$2.000 – $3.500',
+        jobType: 'Toàn thời gian',
+        status: 'submitted',
+        appliedAt: '2024-05-15T10:30:00Z',
+        updatedAt: '2024-05-15T10:30:00Z',
+      },
+      {
+        id: 4, jobId: 13,
+        jobTitle: 'UX Researcher',
+        companyName: 'Shopee',
+        companyLogo: '',
+        location: 'Quận 4, TP.HCM',
+        salary: '$1.800 – $2.800',
+        jobType: 'Toàn thời gian',
+        status: 'rejected',
+        appliedAt: '2024-04-20T09:00:00Z',
+        updatedAt: '2024-04-28T16:00:00Z',
+      },
+    ];
+  }
+
+  // ── Candidate CVs ──────────────────────────────────────────────────────
+  if (url === '/candidate/cv') {
+    return [
+      {
+        id: 1,
+        filename: 'NguyenVanAn_Senior_FE.pdf',
+        name: 'NguyenVanAn_Senior_FE.pdf',
+        size: 524288,
+        url: '',
+        status: 'indexed',
+        uploadedAt: '2024-05-01T10:00:00Z',
+      },
+      {
+        id: 2,
+        filename: 'CV_AnNguyen_2024.docx',
+        name: 'CV_AnNguyen_2024.docx',
+        size: 204800,
+        url: '',
+        status: 'processing',
+        uploadedAt: '2024-05-20T14:30:00Z',
+      },
+    ];
+  }
+
+  // ── Job list (public + candidate share same endpoint) ──────────────────
+  if (url === '/jobs' || url.startsWith('/jobs?')) {
+    return {
+      total: 3,
+      page: 1,
+      limit: 10,
+      items: [
+        {
+          id: 10,
+          title: 'Senior Frontend Developer',
+          companyName: 'Nexus Lab',
+          companyLogo: '',
+          location: 'Quận 1, TP.HCM',
+          salary: '$3.000 – $5.000',
+          jobType: 'Toàn thời gian',
+          category: 'Lập trình',
+          skills: ['React', 'TypeScript', 'GraphQL'],
+          description: 'Xây dựng các sản phẩm frontend hiệu suất cao.',
+          postedAt: '2024-05-01T00:00:00Z',
+          deadline: '2024-06-30T00:00:00Z',
+          status: 'active',
+          isSaved: false,
+        },
+        {
+          id: 11,
+          title: 'React Developer',
+          companyName: 'FinTech Solutions',
+          companyLogo: '',
+          location: 'Remote',
+          salary: '$2.500 – $4.000',
+          jobType: 'Remote',
+          category: 'Lập trình',
+          skills: ['React', 'Redux', 'Node.js'],
+          description: 'Phát triển ứng dụng FinTech trên nền tảng React.',
+          postedAt: '2024-05-05T00:00:00Z',
+          deadline: '2024-06-15T00:00:00Z',
+          status: 'active',
+          isSaved: true,
+        },
+        {
+          id: 12,
+          title: 'UI Engineer',
+          companyName: 'Grab Vietnam',
+          companyLogo: '',
+          location: 'Quận 7, TP.HCM',
+          salary: '$2.000 – $3.500',
+          jobType: 'Toàn thời gian',
+          category: 'Thiết kế',
+          skills: ['Figma', 'React', 'CSS'],
+          description: 'Thiết kế và triển khai giao diện người dùng.',
+          postedAt: '2024-05-08T00:00:00Z',
+          deadline: '2024-06-20T00:00:00Z',
+          status: 'active',
+          isSaved: false,
+        },
+      ],
+    };
+  }
+
+  // ── Job detail ─────────────────────────────────────────────────────────
+  if (/^\/jobs\/\d+$/.test(url)) {
+    return {
+      id: 10,
+      title: 'Senior Frontend Developer',
+      companyName: 'Nexus Lab',
+      companyLogo: '',
+      companyWebsite: 'https://nexuslab.ai',
+      companySize: '200 – 500 nhân viên',
+      location: 'Tầng 24, Bitexco, Quận 1, TP.HCM',
+      salary: '$3.000 – $5.000',
+      jobType: 'Toàn thời gian',
+      category: 'Lập trình',
+      experience: '3 – 5 năm',
+      education: 'Đại học trở lên',
+      skills: ['React', 'TypeScript', 'GraphQL', 'Node.js'],
+      description: '<p>Chào mừng bạn đến với Nexus Lab!</p><p>Chúng tôi đang tìm kiếm một Senior Frontend Developer tài năng để gia nhập đội ngũ kỹ thuật.</p>',
+      requirements: ['3+ năm kinh nghiệm với React', 'Thành thạo TypeScript', 'Hiểu biết về GraphQL'],
+      benefits: ['Lương cạnh tranh', 'Bảo hiểm cao cấp', 'Du lịch hàng năm', 'Thiết bị đời mới'],
+      postedAt: '2024-05-01T00:00:00Z',
+      deadline: '2024-06-30T00:00:00Z',
+      status: 'active',
+      isSaved: false,
+      hasApplied: false,
+    };
   }
 
   return [];
