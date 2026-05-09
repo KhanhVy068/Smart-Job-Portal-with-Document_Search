@@ -1,0 +1,167 @@
+﻿<section id="adminReportsPage" class="w-full max-w-full space-y-6 overflow-hidden p-4 sm:p-6">
+  <!-- Header + bộ lọc: điều khiển dữ liệu report theo thời gian, vai trò, danh mục và địa điểm. -->
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <p class="text-sm font-black uppercase tracking-wider text-blue-600">Reports quản trị</p>
+      <h1 class="mt-1 text-3xl font-black tracking-tight text-slate-950">Reports</h1>
+      <p id="reportsPageSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Reports tổng hợp người dùng, việc làm, hồ sơ ứng tuyển và tìm kiếm.</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button class="reportRangeButton rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-600 hover:bg-slate-50" type="button" data-range="today">Hôm nay</button>
+      <button class="reportRangeButton rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-600 hover:bg-slate-50" type="button" data-range="7d">7 ngày</button>
+      <button class="reportRangeButton rounded-lg bg-blue-600 px-3 py-2 text-sm font-black text-white" type="button" data-range="30d">30 ngày</button>
+      <input id="reportStartDate" class="h-10 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="date">
+      <input id="reportEndDate" class="h-10 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="date">
+      <button id="btnApplyReportDate" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 hover:bg-slate-50" type="button">Áp dụng</button>
+    </div>
+  </div>
+
+  <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-[180px_1fr_1fr_auto]">
+      <select id="reportRoleFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Role: Tất cả</option>
+        <option value="user">Users</option>
+        <option value="employer">Employers</option>
+      </select>
+      <input id="reportCategoryFilter" class="h-11 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Danh mục việc làm">
+      <input id="reportLocationFilter" class="h-11 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Location">
+      <button id="btnReloadReports" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">refresh</span>
+        Reload
+      </button>
+    </div>
+  </div>
+
+  <!-- Overview metrics: tổng quan users, jobs, hồ sơ ứng tuyển và growth. -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Total Users</p>
+      <p id="reportTotalUsers" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Total Jobs</p>
+      <p id="reportTotalJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Total Applications</p>
+      <p id="reportTotalApplications" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Growth</p>
+      <p id="reportGrowth" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- Charts: user growth, jobs posted và hồ sơ ứng tuyển xu hướng. -->
+  <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-100 p-5">
+      <h2 class="text-lg font-black text-slate-950">Analytics Charts</h2>
+      <p class="mt-1 text-sm font-semibold text-slate-500">Biểu đồ chính của trang báo cáo.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-4 p-5 xl:grid-cols-3">
+      <article class="min-w-0 rounded-lg border border-slate-100 p-4">
+        <p class="text-sm font-black text-slate-900">Growth người dùng</p>
+        <div class="relative mt-4 h-52">
+          <svg id="userGrowthChart" class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 420 190"></svg>
+          <p id="userGrowthEmpty" class="absolute inset-0 hidden items-center justify-center text-sm font-bold text-slate-400">Chưa có dữ liệu</p>
+        </div>
+      </article>
+      <article class="min-w-0 rounded-lg border border-slate-100 p-4">
+        <p class="text-sm font-black text-slate-900">Jobs đã đăng</p>
+        <div class="relative mt-4 h-52">
+          <svg id="jobsPostedChart" class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 420 190"></svg>
+          <p id="jobsPostedEmpty" class="absolute inset-0 hidden items-center justify-center text-sm font-bold text-slate-400">Chưa có dữ liệu</p>
+        </div>
+      </article>
+      <article class="min-w-0 rounded-lg border border-slate-100 p-4">
+        <p class="text-sm font-black text-slate-900">Applications trend</p>
+        <div class="relative mt-4 h-52">
+          <svg id="applicationsTrendChart" class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 420 190"></svg>
+          <p id="applicationsTrendEmpty" class="absolute inset-0 hidden items-center justify-center text-sm font-bold text-slate-400">Chưa có dữ liệu</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Reports theo từng module: users, jobs, hồ sơ ứng tuyển, search. -->
+  <div class="grid grid-cols-1 gap-4 xl:grid-cols-4">
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Reports người dùng</h2>
+      <div id="userReportsList" class="mt-4 space-y-3"></div>
+    </section>
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Reports việc làm</h2>
+      <div id="jobReportsList" class="mt-4 space-y-3"></div>
+    </section>
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Reports ứng tuyển</h2>
+      <div id="applicationReportsList" class="mt-4 space-y-3"></div>
+    </section>
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Reports tìm kiếm</h2>
+      <div id="searchReportsList" class="mt-4 space-y-3"></div>
+    </section>
+  </div>
+
+  <!-- Top Ranking, So sánh và Cảnh báo / Gợi ý. -->
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr_1fr]">
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Top / Ranking</h2>
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div><p class="text-sm font-black text-slate-700">Company hàng đầu</p><div id="topCompaniesList" class="mt-3 space-y-2"></div></div>
+        <div><p class="text-sm font-black text-slate-700">Jobs hàng đầu</p><div id="topJobsList" class="mt-3 space-y-2"></div></div>
+        <div><p class="text-sm font-black text-slate-700">Users hàng đầu</p><div id="topUsersList" class="mt-3 space-y-2"></div></div>
+      </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">So sánh</h2>
+      <div id="comparisonList" class="mt-4 space-y-3"></div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Cảnh báo / Gợi ý</h2>
+      <div id="reportInsightsList" class="mt-4 space-y-3"></div>
+    </section>
+  </div>
+
+  <!-- Bảng dữ liệu + Nút xuất: dữ liệu chi tiết có thể xuất dữ liệu. -->
+  <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div class="flex flex-col gap-3 border-b border-slate-100 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <h2 class="text-lg font-black text-slate-950">Bảng dữ liệu</h2>
+        <p class="mt-1 text-sm font-semibold text-slate-500">Users, việc làm, hồ sơ ứng tuyển có thể xuất dữ liệu.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <select id="reportTableType" class="h-10 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+          <option value="users">Users</option>
+          <option value="jobs">Jobs</option>
+          <option value="hồ sơ ứng tuyển">Profile ứng tuyển</option>
+        </select>
+        <button class="reportExportButton rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 hover:bg-slate-50" type="button" data-format="csv">Export CSV</button>
+        <button class="reportExportButton rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 hover:bg-slate-50" type="button" data-format="excel">Export Excel</button>
+        <button class="reportExportButton rounded-lg bg-slate-950 px-3 py-2 text-sm font-black text-white hover:bg-slate-800" type="button" data-format="pdf">Export PDF</button>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[900px] text-left">
+        <thead id="reportTableHead" class="bg-slate-50 text-xs font-black uppercase tracking-wider text-slate-500"></thead>
+        <tbody id="reportTableBody" class="divide-y divide-slate-100">
+          <tr><td class="px-4 py-8 text-center text-sm font-bold text-slate-400">Loading báo cáo...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,185 @@
+<section class="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <header class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div>
+          <nav class="mb-3 flex items-center gap-2 text-xs font-bold text-slate-400">
+            <span>Dashboard</span>
+            <span>/</span>
+            <span class="text-blue-600">Cài đặt</span>
+          </nav>
+          <h1 class="text-3xl font-black tracking-tight text-slate-950">Cài đặt tài khoản nhà tuyển dụng</h1>
+          <p class="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-500">
+            Cập nhật hồ sơ công ty, thông tin tài khoản và tùy chọn nhận thông báo từ dữ liệu backend.
+          </p>
+        </div>
+
+        <button id="btnReloadSettings" class="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50">
+          <span class="material-symbols-outlined text-lg">refresh</span>
+          Tải lại
+        </button>
+      </div>
+    </header>
+
+    <div id="settingsAlert" class="hidden rounded-xl border p-4 text-sm font-semibold"></div>
+
+    <section class="rounded-xl border border-blue-100 bg-blue-50 p-5">
+      <h2 class="text-base font-black text-blue-950">Ghi chú backend</h2>
+      <p class="mt-2 text-sm font-semibold leading-6 text-blue-800">
+        Trang này không dùng dữ liệu giả. Khi backend sẵn sàng, frontend sẽ đọc dữ liệu từ endpoint cài đặt và gửi thay đổi qua API.
+      </p>
+    </section>
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1.25fr_0.85fr]">
+      <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="mb-6 flex items-center gap-4">
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+            <span class="material-symbols-outlined text-2xl">business</span>
+          </div>
+          <div>
+            <h2 class="text-xl font-black text-slate-950">Hồ sơ công ty</h2>
+            <p id="companyStatusText" class="mt-1 text-sm font-semibold text-slate-400">Đang chờ dữ liệu backend.</p>
+          </div>
+        </div>
+
+        <form id="companySettingsForm" class="space-y-5">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div id="companyLogoPreview" class="flex h-24 w-24 shrink-0 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-slate-400">
+              <span class="material-symbols-outlined text-3xl">business</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <label for="companyLogoUrl" class="mb-2 block text-sm font-black text-slate-700">Logo công ty</label>
+              <input id="companyLogoUrl" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" type="url" placeholder="URL logo từ backend hoặc CDN">
+              <p class="mt-2 text-xs font-semibold text-slate-400">Frontend chỉ lưu URL, việc upload file sẽ nối với backend sau.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label class="block">
+              <span class="mb-2 block text-sm font-black text-slate-700">Tên công ty</span>
+              <input id="companyNameInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" type="text" placeholder="Nhập tên công ty">
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-black text-slate-700">Website</span>
+              <input id="companyWebsiteInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" type="url" placeholder="https://example.com">
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-black text-slate-700">Quy mô</span>
+              <select id="companySizeInput" class="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10">
+                <option value="">Chưa chọn</option>
+                <option value="1-10">1 - 10 nhân sự</option>
+                <option value="11-50">11 - 50 nhân sự</option>
+                <option value="51-200">51 - 200 nhân sự</option>
+                <option value="201-500">201 - 500 nhân sự</option>
+                <option value="500+">Trên 500 nhân sự</option>
+              </select>
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-black text-slate-700">Địa điểm</span>
+              <input id="companyLocationInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" type="text" placeholder="Thành phố, quốc gia">
+            </label>
+          </div>
+
+          <label class="block">
+            <span class="mb-2 block text-sm font-black text-slate-700">Mô tả công ty</span>
+            <textarea id="companyDescriptionInput" class="min-h-32 w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold leading-6 text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" placeholder="Giới thiệu ngắn về công ty"></textarea>
+          </label>
+
+          <div class="flex justify-end border-t border-slate-100 pt-5">
+            <button id="btnSaveCompany" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none" type="submit">
+              <span class="material-symbols-outlined text-lg">save</span>
+              Lưu hồ sơ công ty
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <div class="space-y-6">
+        <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="mb-6 flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
+              <span class="material-symbols-outlined text-2xl">manage_accounts</span>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-slate-950">Tài khoản</h2>
+              <p id="accountStatusText" class="mt-1 text-sm font-semibold text-slate-400">Đang chờ dữ liệu backend.</p>
+            </div>
+          </div>
+
+          <form id="accountSettingsForm" class="space-y-4">
+            <label class="block">
+              <span class="mb-2 block text-sm font-black text-slate-700">Tên người liên hệ</span>
+              <input id="contactNameInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" type="text" placeholder="Tên người phụ trách tuyển dụng">
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-black text-slate-700">Email</span>
+              <input id="accountEmailInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" type="email" placeholder="email@company.com">
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-black text-slate-700">Số điện thoại</span>
+              <input id="accountPhoneInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" type="tel" placeholder="Số điện thoại liên hệ">
+            </label>
+
+            <div class="border-t border-slate-100 pt-5">
+              <button id="btnSaveAccount" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-blue-600 bg-white px-5 py-2.5 text-sm font-black text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400" type="submit">
+                <span class="material-symbols-outlined text-lg">save</span>
+                Lưu tài khoản
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="mb-6 flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+              <span class="material-symbols-outlined text-2xl">notifications_active</span>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-slate-950">Thông báo</h2>
+              <p id="notificationStatusText" class="mt-1 text-sm font-semibold text-slate-400">Đang chờ dữ liệu backend.</p>
+            </div>
+          </div>
+
+          <form id="notificationSettingsForm" class="space-y-5">
+            <label class="flex items-center justify-between gap-4 rounded-lg border border-slate-200 p-4">
+              <span>
+                <span class="block text-sm font-black text-slate-950">Nhận email ứng viên mới</span>
+                <span class="mt-1 block text-xs font-semibold text-slate-500">Gửi email khi có CV mới ứng tuyển.</span>
+              </span>
+              <input id="notifyNewCandidateInput" class="peer sr-only" type="checkbox">
+              <span class="relative h-7 w-12 shrink-0 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5"></span>
+            </label>
+
+            <label class="flex items-center justify-between gap-4 rounded-lg border border-slate-200 p-4">
+              <span>
+                <span class="block text-sm font-black text-slate-950">Tóm tắt hằng ngày</span>
+                <span class="mt-1 block text-xs font-semibold text-slate-500">Nhận báo cáo nhanh về tuyển dụng trong ngày.</span>
+              </span>
+              <input id="notifyDailySummaryInput" class="peer sr-only" type="checkbox">
+              <span class="relative h-7 w-12 shrink-0 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5"></span>
+            </label>
+
+            <label class="flex items-center justify-between gap-4 rounded-lg border border-slate-200 p-4">
+              <span>
+                <span class="block text-sm font-black text-slate-950">Cảnh báo hệ thống</span>
+                <span class="mt-1 block text-xs font-semibold text-slate-500">Nhận thông tin bảo mật và thay đổi quan trọng.</span>
+              </span>
+              <input id="notifySystemAlertInput" class="peer sr-only" type="checkbox">
+              <span class="relative h-7 w-12 shrink-0 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5"></span>
+            </label>
+
+            <button id="btnSaveNotifications" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300" type="submit">
+              <span class="material-symbols-outlined text-lg">save</span>
+              Lưu thông báo
+            </button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
