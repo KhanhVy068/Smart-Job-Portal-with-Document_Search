@@ -1,0 +1,132 @@
+<!-- Trang quan ly tin -->
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Phan tieu de -->
+<div class="flex justify-between items-end mb-8">
+  <div>
+    <h2 class="font-h1 text-h1 text-on-surface mb-2">Quản lý tin tuyển dụng</h2>
+    <p class="font-body-md text-body-md text-secondary">Theo dõi và tối ưu hóa các chiến dịch tuyển dụng của bạn.</p>
+  </div>
+  <div class="flex gap-3">
+    <button class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
+      <span class="material-symbols-outlined text-lg" data-icon="file_download">file_download</span>
+      Xuất báo cáo
+    </button>
+    <button class="flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-lg text-sm font-bold hover:bg-primary transition-all shadow-md active:scale-95" data-route="post-job">
+      <span class="material-symbols-outlined text-lg" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+      Đăng tin mới
+    </button>
+  </div>
+</div>
+<!-- The thong ke -->
+<div class="grid grid-cols-4 gap-6 mb-8">
+  <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+      <span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+    </div>
+    <div>
+      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tổng tin đăng</p>
+      <p id="totalJobs" class= "text-2xl font-bold text-slate-900">--</p>
+    </div>
+  </div>
+  <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+    <div class="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center">
+      <span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+    </div>
+    <div>
+      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Đang tuyển</p>
+      <p id="activeJobs" class="text-2xl font-bold text-slate-900">--</p>
+    </div>
+  </div>
+  <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+    <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center">
+      <span class="material-symbols-outlined" data-icon="group">group</span>
+    </div>
+    <div>
+      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tổng ứng viên</p>
+      <p id="totalCandidates" class="text-2xl font-bold text-slate-900">--</p>
+    </div>
+  </div>
+  <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center">
+      <span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+    </div>
+    <div>
+      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Lượt xem tin</p>
+      <p id="totalViews" class="text-2xl font-bold text-slate-900">--</p>
+    </div>
+  </div>
+</div>
+<!-- Thanh loc va bang -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+  <!-- Thanh loc -->
+  <div class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
+    <div class="flex items-center gap-2 p-1 bg-white border border-slate-200 rounded-lg">
+      <button  id="tabAll" class="tab-btn px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md transition-colors">Tất cả</button>
+      <button  id="tabActive" class="tab-btn px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md transition-colors">Đang tuyển (<span id="countActive">--</span>)</button>
+      <button  id="tabClosed" class="tab-btn px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md transition-colors">Đã đóng (<span id="countClosed">--</span>)</button>
+      <button  id="tabDraft" class="tab-btn px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md transition-colors">Nháp (<span id="countDraft">--</span>)</button>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <select class="appearance-none pl-4 pr-10 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:ring-2 focus:ring-primary-container focus:outline-none shadow-sm">
+          <option>Sắp xếp: Mới nhất</option>
+          <option>Sắp xếp: Cũ nhất</option>
+          <option>Sắp xếp: Nhiều ứng viên</option>
+        </select>
+        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" data-icon="expand_more">expand_more</span>
+      </div>
+    </div>
+  </div>
+  <!-- Bang tin tuyen dung -->
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold tracking-widest border-b border-slate-100">
+          <th class="px-6 py-4 font-bold">Tiêu đề công việc</th>
+          <th class="px-6 py-4 font-bold text-center">Trạng thái</th>
+          <th class="px-6 py-4 font-bold">Ngày tạo</th>
+          <th class="px-6 py-4 font-bold text-center">Số ứng viên</th>
+          <th class="px-6 py-4 font-bold text-right">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody id="jobList" class="divide-y divide-slate-50">
+        <!-- Du lieu cho -->
+        <tr>
+          <td class="px-6 py-5 text-sm font-semibold text-slate-400" colspan="5">Dang tai tin tuyen dung...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- Phan trang -->
+  <div class="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between">
+    <p id="pageInfo" class="text-sm text-slate-500"></p>
+    <p id="pageSummary" class="text-sm text-slate-500 font-medium"></p>
+    <div id="pagination" class="flex items-center gap-1"></div>
+  </div>
+</div>
+<!-- Goi y tuyen dung -->
+<div class="mt-8 flex gap-8">
+  <div class="flex-1 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-8 text-white relative overflow-hidden shadow-xl group">
+    <div class="relative z-10">
+      <h3 class="text-xl font-bold mb-2">Đẩy mạnh tin tuyển dụng của bạn?</h3>
+      <p class="text-blue-100 text-sm mb-6 max-w-md">Su dung goi Tin Noi Bat de tang kha nang tiep can ung vien phu hop.</p>
+      <button class="px-6 py-2.5 bg-white text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-50 transition-all">Nâng cấp ngay</button>
+    </div>
+    <div class="absolute right-0 bottom-0 opacity-10 group-hover:scale-110 transition-transform duration-500">
+      <span class="material-symbols-outlined !text-[120px]" data-icon="auto_awesome">auto_awesome</span>
+    </div>
+  </div>
+  <div class="w-1/3 bg-surface-container rounded-2xl p-8 border border-slate-200">
+    <h3 class="text-lg font-bold text-slate-900 mb-4">Mẹo tuyển dụng</h3>
+    <ul class="space-y-4">
+      <li class="flex gap-3">
+        <span class="material-symbols-outlined text-blue-600" data-icon="lightbulb">lightbulb</span>
+        <p class="text-sm text-slate-600">Mo ta cong viec ro rang giup thu hut ung vien phu hop hon.</p>
+      </li>
+      <li class="flex gap-3">
+        <span class="material-symbols-outlined text-blue-600" data-icon="tips_and_updates">tips_and_updates</span>
+        <p class="text-sm text-slate-600">Phan hoi ung vien kip thoi de tang uy tin thuong hieu.</p>
+      </li>
+    </ul>
+  </div>
+</div>

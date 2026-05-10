@@ -1,0 +1,238 @@
+﻿<section class="w-full max-w-full space-y-6 overflow-hidden p-4 sm:p-6">
+  <!-- Header: tiêu đề dashboard và nút tải lại dữ liệu. -->
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <h1 class="mt-1 text-3xl font-black tracking-tight text-slate-950">Tổng quan hệ thống</h1>
+      <p id="adminDashboardSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Loading dữ liệu thật từ backend...</p>
+    </div>
+    <button id="adminDashboardReload" class="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50" type="button">
+      <span class="material-symbols-outlined text-xl">refresh</span>
+      Làm mới
+    </button>
+  </div>
+
+  <!-- TOP: Các card thống kê nhanh toàn hệ thống. -->
+  <div id="adminOverviewCards" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Tổng tài khoản</p>
+        <span class="material-symbols-outlined text-blue-600">groups</span>
+      </div>
+      <p id="totalUsers" class="mt-4 text-3xl font-black text-slate-950">--</p>
+
+    </article>
+
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Tất cả tin tuyển dụng</p>
+        <span class="material-symbols-outlined text-cyan-600">work</span>
+      </div>
+      <p id="totalJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Hồ sơ ứng tuyển</p>
+        <span class="material-symbols-outlined text-violet-600">description</span>
+      </div>
+      <p id="totalApplications" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Nhà tuyển dụng</p>
+        <span class="material-symbols-outlined text-emerald-600">business</span>
+      </div>
+      <p id="totalEmployers" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Tin đang hoạt động</p>
+        <span class="material-symbols-outlined text-rose-600">rocket_launch</span>
+      </div>
+      <p id="activeJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- MIDDLE: Biểu đồ xu hướng và các thao tác nhanh. -->
+  <div class="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+    <section class="min-w-0 rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-100 p-5">
+        <h2 class="text-lg font-black text-slate-950">Phân tích</h2>
+        <p class="mt-1 text-sm font-semibold text-slate-500">Xu hướng việc làm, người dùng đăng ký và CV đã nộp theo thời gian.</p>
+      </div>
+      <div class="grid grid-cols-1 gap-4 p-5 lg:grid-cols-3">
+        <article class="min-w-0 rounded-lg border border-slate-100 p-4">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-black text-slate-900">Tin theo thời gian</p>
+            <span class="material-symbols-outlined text-cyan-600">monitoring</span>
+          </div>
+          <div class="relative mt-4 h-48">
+            <svg id="jobsChartSvg" class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 420 180" role="img" aria-label="Biểu đồ việc làm theo thời gian"></svg>
+            <p id="jobsChartEmpty" class="absolute inset-0 hidden items-center justify-center text-sm font-bold text-slate-400">Chưa có dữ liệu</p>
+          </div>
+          <div id="jobsChartLabels" class="mt-2 flex justify-between text-[11px] font-bold text-slate-400"></div>
+        </article>
+
+        <article class="min-w-0 rounded-lg border border-slate-100 p-4">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-black text-slate-900">Người dùng đăng ký</p>
+            <span class="material-symbols-outlined text-blue-600">group_add</span>
+          </div>
+          <div class="relative mt-4 h-48">
+            <svg id="usersChartSvg" class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 420 180" role="img" aria-label="Biểu đồ người dùng đăng ký"></svg>
+            <p id="usersChartEmpty" class="absolute inset-0 hidden items-center justify-center text-sm font-bold text-slate-400">Chưa có dữ liệu</p>
+          </div>
+          <div id="usersChartLabels" class="mt-2 flex justify-between text-[11px] font-bold text-slate-400"></div>
+        </article>
+
+        <article class="min-w-0 rounded-lg border border-slate-100 p-4">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-black text-slate-900">CV đã nộp</p>
+            <span class="material-symbols-outlined text-violet-600">upload_file</span>
+          </div>
+          <div class="relative mt-4 h-48">
+            <svg id="applicationsChartSvg" class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 420 180" role="img" aria-label="Biểu đồ CV đã nộp"></svg>
+            <p id="applicationsChartEmpty" class="absolute inset-0 hidden items-center justify-center text-sm font-bold text-slate-400">Chưa có dữ liệu</p>
+          </div>
+          <div id="applicationsChartLabels" class="mt-2 flex justify-between text-[11px] font-bold text-slate-400"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Cột phải: quản lý nhanh và trạng thái vận hành hệ thống. -->
+    <div class="min-w-0 space-y-6">
+      <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="text-lg font-black text-slate-950">Quản lý nhanh</h2>
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <button class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-3 py-3 text-sm font-black text-white transition-colors hover:bg-slate-800" type="button" data-route="jobs">
+            <span class="material-symbols-outlined text-xl">add</span>
+            Tạo tin mới
+          </button>
+          <button class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm font-black text-slate-700 transition-colors hover:bg-slate-50" type="button" data-route="users">
+            <span class="material-symbols-outlined text-xl">person_add</span>
+            Thêm người dùng
+          </button>
+          <button class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm font-black text-slate-700 transition-colors hover:bg-slate-50" type="button" data-route="reports">
+            <span class="material-symbols-outlined text-xl">analytics</span>
+            Xem báo cáo
+          </button>
+          <button class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm font-black text-slate-700 transition-colors hover:bg-slate-50" type="button" data-route="settings">
+            <span class="material-symbols-outlined text-xl">settings</span>
+            Cài đặt
+          </button>
+        </div>
+      </section>
+
+      <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="text-lg font-black text-slate-950">Trạng thái hệ thống</h2>
+        <div class="mt-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-500">Trạng thái máy chủ</span>
+            <span id="serverStatus" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">--</span>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-sm font-bold">
+              <span class="text-slate-500">Dung lượng đã sử dụng</span>
+              <span id="storageUsageText" class="text-slate-900">--</span>
+            </div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+              <div id="storageUsageBar" class="h-full w-0 rounded-full bg-blue-600 transition-all"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-500">Tác vụ nền</span>
+            <span id="backgroundJobsStatus" class="text-sm font-black text-slate-900">--</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- HIGHLIGHT + ALERT: Các điểm nổi bật và cảnh báo cần admin xử lý. -->
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)]">
+    <section class="min-w-0 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-black text-slate-950">Nổi bật</h2>
+        <span class="material-symbols-outlined text-amber-500">workspace_premium</span>
+      </div>
+      <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <article class="min-w-0 rounded-lg bg-slate-50 p-4">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Công ty nổi bật</p>
+          <p id="topCompanyName" class="mt-3 truncate text-lg font-black text-slate-950">--</p>
+          <p id="topCompanyMeta" class="mt-1 text-sm font-bold text-slate-500">--</p>
+        </article>
+        <article class="min-w-0 rounded-lg bg-slate-50 p-4">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Tin tuyển dụng nổi bật</p>
+          <p id="hotJobTitle" class="mt-3 truncate text-lg font-black text-slate-950">--</p>
+          <p id="hotJobMeta" class="mt-1 text-sm font-bold text-slate-500">--</p>
+        </article>
+        <article class="min-w-0 rounded-lg bg-slate-50 p-4">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Người dùng đang hoạt động</p>
+          <p id="activeUsersName" class="mt-3 truncate text-lg font-black text-slate-950">--</p>
+          <p id="activeUsersMeta" class="mt-1 text-sm font-bold text-slate-500">--</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="min-w-0 rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-100 p-5">
+        <h2 class="text-lg font-black text-slate-950">Thông báo</h2>
+      </div>
+      <div id="adminAlerts" class="max-h-64 space-y-2 overflow-auto p-3">
+        <p class="px-2 py-6 text-center text-sm font-bold text-slate-400">Loading cảnh báo...</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- BOTTOM: Hoạt động gần đây và các bảng dữ liệu nhanh. -->
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(320px,1fr)_minmax(0,1.4fr)]">
+    <section class="min-w-0 rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-100 p-5">
+        <h2 class="text-lg font-black text-slate-950">Hoạt động gần đây</h2>
+      </div>
+      <div id="recentActivity" class="max-h-[520px] space-y-2 overflow-auto p-3">
+        <p class="px-2 py-6 text-center text-sm font-bold text-slate-400">Loading hoạt động...</p>
+      </div>
+    </section>
+
+    <section class="min-w-0 rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-100 p-5">
+        <h2 class="text-lg font-black text-slate-950">Bảng dữ liệu nhanh</h2>
+      </div>
+      <div class="grid grid-cols-1 divide-y divide-slate-100 xl:grid-cols-3 xl:divide-x xl:divide-y-0">
+        <div class="min-w-0">
+          <div class="border-b border-slate-100 px-4 py-3">
+            <p class="text-sm font-black text-slate-900">Người dùng gần đây</p>
+          </div>
+          <div id="recentUsersTable" class="divide-y divide-slate-100"></div>
+        </div>
+
+        <div class="min-w-0">
+          <div class="border-b border-slate-100 px-4 py-3">
+            <p class="text-sm font-black text-slate-900">Tin gần đây</p>
+          </div>
+          <div id="recentJobsTable" class="divide-y divide-slate-100"></div>
+        </div>
+
+        <div class="min-w-0">
+          <div class="border-b border-slate-100 px-4 py-3">
+            <p class="text-sm font-black text-slate-900">Đang chờ duyệt</p>
+          </div>
+          <div id="pendingApprovalsTable" class="divide-y divide-slate-100"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,55 @@
+<!-- Sidebar Navigation -->
+<aside id="sidebarEl" class="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col overflow-hidden 
+                           bg-white p-4 transition-all duration-300 shadow-sm">
+  <div class="sidebar-header mb-6 flex items-center gap-3 px-2 py-4">
+    <button id="toggleSidebar" type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950" aria-label="Toggle sidebar" aria-expanded="true">
+      <span class="material-symbols-outlined text-2xl">menu</span>
+    </button>
+    
+  </div>
+
+  <nav class="flex-1 space-y-1">
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#dashboard" data-route="dashboard" title="Dashboard">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="menu-text font-sans text-sm font-semibold">Dashboard</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#jobs" data-route="jobs" title="Job Management">
+      <span class="material-symbols-outlined">work</span>
+      <span class="menu-text font-sans text-sm font-semibold">Quản lý tin</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#search" data-route="search" title="CV Search">
+      <span class="material-symbols-outlined">search</span>
+      <span class="menu-text font-sans text-sm font-semibold">Tìm CV</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#saved" data-route="saved" title="Saved Candidates">
+      <span class="material-symbols-outlined">bookmark</span>
+      <span class="menu-text font-sans text-sm font-semibold">Ứng viên đã lưu</span>
+    </a>
+    <a class="menu-item sidebar-link text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950" href="#post-job" data-route="post-job" title="Post Job">
+      <span class="material-symbols-outlined">add_box</span>
+      <span class="menu-text font-sans text-sm font-semibold">Đăng tin</span>
+    </a>
+  </nav>
+
+<div class="company-panel p-4 border-t border-slate-200 dark:border-slate-800">
+  <a class="company-card flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer" href="#settings" data-route="settings" title="Settings">
+    
+    <div class="company-logo-wrap">
+      <img id="companyLogo"
+        class="company-logo w-10 h-10 rounded-lg object-cover bg-slate-100"
+        src=""
+        alt="Company Logo"
+      />
+      <span class="company-logo-fallback material-symbols-outlined" aria-hidden="true">business</span>
+    </div>
+
+    <div class="company-info overflow-hidden">
+    
+      <p id="companyName" class="text-sm font-bold text-slate-900 dark:text-white break-words leading-tight"></p>
+      
+    </div>
+
+  </a>
+</div>
+
+</aside>

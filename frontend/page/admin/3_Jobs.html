@@ -1,0 +1,202 @@
+﻿<section id="adminJobsPage" class="w-full max-w-full space-y-6 overflow-hidden p-4 sm:p-6">
+  <!-- Header + thanh thao tác: tìm kiếm job, lọc trạng thái/công ty/địa điểm và tạo job mới. -->
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <h1 class="mt-1 text-3xl font-black tracking-tight text-slate-950">Quản lý tin tuyển dụng</h1>
+      <p id="jobsPageSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Kiểm duyệt, theo dõi và quản lý toàn bộ tin tuyển dụng.</p>
+    </div>
+
+    <button id="btnAddJob" class="inline-flex w-fit items-center gap-2 rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-black text-white transition-colors hover:bg-slate-800" type="button">
+      <span class="material-symbols-outlined text-xl">add</span>
+      Tạo tin tuyển dụng mới
+    </button>
+  </div>
+
+  <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(220px,1fr)_160px_180px_180px_auto]">
+      <label class="relative block">
+        <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xl text-slate-400">search</span>
+        <input id="jobSearchInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm font-semibold text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100" type="search" placeholder="Tìm việc làm theo tiêu đề, công ty..." autocomplete="off">
+      </label>
+
+      <select id="jobStatusFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Trạng thái: Tất cả</option>
+        <option value="active">Hoạt động</option>
+        <option value="pending">Đang chờ</option>
+        <option value="expired">Hết hạn</option>
+        <option value="banned">Bị khóa</option>
+      </select>
+
+      <input id="jobCompanyFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Company">
+
+      <input id="jobLocationFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Location">
+
+      <button id="btnReloadJobs" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition-colors hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">refresh</span>
+        Tải lại
+      </button>
+    </div>
+  </div>
+
+  <!-- Analytics nhẹ: tổng job, active, pending, bị báo cáo. -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Tổng số tin tuyển dụng</p>
+      <p id="statTotalJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Tin tuyển dụng đang hoạt động</p>
+      <p id="statActiveJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Tin tuyển dụng đang chờ</p>
+      <p id="statPendingJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-500">Tin tuyển dụng bị báo cáo</p>
+      <p id="statReportedJobs" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- Bulk actions: duyệt hoặc xóa nhiều job cùng lúc. -->
+  <div id="bulkJobsBar" class="hidden items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-4">
+    <p class="text-sm font-black text-blue-700"><span id="selectedJobsCount">0</span> việc làm đang được chọn</p>
+    <div class="flex items-center gap-2">
+      <button id="btnBulkApproveJobs" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-black text-white hover:bg-blue-700" type="button">
+        <span class="material-symbols-outlined text-xl">check_circle</span>
+        Duyệt hàng loạt
+      </button>
+      <button id="btnBulkDeleteJobs" class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-black text-white hover:bg-red-700" type="button">
+        <span class="material-symbols-outlined text-xl">delete</span>
+        Xóa hàng loạt
+      </button>
+    </div>
+  </div>
+
+  <!-- Bảng danh sách việc làm: phần chính chính của trang quản trị job. -->
+  <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[1120px] text-left">
+        <thead class="bg-slate-50 text-xs font-black uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="w-12 px-4 py-4"><input id="selectAllJobs" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" type="checkbox" aria-label="Chọn tất cả job"></th>
+            <th class="px-4 py-4">Tên việc làm</th>
+            <th class="px-4 py-4">Tên công ty</th>
+            <th class="px-4 py-4">Vị trí</th>
+            <th class="px-4 py-4">Lương</th>
+            <th class="px-4 py-4">Trạng thái</th>
+            <th class="px-4 py-4">Ngày đăng</th>
+            <th class="px-4 py-4">Số lượng đơn ứng tuyển</th>
+            <th class="px-4 py-4 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="jobsTableBody" class="divide-y divide-slate-100">
+          <tr><td class="px-4 py-8 text-center text-sm font-bold text-slate-400" colspan="9">Loading danh sách việc làm...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Phân trang: bắt buộc để không load toàn bộ jobs một lần. -->
+  <div class="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex items-center gap-3">
+      <span id="jobsPaginationSummary" class="text-sm font-bold text-slate-500">--</span>
+      <select id="jobsItemsPerPage" class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="10">10 / trang</option>
+        <option value="20">20 / trang</option>
+        <option value="50">50 / trang</option>
+      </select>
+    </div>
+    <div id="jobsPaginationButtons" class="flex flex-wrap items-center gap-2"></div>
+  </div>
+
+  <!-- Modal tạo/sửa job: admin có thể tạo job hoặc chỉnh sửa job hiện có. -->
+  <div id="jobFormModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 p-4">
+    <div class="w-full max-w-3xl overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 p-5">
+        <div>
+          <h2 id="jobFormTitle" class="text-xl font-black text-slate-950">Tạo tin tuyển dụng mới</h2>
+          <p class="mt-1 text-sm font-semibold text-slate-500">Nhập thông tin tin tuyển dụng và trạng thái kiểm duyệt.</p>
+        </div>
+        <button class="closeJobModal flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-50" type="button" aria-label="Đóng modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="jobForm" class="space-y-4 p-5">
+        <input id="jobIdInput" type="hidden">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Tên việc làm</span>
+            <input id="jobTitleInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text" required>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Tên công ty</span>
+            <input id="jobCompanyInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text" required>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Vị trí</span>
+            <input id="jobLocationInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text">
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Lương</span>
+            <input id="jobSalaryInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text">
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Trạng thái</span>
+            <select id="jobStatusInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="expired">Hết hạn</option>
+              <option value="banned">Banned</option>
+            </select>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Ngày đăng</span>
+            <input id="jobPostedDateInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="date">
+          </label>
+          <label class="space-y-2 md:col-span-2">
+            <span class="text-sm font-black text-slate-700">Mô tả công việc</span>
+            <textarea id="jobDescriptionInput" class="min-h-24 w-full rounded-lg border border-slate-200 px-3 py-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></textarea>
+          </label>
+          <label class="space-y-2 md:col-span-2">
+            <span class="text-sm font-black text-slate-700">Yêu cầu</span>
+            <textarea id="jobRequirementsInput" class="min-h-24 w-full rounded-lg border border-slate-200 px-3 py-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></textarea>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+          <button class="closeJobModal rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 hover:bg-slate-50" type="button">Hủy</button>
+          <button id="btnSaveJob" class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-black text-white hover:bg-blue-700" type="submit">Lưu việc làm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal chi tiết job: mô tả, yêu cầu, thông tin công ty, hồ sơ ứng tuyển và trạng thái. -->
+  <div id="jobDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 p-4">
+    <div class="w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 p-5">
+        <div>
+          <h2 class="text-xl font-black text-slate-950">Chi tiết việc làm</h2>
+          <p class="mt-1 text-sm font-semibold text-slate-500">Info chi tiết việc làm và danh sách CV ứng tuyển.</p>
+        </div>
+        <button class="closeJobDetailModal flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-50" type="button" aria-label="Đóng modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="jobDetailContent" class="max-h-[72vh] overflow-auto p-5"></div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
