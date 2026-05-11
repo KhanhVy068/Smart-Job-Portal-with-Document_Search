@@ -1,3 +1,4 @@
+
 /**
  * @swagger
  * tags:
@@ -358,4 +359,5 @@ router.put('/categories/:id', updateCategory);
 router.delete('/categories/:id', deleteCategory);
 
 router.get('/stats', getStats);
+
 module.exports = router;
