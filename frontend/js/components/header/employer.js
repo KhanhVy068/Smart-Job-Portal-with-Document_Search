@@ -229,13 +229,13 @@ function closeProfileDropdown() {
   document.getElementById('headerProfileDropdown')?.classList.add('hidden');
 }
 
-// Đăng xuất phía frontend: xóa token hiện có và quay về home khách.
-// Nếu backend có đường dẫn home riêng, đặt localStorage.guestHomeUrl trước khi đăng xuất.
+// Đăng xuất phía frontend: xóa token hiện có và quay về màn đăng nhập.
 function logout() {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('token');
+  localStorage.removeItem('user');
   sessionStorage.clear();
-  window.location.href = localStorage.getItem('guestHomeUrl') || '/';
+  window.location.href = './index.html';
 }
 
 function getInitials(name = '') {

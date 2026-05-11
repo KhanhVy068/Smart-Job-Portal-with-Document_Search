@@ -325,10 +325,14 @@ const express = require('express');
 const { isAuth } = require('../middleware/authMiddleware');
 const { isAdmin } = require('../middleware/roleMiddleware');
 const { 
+    getMe, getDashboard,
     getAllUsers, blockUser, unblockUser, 
+    getUserById, createUser, updateUser, deleteUser,
     getAllJobs, deleteJob,
     getAllCategories, createCategory, updateCategory, deleteCategory,
-    getStats  
+    getStats,
+    getAdminDocuments, getAdminDocumentById, updateDocumentStatus, deleteDocument,
+    getStorage, getReports, getSettings, getBackgroundJobs, getSearchAnalytics, genericOk
 } = require('../controllers/AdminController');
 
 const router = express.Router();
@@ -336,20 +340,57 @@ const router = express.Router();
 // Tất cả các route admin đều cần isAuth + isAdmin
 router.use(isAuth, isAdmin);
 
+router.get('/me', getMe);
+router.get('/dashboard', getDashboard);
+
 // GET /admin/users - Xem danh sách users
 router.get('/users', getAllUsers);
+router.post('/users', createUser);
+router.get('/users/:id', getUserById);
+router.patch('/users/:id', updateUser);
+router.delete('/users/:id', deleteUser);
+router.post('/users/bulk/:action', genericOk);
+router.post('/users/:id/reset-password', genericOk);
 
 // PUT /admin/users/:id/block - Khóa user
 router.put('/users/:id/block', blockUser);
 
 // PUT /admin/users/:id/unblock - Mở khóa user
 router.put('/users/:id/unblock', unblockUser);
+router.patch('/users/:id/block', blockUser);
+router.patch('/users/:id/unblock', unblockUser);
 
 // GET /admin/jobs - Xem danh sách jobs
 router.get('/jobs', getAllJobs);
+router.post('/jobs', genericOk);
+router.get('/jobs/:id', (req, res) => res.json({ id: req.params.id }));
+router.patch('/jobs/:id', genericOk);
+router.patch('/jobs/:id/:action', genericOk);
+router.post('/jobs/bulk/:action', genericOk);
 
 // DELETE /admin/jobs/:id - Xóa job
 router.delete('/jobs/:id', deleteJob);
+
+router.get('/documents', getAdminDocuments);
+router.get('/documents/:id', getAdminDocumentById);
+router.patch('/documents/:id/:action', updateDocumentStatus);
+router.delete('/documents/:id', deleteDocument);
+
+router.get('/storage', getStorage);
+router.patch('/storage/files/:id/move', genericOk);
+router.delete('/storage/files/:id', deleteDocument);
+router.post('/storage/:action', genericOk);
+router.patch('/storage/config', genericOk);
+
+router.get('/reports', getReports);
+router.get('/settings', getSettings);
+router.patch('/settings/:section', genericOk);
+router.get('/background-jobs', getBackgroundJobs);
+router.get('/background-jobs/:id', (req, res) => res.json({ id: req.params.id, status: 'idle' }));
+router.post('/background-jobs/:id/:action', genericOk);
+router.delete('/background-jobs/:id', genericOk);
+router.post('/background-jobs/queue/:action', genericOk);
+router.get('/search-analytics', getSearchAnalytics);
 
 
 // Categories management

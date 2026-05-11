@@ -239,6 +239,11 @@ CREATE INDEX idx_jobs_location ON jobs(location);
 CREATE INDEX idx_jobs_expiry_status ON jobs(expiry_date, status);
 CREATE INDEX idx_jobs_experience ON jobs(experience_required);
 
+-- Full-text fallback khi Meilisearch chưa chạy.
+-- Meilisearch vẫn là search engine chính; các index này giúp demo tìm kiếm lớn bằng MySQL ổn hơn.
+CREATE FULLTEXT INDEX ft_jobs_text ON jobs(title, description, requirements, benefits, location);
+CREATE FULLTEXT INDEX ft_documents_text ON documents(file_name, extracted_text);
+
 -- ==========================================
 -- 10. TRIGGER: Tự động đóng job khi hết hạn
 -- ⚠️ LƯU Ý: Chỉ dùng trong đồ án, production sẽ thay bằng background job (cron/BullMQ)
@@ -277,7 +282,8 @@ INSERT INTO job_categories (id, name, slug, parent_id) VALUES
 
 INSERT INTO users (id, full_name, email, password_hash, role, is_verified) VALUES 
 (1, 'Công ty Công nghệ ABC', 'hr@abc.tech', '$2b$10$YourRealHashHere', 'employer', TRUE),
-(2, 'Mai Thi Anh Tuyet', 'tuyet.mai@student.uit.edu.vn', '$2b$10$YourRealHashHere', 'candidate', FALSE);
+(2, 'Mai Thi Anh Tuyet', 'tuyet.mai@student.uit.edu.vn', '$2b$10$YourRealHashHere', 'candidate', FALSE),
+(3, 'Quản trị hệ thống', 'admin@smartjob.vn', '$2b$10$YourRealHashHere', 'admin', TRUE);
 
 INSERT INTO jobs (
     id, employer_id, category_id, title, description, location,

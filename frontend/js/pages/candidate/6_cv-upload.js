@@ -41,6 +41,7 @@ function setupDropZone() {
 
   document.getElementById('cvFileRemove')?.addEventListener('click', () => {
     selectedFile = null;
+    setUploadButtonEnabled(false);
     document.getElementById('cvFilePreview')?.classList.add('hidden');
     zone?.classList.remove('hidden');
     hideAlerts();
@@ -48,20 +49,24 @@ function setupDropZone() {
 }
 
 function handleFile(file) {
-  const allowed = ['application/pdf', 'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-  const maxMB = 5;
+  const maxMB = 10;
+  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
-  if (!allowed.includes(file.type)) {
-    showError('Chỉ chấp nhận file PDF hoặc Word (.doc, .docx).');
+  if (!isPdf) {
+    selectedFile = null;
+    setUploadButtonEnabled(false);
+    showError('Chỉ chấp nhận file PDF.');
     return;
   }
   if (file.size > maxMB * 1024 * 1024) {
+    selectedFile = null;
+    setUploadButtonEnabled(false);
     showError(`File phải nhỏ hơn ${maxMB}MB.`);
     return;
   }
 
   selectedFile = file;
+  setUploadButtonEnabled(true);
   hideAlerts();
 
   setText('cvFileName', file.name);
@@ -109,6 +114,7 @@ async function uploadFile(file) {
       progressWrap?.classList.add('hidden');
       document.getElementById('cvUploadSuccess')?.classList.remove('hidden');
       selectedFile = null;
+      setUploadButtonEnabled(false);
       document.getElementById('cvFilePreview')?.classList.add('hidden');
       document.getElementById('cvDropZone')?.classList.remove('hidden');
       loadCvCount();
@@ -120,6 +126,11 @@ async function uploadFile(file) {
   } finally {
     if (btn) btn.disabled = false;
   }
+}
+
+function setUploadButtonEnabled(enabled) {
+  const btn = document.getElementById('cvUploadBtn');
+  if (btn) btn.disabled = !enabled;
 }
 
 function showError(msg) {

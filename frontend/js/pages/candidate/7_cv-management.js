@@ -37,6 +37,9 @@ function render(cvs) {
   const statusBadge = {
     indexed:    { label: 'Đã lập chỉ mục', color: 'bg-teal-100 text-teal-700' },
     processing: { label: 'Đang xử lý',     color: 'bg-blue-100 text-blue-700' },
+    pending:    { label: 'Chờ xử lý',       color: 'bg-amber-100 text-amber-700' },
+    completed:  { label: 'Đã trích xuất',   color: 'bg-teal-100 text-teal-700' },
+    failed:     { label: 'Lỗi xử lý',       color: 'bg-red-100 text-red-600' },
     error:      { label: 'Lỗi',            color: 'bg-red-100 text-red-600' },
   };
 

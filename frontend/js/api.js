@@ -1,5 +1,5 @@
 // Cấu hình URL API và chế độ mock từ localStorage.
-const API_BASE_URL = localStorage.getItem('apiBaseUrl') || '/api';
+const API_BASE_URL = localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api';
 const USE_MOCK = localStorage.getItem('useMockApi') === 'true';
 
 // Gom các hàm gọi API thường dùng để các trang import lại.
@@ -36,8 +36,7 @@ async function request(url, options = {}) {
 
   const fetchOptions = {
     method,
-    headers,
-    credentials: 'include'
+    headers
   };
 
   if (options._formData !== undefined) {
@@ -56,7 +55,7 @@ async function request(url, options = {}) {
     throw createApiError(res, payload);
   }
 
-  return payload;
+  return fixMojibakeDeep(payload);
 }
 
 // Chuẩn hóa lỗi từ backend thành Error có status và payload.
@@ -71,6 +70,38 @@ function createApiError(res, payload) {
   err.status = res.status;
   err.payload = payload;
   return err;
+}
+
+function fixMojibakeDeep(value) {
+  if (typeof value === 'string') return fixMojibake(value);
+  if (Array.isArray(value)) return value.map(fixMojibakeDeep);
+  if (!value || typeof value !== 'object') return value;
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [key, fixMojibakeDeep(item)])
+  );
+}
+
+function fixMojibake(value = '') {
+  const text = String(value);
+  const looksBroken =
+    text.includes('Ã') ||
+    text.includes('Â') ||
+    text.includes('Ä') ||
+    text.includes('Æ') ||
+    text.includes('áº') ||
+    text.includes('á»') ||
+    text.includes('à¡') ||
+    text.includes('â');
+  if (!looksBroken) return text;
+
+  try {
+    const bytes = Uint8Array.from([...text].map(char => char.charCodeAt(0) & 0xff));
+    const decoded = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+    return decoded.includes('\uFFFD') ? text : decoded;
+  } catch {
+    return text;
+  }
 }
 
 // Dữ liệu giả dùng khi bật useMockApi để test giao diện không cần backend.

@@ -80,6 +80,7 @@ async function fetchJobs() {
   } catch {
     document.getElementById('jobListContainer').innerHTML =
       '<div class="bg-white border border-slate-100 rounded-xl p-8 text-center text-sm text-slate-400">Không thể tải danh sách việc làm.</div>';
+    setText('jobListCount', 'Không thể tải kết quả phù hợp');
   } finally {
     state.loading = false;
   }
@@ -98,16 +99,16 @@ function renderJobs(jobs) {
     return;
   }
   el.innerHTML = jobs.map(j => `
-    <article class="bg-white border border-slate-100 rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+    <article class="cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md group"
              data-job-id="${j.id}">
       <div class="flex flex-col sm:flex-row sm:items-start gap-4">
-        <div class="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center text-blue-900 font-bold text-lg flex-shrink-0 overflow-hidden">
+        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-blue-50 text-base font-bold text-blue-900">
           ${j.companyLogo ? `<img src="${esc(j.companyLogo)}" class="w-full h-full object-cover"/>` : esc((j.companyName||'?')[0])}
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-2">
             <div>
-              <h2 class="text-base font-bold text-blue-900 group-hover:underline">${esc(j.title)}</h2>
+              <h2 class="text-base font-black text-slate-950 group-hover:text-blue-600">${esc(j.title)}</h2>
               <p class="text-sm text-slate-500 mt-0.5">${esc(j.companyName)}</p>
             </div>
             <button class="save-btn flex-shrink-0 p-2 rounded-xl ${j.isSaved ? 'text-blue-900 bg-blue-50' : 'text-slate-300 hover:text-blue-900 hover:bg-blue-50'} transition-all"
@@ -115,12 +116,12 @@ function renderJobs(jobs) {
               <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' ${j.isSaved ? 1 : 0}">bookmark</span>
             </button>
           </div>
-          <div class="flex flex-wrap gap-3 mt-3 text-xs text-slate-500">
+          <div class="mt-3 flex flex-wrap gap-3 text-xs font-semibold text-slate-500">
             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span>${esc(j.location)}</span>
             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">payments</span>${esc(j.salary)}</span>
             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span>${timeAgo(j.postedAt)}</span>
           </div>
-          <div class="flex flex-wrap gap-2 mt-3">
+          <div class="mt-3 flex flex-wrap gap-2">
             <span class="text-[10px] font-bold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">${esc(j.jobType)}</span>
             ${(j.skills || []).slice(0,3).map(s => `<span class="text-[10px] font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">${esc(s)}</span>`).join('')}
           </div>
@@ -180,7 +181,7 @@ function renderPagination() {
 function showSkeleton() {
   const el = document.getElementById('jobListContainer');
   if (el) el.innerHTML = [1,2,3].map(() =>
-    '<div class="bg-white border border-slate-100 rounded-xl p-5 animate-pulse h-28"></div>').join('');
+    '<div class="h-24 animate-pulse rounded-xl border border-slate-100 bg-white p-4"></div>').join('');
 }
 
 function timeAgo(iso) {

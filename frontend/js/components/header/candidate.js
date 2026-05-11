@@ -28,6 +28,7 @@ function renderHeader(user) {
   setText('candidateNameSidebar', name);
 
   renderAvatar('candidateAvatarHeader', avatar, name);
+  renderAvatar('candidateMenuAvatar', avatar, name);
   renderAvatar('candidateAvatarSidebar', avatar, name);
 }
 
@@ -49,11 +50,13 @@ function setupDropdown() {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     menu.classList.toggle('hidden');
+    btn.setAttribute('aria-expanded', String(!menu.classList.contains('hidden')));
   });
 
   document.addEventListener('click', (e) => {
     if (!document.getElementById('candidateMenuContainer')?.contains(e.target)) {
       menu.classList.add('hidden');
+      btn.setAttribute('aria-expanded', 'false');
     }
   });
 }
@@ -63,7 +66,8 @@ function setupLogout() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/page/guest/4_Login.html';
+    sessionStorage.clear();
+    window.location.href = './index.html';
   });
 }
 

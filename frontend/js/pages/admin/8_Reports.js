@@ -373,7 +373,7 @@ function formatNumber(value) {
 }
 
 function apiBaseUrl() {
-  return localStorage.getItem('apiBaseUrl') || '/api';
+  return localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api';
 }
 
 function setText(id, value) {

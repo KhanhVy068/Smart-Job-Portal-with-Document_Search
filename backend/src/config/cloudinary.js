@@ -1,39 +1,54 @@
-
 const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
 require('dotenv').config();
 
-// Kết nối với Cloudinary 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-module.exports = cloudinary;
-=======
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const multer = require('multer');
-require('dotenv').config();
-
-// Cấu hình Cloudinary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-// Cấu hình storage cho multer
 const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'smart-job-portal',  // Thư mục trên Cloudinary
-        allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
-        resource_type: 'auto'
-    }
+  cloudinary,
+  params: {
+    folder: 'smart-job-portal',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
+    resource_type: 'auto'
+  }
 });
 
-const upload = multer({ storage: storage });
+const pdfStorage = new CloudinaryStorage({
+  cloudinary,
+  params: (req, file) => ({
+    folder: 'smart-job-portal/cv',
+    allowed_formats: ['pdf'],
+    resource_type: 'raw',
+    format: 'pdf',
+    public_id: `${Date.now()}-${file.originalname
+      .replace(/\.pdf$/i, '')
+      .replace(/[^a-zA-Z0-9_-]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'cv'}`
+  })
+});
 
-module.exports = { cloudinary, upload };
+const upload = multer({
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024 }
+});
 
+const pdfUpload = multer({
+  storage: pdfStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const isPdf = file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
+      const err = new Error('Chỉ chấp nhận file PDF.');
+      err.status = 400;
+      return cb(err);
+    }
+    cb(null, true);
+  }
+});
+
+module.exports = { cloudinary, upload, pdfUpload };

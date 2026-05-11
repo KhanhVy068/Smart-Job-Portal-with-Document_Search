@@ -104,7 +104,8 @@ function setupLogoutAll() {
   document.getElementById('acctLogoutAllBtn')?.addEventListener('click', () => {
     if (!confirm('Bạn có chắc muốn đăng xuất khỏi tất cả thiết bị?')) return;
     ['accessToken', 'token', 'user', 'role'].forEach(k => localStorage.removeItem(k));
-    window.location.href = '/page/guest/4_Login.html';
+    sessionStorage.clear();
+    window.location.href = './index.html';
   });
 }
 

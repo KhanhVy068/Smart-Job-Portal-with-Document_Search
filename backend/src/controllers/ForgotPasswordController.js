@@ -1,89 +1,53 @@
 const crypto = require('crypto');
-const db = require('../models');
-const { Op } = require('sequelize');
-const User = db.User;
+const bcrypt = require('bcryptjs');
+const db = require('../config/db');
 
-// POST /api/auth/forgot-password - Gửi email reset mật khẩu
 const forgotPassword = async (req, res) => {
-    try {
-        const { email } = req.body;
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Vui lòng nhập email' });
 
-        if (!email) {
-            return res.status(400).json({ message: 'Vui lòng nhập email' });
-        }
+    const [[user]] = await db.query('SELECT id FROM users WHERE email = ? AND deleted_at IS NULL', [email]);
+    if (!user) return res.status(404).json({ message: 'Email không tồn tại trong hệ thống' });
 
-        const user = await User.findOne({ where: { email } });
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
 
-        if (!user) {
-            return res.status(404).json({ message: 'Email không tồn tại trong hệ thống' });
-        }
+    await db.query(
+      'UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE id = ?',
+      [resetToken, resetTokenExpiry, user.id]
+    );
 
-        // Tạo reset token ngẫu nhiên
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        
-        // Lưu token vào database (hết hạn sau 1 giờ)
-        const resetTokenExpiry = new Date();
-        resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1);
-
-        await user.update({
-            reset_token: resetToken,
-            reset_token_expiry: resetTokenExpiry
-        });
-
-        // Trong đồ án, trả về token (thực tế nên gửi email)
-        res.json({
-            message: 'Link reset mật khẩu đã được tạo',
-            resetToken: resetToken  // Trong thực tế, gửi email chứ không trả về JSON
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Lỗi server', error: error.message });
-    }
+    res.json({ message: 'Link reset mật khẩu đã được tạo', resetToken });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
 };
 
-// POST /api/auth/reset-password - Đặt lại mật khẩu
 const resetPassword = async (req, res) => {
-    try {
-        const { token, new_password } = req.body;
+  try {
+    const { token, new_password } = req.body;
+    if (!token || !new_password) return res.status(400).json({ message: 'Vui lòng nhập token và mật khẩu mới' });
+    if (new_password.length < 6) return res.status(400).json({ message: 'Mật khẩu phải có ít nhất 6 ký tự' });
 
-        if (!token || !new_password) {
-            return res.status(400).json({ message: 'Vui lòng nhập token và mật khẩu mới' });
-        }
+    const [[user]] = await db.query(
+      'SELECT id FROM users WHERE reset_token = ? AND reset_token_expiry > NOW() AND deleted_at IS NULL',
+      [token]
+    );
+    if (!user) return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
 
-        if (new_password.length < 6) {
-            return res.status(400).json({ message: 'Mật khẩu phải có ít nhất 6 ký tự' });
-        }
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await db.query(
+      'UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?',
+      [hashedPassword, user.id]
+    );
 
-        // Tìm user theo token và token chưa hết hạn
-        const user = await User.findOne({
-            where: {
-                reset_token: token,
-               reset_token_expiry: { [Op.gt]: new Date() }
-            }
-        });
-
-        if (!user) {
-            return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
-        }
-
-        // Mã hóa mật khẩu mới
-        const bcrypt = require('bcryptjs');
-        const hashedPassword = await bcrypt.hash(new_password, 10);
-
-        // Cập nhật mật khẩu và xóa token
-        await user.update({
-            password_hash: hashedPassword,
-            reset_token: null,
-            reset_token_expiry: null
-        });
-
-        res.json({ message: 'Đặt lại mật khẩu thành công' });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Lỗi server', error: error.message });
-    }
+    res.json({ message: 'Đặt lại mật khẩu thành công' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
 };
 
 module.exports = { forgotPassword, resetPassword };

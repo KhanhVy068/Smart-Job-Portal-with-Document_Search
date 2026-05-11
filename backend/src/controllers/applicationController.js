@@ -1,115 +1,218 @@
 const db = require('../config/db');
 
-/**
- * Xử lý nộp đơn ứng tuyển mới (Dành cho Candidate)
- * POST /api/applications/apply
- */
+function fixMojibake(value) {
+  if (typeof value !== 'string') return value;
+  if (!/[ÃÂÄÆ]|á[º»¼½¾¿]|à[¡¢£¤¥¦§¨©ª«¬­®¯]|â[\u0080-\u009c]/.test(value)) return value;
+  try {
+    return Buffer.from(value, 'latin1').toString('utf8');
+  } catch {
+    return value;
+  }
+}
+
+function getUserId(req, fallback = 2) {
+  return req.user?.id || fallback;
+}
+
+function toApplicationResponse(row = {}) {
+  return {
+    id: row.id || row.application_id,
+    applicationId: row.id || row.application_id,
+    jobId: row.job_id,
+    jobTitle: fixMojibake(row.job_title),
+    companyName: fixMojibake(row.company_name || row.employer_name || 'Smart Job Portal'),
+    location: fixMojibake(row.location),
+    status: row.status,
+    applicationStatus: row.status,
+    appliedAt: row.applied_at,
+    updatedAt: row.updated_at,
+    candidateId: row.candidate_id,
+    candidateName: fixMojibake(row.candidate_name),
+    email: row.candidate_email,
+    phone: row.candidate_phone || row.phone,
+    coverLetter: row.cover_letter,
+    expectedSalary: row.expected_salary,
+    availableFrom: row.available_from,
+    cvDocumentId: row.cv_document_id,
+    fileName: fixMojibake(row.cv_name),
+    cvUrl: row.cv_link,
+    url: row.cv_link,
+    cvStatus: row.cv_status,
+    extractedText: fixMojibake(row.extracted_text),
+    documentStatus: row.cv_status
+  };
+}
+
+function normalizeApplicationStatus(status = '') {
+  const value = String(status).trim().toLowerCase();
+  const map = {
+    submitted: 'pending',
+    pending: 'pending',
+    reviewing: 'reviewed',
+    reviewed: 'reviewed',
+    shortlisted: 'shortlisted',
+    interview: 'interviewed',
+    interviewed: 'interviewed',
+    offered: 'offered',
+    hired: 'hired',
+    accepted: 'hired',
+    rejected: 'rejected'
+  };
+  return map[value] || null;
+}
+
 exports.applyJob = async (req, res) => {
   try {
-    const { job_id, document_id } = req.body;
-    const candidateId = 1; // Tạm thời fix cứng ID ứng viên để demo
+    const jobId = Number(req.body.job_id || req.body.jobId || req.params.jobId);
+    const cvDocumentId = Number(req.body.document_id || req.body.documentId || req.body.cvId || req.body.cv_document_id);
+    const candidateId = getUserId(req);
 
-    // 1. Kiểm tra dữ liệu đầu vào
-    if (!job_id || isNaN(job_id) || !document_id || isNaN(document_id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Mã công việc hoặc hồ sơ không hợp lệ. Vui lòng kiểm tra lại.'
-      });
+    if (!jobId || !cvDocumentId) {
+      return res.status(400).json({ message: 'Mã công việc hoặc CV không hợp lệ.' });
     }
 
-    // 2. Kiểm tra xem ứng viên đã nộp đơn cho vị trí này chưa (Chống nộp trùng)
-    const [existing] = await db.query(
-      'SELECT id FROM applications WHERE job_id = ? AND candidate_id = ?',
-      [job_id, candidateId]
+    await db.query(
+      `
+      INSERT INTO applications (job_id, candidate_id, cv_document_id, cover_letter, status)
+      VALUES (?, ?, ?, ?, 'pending')
+      `,
+      [jobId, candidateId, cvDocumentId, req.body.coverLetter || req.body.cover_letter || null]
     );
 
-    if (existing.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'Hệ thống ghi nhận bạn đã nộp đơn cho vị trí tuyển dụng này rồi.'
-      });
-    }
-
-    // 3. Thực hiện lưu thông tin ứng tuyển
-    const sql = `INSERT INTO applications (job_id, candidate_id, document_id, status) VALUES (?, ?, ?, 'pending')`;
-    await db.query(sql, [job_id, candidateId, document_id]);
-
-    return res.status(201).json({
-      success: true,
-      message: 'Nộp đơn ứng tuyển thành công! Hồ sơ đã được gửi tới nhà tuyển dụng.'
-    });
-
+    res.status(201).json({ success: true, message: 'Nộp đơn ứng tuyển thành công.' });
   } catch (error) {
-    console.error('Application Error:', error.message);
-    return res.status(500).json({
-      success: false,
-      message: 'Đã xảy ra lỗi hệ thống khi nộp đơn.'
-    });
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: 'Bạn đã ứng tuyển công việc này rồi.' });
+    }
+    console.error('Apply error:', error);
+    res.status(500).json({ message: 'Lỗi nộp đơn ứng tuyển', error: error.message });
   }
 };
 
-/**
- * Lấy lịch sử ứng tuyển của cá nhân (Dành cho Candidate)
- * GET /api/applications/my-applications
- */
 exports.getMyApplications = async (req, res) => {
   try {
-    const candidateId = 1;
-    const sql = `
-      SELECT a.id, a.status, a.applied_at, 
-             j.title AS job_title, 
-             d.file_name AS cv_name 
+    const [rows] = await db.query(
+      `
+      SELECT a.*, j.title AS job_title, j.location, u.full_name AS employer_name,
+             d.file_name AS cv_name, d.file_url AS cv_link, d.status AS cv_status
       FROM applications a
       JOIN jobs j ON a.job_id = j.id
-      JOIN documents d ON a.document_id = d.id
-      WHERE a.candidate_id = ?
+      LEFT JOIN users u ON j.employer_id = u.id
+      JOIN documents d ON a.cv_document_id = d.id
+      WHERE a.candidate_id = ? AND a.deleted_at IS NULL
       ORDER BY a.applied_at DESC
-    `;
-    const [rows] = await db.query(sql, [candidateId]);
+      `,
+      [getUserId(req)]
+    );
 
-    return res.status(200).json({
-      success: true,
-      data: rows
-    });
+    res.json(rows.map(toApplicationResponse));
   } catch (error) {
-    console.error('Fetch My Applications Error:', error.message);
-    return res.status(500).json({ success: false, message: 'Lỗi lấy lịch sử ứng tuyển.' });
+    console.error('Get applications error:', error);
+    res.status(500).json({ message: 'Lỗi lấy lịch sử ứng tuyển', error: error.message });
   }
 };
 
-/**
- * Xem danh sách ứng viên của một Job (Dành cho Employer)
- * GET /api/applications/job/:jobId/applicants
- */
 exports.getApplicantsByJob = async (req, res) => {
   try {
-    const { jobId } = req.params;
-    
-    if (!jobId || isNaN(jobId)) {
-        return res.status(400).json({ success: false, message: 'Mã tin tuyển dụng không hợp lệ.' });
+    const params = [];
+    let whereSql = 'a.deleted_at IS NULL';
+    if (req.params.jobId || req.query.jobId) {
+      whereSql += ' AND a.job_id = ?';
+      params.push(req.params.jobId || req.query.jobId);
     }
 
-    // Câu lệnh SQL khớp 100% với cấu trúc bảng của ông (full_name, file_url, file_name)
-    const sql = `
-      SELECT a.id AS application_id, a.status, a.applied_at,
+    const [rows] = await db.query(
+      `
+      SELECT a.id AS application_id, a.job_id, a.status, a.applied_at, a.updated_at,
              u.full_name AS candidate_name, u.email AS candidate_email,
-             d.file_url AS cv_link, d.file_name AS cv_name
+             d.file_url AS cv_link, d.file_name AS cv_name, d.status AS cv_status,
+             j.title AS job_title
       FROM applications a
       JOIN users u ON a.candidate_id = u.id
-      JOIN documents d ON a.document_id = d.id
-      WHERE a.job_id = ?
+      JOIN documents d ON a.cv_document_id = d.id
+      JOIN jobs j ON a.job_id = j.id
+      WHERE ${whereSql}
       ORDER BY a.applied_at DESC
-    `;
-    
-    const [rows] = await db.query(sql, [jobId]);
-    
-    res.status(200).json({ 
-      success: true, 
-      message: `Tìm thấy ${rows.length} ứng viên.`,
-      data: rows 
-    });
+      `,
+      params
+    );
+
+    const items = rows.map(toApplicationResponse);
+    res.json({ total: items.length, items, data: items });
   } catch (error) {
-    console.error('Lỗi SQL chi tiết:', error.message);
-    res.status(500).json({ success: false, message: 'Lỗi hệ thống khi lấy danh sách ứng viên.' });
+    console.error('Get applicants error:', error);
+    res.status(500).json({ message: 'Lỗi lấy danh sách ứng viên', error: error.message });
+  }
+};
+
+exports.getApplicationById = async (req, res) => {
+  try {
+    const [[row]] = await db.query(
+      `
+      SELECT a.id AS application_id, a.job_id, a.candidate_id, a.cv_document_id,
+             a.cover_letter, a.expected_salary, a.available_from, a.status,
+             a.applied_at, a.updated_at,
+             u.full_name AS candidate_name, u.email AS candidate_email, u.phone AS candidate_phone,
+             d.file_url AS cv_link, d.file_name AS cv_name, d.status AS cv_status, d.extracted_text,
+             j.title AS job_title, j.location,
+             employer.full_name AS employer_name
+      FROM applications a
+      JOIN users u ON a.candidate_id = u.id
+      JOIN documents d ON a.cv_document_id = d.id
+      JOIN jobs j ON a.job_id = j.id
+      LEFT JOIN users employer ON j.employer_id = employer.id
+      WHERE a.id = ? AND a.deleted_at IS NULL
+      LIMIT 1
+      `,
+      [req.params.id]
+    );
+
+    if (!row) return res.status(404).json({ message: 'Không tìm thấy hồ sơ ứng tuyển.' });
+    res.json(toApplicationResponse(row));
+  } catch (error) {
+    console.error('Get application detail error:', error);
+    res.status(500).json({ message: 'Lỗi lấy chi tiết hồ sơ ứng tuyển', error: error.message });
+  }
+};
+
+exports.updateApplicationStatus = async (req, res) => {
+  try {
+    const nextStatus = normalizeApplicationStatus(req.body.status || req.body.applicationStatus || req.body.cvStatus);
+    if (!nextStatus) {
+      return res.status(400).json({ message: 'Trạng thái hồ sơ không hợp lệ.' });
+    }
+
+    const [result] = await db.query(
+      `
+      UPDATE applications
+      SET status = ?,
+          reviewed_at = CASE WHEN ? <> 'pending' THEN COALESCE(reviewed_at, NOW()) ELSE reviewed_at END,
+          updated_at = NOW()
+      WHERE id = ? AND deleted_at IS NULL
+      `,
+      [nextStatus, nextStatus, req.params.id]
+    );
+
+    if (!result.affectedRows) return res.status(404).json({ message: 'Không tìm thấy hồ sơ ứng tuyển.' });
+
+    const [[row]] = await db.query(
+      `
+      SELECT a.*, j.title AS job_title, j.location, employer.full_name AS employer_name,
+             u.full_name AS candidate_name, u.email AS candidate_email, u.phone AS candidate_phone,
+             d.file_name AS cv_name, d.file_url AS cv_link, d.status AS cv_status, d.extracted_text
+      FROM applications a
+      JOIN jobs j ON a.job_id = j.id
+      LEFT JOIN users employer ON j.employer_id = employer.id
+      JOIN users u ON a.candidate_id = u.id
+      JOIN documents d ON a.cv_document_id = d.id
+      WHERE a.id = ?
+      `,
+      [req.params.id]
+    );
+
+    res.json({ success: true, message: 'Đã cập nhật trạng thái hồ sơ.', application: toApplicationResponse(row) });
+  } catch (error) {
+    console.error('Update application status error:', error);
+    res.status(500).json({ message: 'Lỗi cập nhật trạng thái hồ sơ', error: error.message });
   }
 };

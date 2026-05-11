@@ -1,4 +1,5 @@
-import { getRole } from "./auth.js";
+import { api } from "./api.js";
+import { getRole, getUser } from "./auth.js";
 import { hasRoute, navigate, setRoutes } from "./router.js";
 import { initAdminHeader } from "./components/header/admin.js";
 import { initHeader } from "./components/header/employer.js";
@@ -97,6 +98,21 @@ const roleConfigs = {
 
 let appConfig = roleConfigs.employer;
 
+const logoutButtonIds = new Set([
+  "headerLogoutButton",
+  "candidateLogoutBtn",
+  "adminLogoutButton"
+]);
+
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button || !logoutButtonIds.has(button.id)) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  logout();
+});
+
 async function loadComponent(id, path) {
   const separator = path.includes("?") ? "&" : "?";
   const res = await fetch(`${path}${separator}v=${Date.now()}`, { cache: "no-store" });
@@ -109,6 +125,11 @@ async function loadComponent(id, path) {
 }
 
 async function init() {
+  if (!getUser()) {
+    renderLoginScreen();
+    return;
+  }
+
   appConfig = roleConfigs[getRole()] || roleConfigs.employer;
   setRoutes(appConfig.routes);
 
@@ -122,6 +143,128 @@ async function init() {
 }
 
 init();
+
+function renderLoginScreen() {
+  document.getElementById("header").innerHTML = "";
+  document.getElementById("sidebar").innerHTML = "";
+  document.getElementById("footer").innerHTML = "";
+
+  const contentShell = document.getElementById("contentShell");
+  contentShell?.classList.remove("ml-64", "ml-20", "pt-16");
+
+  const app = document.getElementById("app");
+  if (!app) return;
+
+  const accounts = {
+    employer: { label: "Nhà tuyển dụng", email: "hr@abc.tech", password: "123456" },
+    candidate: { label: "Ứng viên", email: "tuyet.mai@student.uit.edu.vn", password: "123456" },
+    admin: { label: "Quản trị", email: "admin@smartjob.vn", password: "123456" }
+  };
+
+  app.innerHTML = `
+    <main class="min-h-screen bg-slate-50 px-4 py-10">
+      <section class="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
+        <div class="grid w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl lg:grid-cols-[1fr_440px]">
+          <div class="hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
+            <div>
+              <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600">
+                <span class="material-symbols-outlined text-3xl">rocket_launch</span>
+              </div>
+              <h1 class="mt-8 text-4xl font-black tracking-tight">Smart Job Portal</h1>
+              <p class="mt-4 max-w-md text-base font-semibold leading-7 text-slate-300">
+                Cổng tuyển dụng cho nhà tuyển dụng, ứng viên và quản trị viên. Dữ liệu được lấy từ backend MySQL.
+              </p>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-sm font-bold text-slate-300">
+              <div class="rounded-lg bg-white/10 p-4">Jobs</div>
+              <div class="rounded-lg bg-white/10 p-4">CV PDF</div>
+              <div class="rounded-lg bg-white/10 p-4">Admin</div>
+            </div>
+          </div>
+
+          <form id="loginForm" class="p-6 sm:p-10">
+            <h2 class="text-3xl font-black text-slate-950">Đăng nhập</h2>
+            <p class="mt-2 text-sm font-semibold text-slate-500">Chọn tài khoản demo hoặc nhập thông tin của bạn.</p>
+
+            <div class="mt-6 grid grid-cols-3 gap-2">
+              ${Object.entries(accounts).map(([role, account]) => `
+                <button class="demoLogin rounded-lg border border-slate-200 px-3 py-3 text-xs font-black text-slate-700 transition hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700" type="button" data-role="${role}">
+                  ${account.label}
+                </button>
+              `).join("")}
+            </div>
+
+            <label class="mt-6 block space-y-2">
+              <span class="text-xs font-black uppercase tracking-wider text-slate-500">Email</span>
+              <input id="loginEmail" class="h-12 w-full rounded-lg border border-slate-200 px-4 text-sm font-semibold outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100" type="email" required>
+            </label>
+
+            <label class="mt-4 block space-y-2">
+              <span class="text-xs font-black uppercase tracking-wider text-slate-500">Mật khẩu</span>
+              <input id="loginPassword" class="h-12 w-full rounded-lg border border-slate-200 px-4 text-sm font-semibold outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100" type="password" required>
+            </label>
+
+            <p id="loginMessage" class="mt-4 min-h-5 text-sm font-bold text-red-600"></p>
+
+            <button id="loginSubmit" class="mt-2 flex h-12 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700" type="submit">
+              Đăng nhập
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+  `;
+
+  const fillAccount = (role = "employer") => {
+    document.getElementById("loginEmail").value = accounts[role].email;
+    document.getElementById("loginPassword").value = accounts[role].password;
+  };
+
+  fillAccount("employer");
+  app.querySelectorAll(".demoLogin").forEach((button) => {
+    button.addEventListener("click", () => fillAccount(button.dataset.role));
+  });
+
+  document.getElementById("loginForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const message = document.getElementById("loginMessage");
+    const submit = document.getElementById("loginSubmit");
+    message.textContent = "";
+    submit.disabled = true;
+    submit.textContent = "Đang đăng nhập...";
+
+    try {
+      const payload = await api.post("/auth/login", {
+        email: document.getElementById("loginEmail").value.trim(),
+        password: document.getElementById("loginPassword").value
+      });
+
+      const token = payload.accessToken || payload.token;
+      if (token) {
+        localStorage.setItem("accessToken", token);
+        localStorage.setItem("token", token);
+      }
+      localStorage.setItem("user", JSON.stringify(payload.user || {}));
+      window.location.hash = "#dashboard";
+      window.location.reload();
+    } catch (err) {
+      message.textContent = err.message || "Không đăng nhập được.";
+    } finally {
+      submit.disabled = false;
+      submit.textContent = "Đăng nhập";
+    }
+  });
+}
+
+function logout() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  sessionStorage.clear();
+
+  window.history.replaceState(null, "", window.location.pathname);
+  window.location.reload();
+}
 
 function setupSidebarToggle() {
   const buttons = document.querySelectorAll("#toggleSidebar");

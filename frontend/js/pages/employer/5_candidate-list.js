@@ -113,7 +113,7 @@ async function findSelectedJob(id) {
   }
 }
 
-// Tải ứng viên từ API; nếu backend chưa sẵn sàng thì dùng dữ liệu mẫu
+// Tải ứng viên từ API. Demo fallback chỉ bật khi chủ động set localStorage.useDemoCandidates = 'true'.
 async function loadCandidates(jobId) {
   const endpoints = jobId
     ? [candidateEndpoints.byJob(jobId), candidateEndpoints.byQuery(jobId), candidateEndpoints.allApplications, candidateEndpoints.allCandidates]
@@ -133,8 +133,6 @@ async function loadCandidates(jobId) {
     }
   }
 
-  // Backend chưa được thêm vào nên giữ fallback demo để hoàn thiện UI.
-  // Khi có backend, trả dữ liệu theo contract bên trên là trang tự dùng dữ liệu thật.
   return shouldUseDemoFallback() ? normalizeCandidates(getMockCandidates(jobId), jobId) : [];
 }
 
@@ -148,8 +146,8 @@ function renderJobHeader(job, selectedJobId) {
 // Render số liệu tổng quan
 function renderStats(candidates) {
   setText('statTotalCandidates', formatNumber(candidates.length));
-  setText('statProcessingCandidates', formatNumber(candidates.filter(item => item.status === 'processing').length));
-  setText('statIndexedCandidates', formatNumber(candidates.filter(item => item.status === 'indexed').length));
+  setText('statProcessingCandidates', formatNumber(candidates.filter(item => item.status === 'submitted').length));
+  setText('statIndexedCandidates', formatNumber(candidates.filter(item => item.status === 'reviewing' || item.status === 'interview').length));
   setText('statRejectedCandidates', formatNumber(candidates.filter(item => item.status === 'rejected').length));
 }
 
@@ -263,9 +261,9 @@ function renderCandidates(candidates) {
       </td>
 
       <td class="px-6 py-5 text-center">
-        <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-black ${getStatusClass(candidate.status)}">
-          ${escapeHtml(candidate.statusLabel)}
-        </span>
+        <select class="candidateStatusSelect rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-black ${getStatusClass(candidate.status)}" data-id="${escapeHtml(candidate.applicationId || candidate.id)}" title="Cập nhật trạng thái hồ sơ">
+          ${renderStatusOptions(candidate.status)}
+        </select>
       </td>
 
       <td class="px-6 py-5">
@@ -273,10 +271,10 @@ function renderCandidates(candidates) {
           <button class="btnViewCandidate rounded-lg p-2 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" data-id="${escapeHtml(candidate.id)}" title="Xem chi tiết CV">
             <span class="material-symbols-outlined">visibility</span>
           </button>
-          <button class="btnSaveCandidate rounded-lg p-2 text-slate-400 transition-colors hover:bg-green-50 hover:text-green-600" data-id="${escapeHtml(candidate.id)}" title="Lưu ứng viên">
+          <button class="btnSaveCandidate rounded-lg p-2 text-slate-400 transition-colors hover:bg-green-50 hover:text-green-600" data-id="${escapeHtml(candidate.applicationId || candidate.id)}" title="Chuyển sang đang xét duyệt">
             <span class="material-symbols-outlined">bookmark</span>
           </button>
-          <button class="btnRejectCandidate rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600" data-id="${escapeHtml(candidate.id)}" title="Loại ứng viên">
+          <button class="btnRejectCandidate rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600" data-id="${escapeHtml(candidate.applicationId || candidate.id)}" title="Loại ứng viên">
             <span class="material-symbols-outlined">person_remove</span>
           </button>
         </div>
@@ -289,16 +287,21 @@ function renderCandidates(candidates) {
 
 // Gắn sự kiện cho từng dòng ứng viên
 function bindCandidateRowEvents() {
+  document.querySelectorAll('.candidateStatusSelect').forEach(select => {
+    select.onchange = () => updateCandidateStatus(select.dataset.id, select.value);
+  });
+
   document.querySelectorAll('.btnViewCandidate').forEach(button => {
     button.onclick = () => {
       const candidate = allCandidates.find(item => String(item.id) === String(button.dataset.id));
       if (candidate) sessionStorage.setItem('selectedCandidate', JSON.stringify(candidate));
+      if (candidate) sessionStorage.setItem('selectedApplicationId', candidate.applicationId || candidate.id);
       window.appRouter?.navigate('cv-detail') ?? (window.location.hash = '#cv-detail');
     };
   });
 
   document.querySelectorAll('.btnSaveCandidate').forEach(button => {
-    button.onclick = () => updateCandidateStatus(button.dataset.id, 'indexed');
+    button.onclick = () => updateCandidateStatus(button.dataset.id, 'reviewing');
   });
 
   document.querySelectorAll('.btnRejectCandidate').forEach(button => {
@@ -308,13 +311,23 @@ function bindCandidateRowEvents() {
 
 // Cập nhật trạng thái tạm trên giao diện
 async function updateCandidateStatus(id, nextStatus) {
-  const selectedCandidate = allCandidates.find(candidate => String(candidate.id) === String(id));
+  const selectedCandidate = allCandidates.find(candidate =>
+    String(candidate.applicationId || candidate.id) === String(id) || String(candidate.id) === String(id)
+  );
   if (!selectedCandidate) return;
 
-  await syncCandidateStatus(selectedCandidate, nextStatus);
+  try {
+    await syncCandidateStatus(selectedCandidate, nextStatus);
+  } catch (err) {
+    alert(err.message || 'Không cập nhật được trạng thái hồ sơ.');
+    renderCurrentView();
+    return;
+  }
 
   allCandidates = allCandidates.map(candidate => {
-    if (String(candidate.id) !== String(id)) return candidate;
+    const sameCandidate =
+      String(candidate.applicationId || candidate.id) === String(id) || String(candidate.id) === String(id);
+    if (!sameCandidate) return candidate;
     return {
       ...candidate,
       status: nextStatus,
@@ -333,21 +346,23 @@ async function syncCandidateStatus(candidate, nextStatus) {
     cvStatus: nextStatus,
     jobId: candidate.jobId || currentJob?.id || currentJob?._id || null
   };
+  const applicationId = candidate.applicationId || candidate.id;
+  if (!applicationId) throw new Error('Thiếu mã hồ sơ ứng tuyển để cập nhật trạng thái.');
+
+  await api.patch(candidateEndpoints.updateApplicationStatus(applicationId), payload);
 
   try {
-    await api.patch(candidateEndpoints.updateApplicationStatus(candidate.id), payload);
-    return;
-  } catch (err) {
-    if (err.status && ![404, 405].includes(err.status)) {
-      console.error('Update application status error:', err);
+    const updated = await api.get(`/applications/${encodeURIComponent(applicationId)}`);
+    const savedStatus = normalizeCandidateStatus(updated.status || updated.applicationStatus);
+    if (savedStatus !== nextStatus) {
+      throw new Error('Backend chưa lưu trạng thái mới vào database.');
     }
-  }
-
-  try {
-    await api.patch(candidateEndpoints.updateCandidateStatus(candidate.id), payload);
   } catch (err) {
-    // Backend chưa có endpoint thì vẫn cập nhật UI tạm để employer thao tác được khi demo.
-    console.warn('Candidate status API is not ready, updated UI only:', err);
+    throw new Error(
+      err.status === 404
+        ? 'Backend đang chạy bản cũ. Hãy restart backend để bật API lưu trạng thái thật.'
+        : err.message || 'Không xác minh được trạng thái vừa cập nhật.'
+    );
   }
 }
 
@@ -436,16 +451,23 @@ function exportCandidatesCsv(candidates) {
 function normalizeCandidates(payload, selectedJobId) {
   return normalizeList(payload, ['items', 'candidates', 'applications', 'data']).map((item, index) => {
     const createdAt = item.createdAt || item.appliedAt || item.submittedAt || new Date().toISOString();
-    const status = normalizeCandidateStatus(item.cvStatus || item.status);
+    const status = normalizeCandidateStatus(item.status || item.applicationStatus || item.cvStatus);
     const score = Number(item.score ?? item.matchScore ?? item.fitScore ?? 70 + ((index * 7) % 26));
 
     return {
       id: item.id || item._id || `candidate-${index + 1}`,
+      applicationId: item.applicationId || item.id || item._id || `candidate-${index + 1}`,
+      candidateId: item.candidateId || item.candidate_id || '',
       jobId: item.jobId || item.job?._id || item.job?.id || selectedJobId || '',
       name: item.candidateName || item.name || item.fullName || 'Ứng viên chưa đặt tên',
       email: item.email || item.candidateEmail || 'candidate@email.com',
       phone: item.phone || item.candidatePhone || '',
       fileName: item.fileName || item.cvFileName || item.resumeName || `${slugify(item.candidateName || item.name || 'ung-vien')}-CV.pdf`,
+      cvUrl: item.cvUrl || item.url || item.fileUrl || '',
+      coverLetter: item.coverLetter || '',
+      expectedSalary: item.expectedSalary || '',
+      availableFrom: item.availableFrom || '',
+      extractedText: item.extractedText || '',
       position: item.position || item.currentPosition || item.jobTitle || 'Chưa cập nhật vị trí',
       summary: item.summary || item.note || '',
       skills: normalizeSkills(item.skills || item.skillNames || item.tags),
@@ -459,10 +481,9 @@ function normalizeCandidates(payload, selectedJobId) {
   });
 }
 
-// Mặc định bật demo fallback vì backend chưa được thêm vào project.
-// Đặt localStorage.useDemoCandidates = 'false' để xem empty/error state thuần API.
+// Mặc định dùng dữ liệu thật. Đặt localStorage.useDemoCandidates = 'true' nếu muốn xem dữ liệu mẫu.
 function shouldUseDemoFallback() {
-  return localStorage.getItem(DEMO_FALLBACK_KEY) !== 'false';
+  return localStorage.getItem(DEMO_FALLBACK_KEY) === 'true';
 }
 
 // Chuẩn hóa danh sách từ payload API
@@ -489,33 +510,49 @@ function normalizeSkills(value) {
 // Chuẩn hóa trạng thái ứng viên
 function normalizeCandidateStatus(status = '') {
   const normalized = String(status).trim().toLowerCase();
-  if (['processed', 'indexed', 'saved', 'da luu', 'da luu/indexed', 'đã lưu/indexed'].includes(normalized)) return 'indexed';
+  if (['pending', 'submitted', 'processing', 'new'].includes(normalized)) return 'submitted';
+  if (['reviewing', 'reviewed', 'shortlisted', 'processed', 'indexed', 'saved', 'da luu', 'da luu/indexed', 'đã lưu/indexed'].includes(normalized)) return 'reviewing';
+  if (['interview', 'interviewed', 'invited', 'moi phong van', 'mời phỏng vấn'].includes(normalized)) return 'interview';
   if (['rejected', 'denied', 'bi loai', 'bị loại'].includes(normalized)) return 'rejected';
-  if (['interview', 'invited', 'moi phong van', 'mời phỏng vấn'].includes(normalized)) return 'interview';
   return 'processing';
 }
 
 // Nhãn trạng thái
 function getStatusLabel(status) {
-  if (status === 'indexed') return 'Đã lưu/Indexed';
+  if (status === 'submitted') return 'Đã nộp';
+  if (status === 'reviewing') return 'Đang xét duyệt';
   if (status === 'rejected') return 'Bị loại';
   if (status === 'interview') return 'Mời phỏng vấn';
   return 'Đang xử lý';
 }
 
+function renderStatusOptions(currentStatus) {
+  const options = [
+    ['submitted', 'Đã nộp'],
+    ['reviewing', 'Đang xét duyệt'],
+    ['interview', 'Mời phỏng vấn'],
+    ['rejected', 'Không đạt']
+  ];
+  return options.map(([value, label]) =>
+    `<option value="${value}" ${value === currentStatus ? 'selected' : ''}>${label}</option>`
+  ).join('');
+}
+
 // Màu trạng thái
 function getStatusClass(status) {
-  if (status === 'indexed') return 'bg-green-100 text-green-700';
+  if (status === 'submitted') return 'bg-slate-100 text-slate-700';
+  if (status === 'reviewing') return 'bg-blue-100 text-blue-700';
   if (status === 'rejected') return 'bg-red-100 text-red-700';
-  if (status === 'interview') return 'bg-blue-100 text-blue-700';
+  if (status === 'interview') return 'bg-teal-100 text-teal-700';
   return 'bg-amber-100 text-amber-700';
 }
 
 // Màu icon file CV
 function getAvatarClass(status) {
-  if (status === 'indexed') return 'bg-green-50 text-green-600';
+  if (status === 'submitted') return 'bg-slate-50 text-slate-600';
+  if (status === 'reviewing') return 'bg-blue-50 text-blue-600';
   if (status === 'rejected') return 'bg-red-50 text-red-600';
-  if (status === 'interview') return 'bg-blue-50 text-blue-600';
+  if (status === 'interview') return 'bg-teal-50 text-teal-600';
   return 'bg-amber-50 text-amber-600';
 }
 

@@ -1,54 +1,68 @@
-
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const sequelize = require('./config/database');
-const db = require('./models');
+const db = require('./config/db');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpecs = require('./config/swagger');
-// Import routes
-const authRoutes = require('./routes/authRoutes');
-const testRoutes = require('./routes/testRoutes');
-const jobRoutes = require('./routes/jobRoutes');
-const profileRoutes = require('./routes/profileRoutes');
-const app = express();
-const PORT = process.env.PORT || 5000;
-const uploadRoutes = require('./routes/uploadRoutes');
 
 const adminRoutes = require('./routes/adminRoutes');
+const applicationRoutes = require('./routes/applicationRoutes');
+const authRoutes = require('./routes/authRoutes');
+const candidateRoutes = require('./routes/candidateRoutes');
+const candidatesRoutes = require('./routes/candidatesRoutes');
+const documentRoutes = require('./routes/documentRoutes');
+const employerRoutes = require('./routes/employerRoutes');
+const jobRoutes = require('./routes/jobRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+const testRoutes = require('./routes/testRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+const userRoutes = require('./routes/userRoutes');
+const documentWorker = require('./services/documentWorker');
+const searchService = require('./services/searchService');
 
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-
-// Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// Kiểm tra kết nối database
-sequelize.authenticate()
-    .then(() => console.log('✅ Kết nối MySQL thành công!'))
-    .catch(err => console.log('❌ Lỗi kết nối MySQL:', err));
-
-// Sync database
-db.sequelize.sync({ alter: false })
-    .then(() => console.log('✅ Database sync completed'))
-    .catch(err => console.log('❌ Sync error:', err));
+db.query('SELECT 1')
+  .then(() => console.log('Database connected. Use database/db.sql as the source schema.'))
+  .catch(err => console.error('Database connection error:', err.message));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-// Routes
+
 app.use('/api/auth', authRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/upload', uploadRoutes);
-
+app.use('/api/documents', documentRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/employer', employerRoutes);
+app.use('/api/applications', applicationRoutes);
+app.use('/api/candidate', candidateRoutes);
+app.use('/api/candidates', candidatesRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/admin', adminRoutes);
-// Route mẫu
+
 app.get('/', (req, res) => {
-    res.json({ message: 'Smart Job Portal API đang chạy!' });
+  res.json({ message: 'Smart Job Portal API đang chạy!' });
 });
 
-// Khởi động server
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(err.status || 500).json({ message: err.message || 'Lỗi server' });
+});
+
 app.listen(PORT, () => {
-    console.log(` Server đang chạy tại http://localhost:${PORT}`);
+  console.log(`Server đang chạy tại http://localhost:${PORT}`);
+  documentWorker.start();
+  searchService.reindexAll()
+    .then(result => console.log(`Search index ready (${result.engine}, indexed: ${result.indexed}).`))
+    .catch(err => console.warn('Search index startup warning:', err.message));
 });

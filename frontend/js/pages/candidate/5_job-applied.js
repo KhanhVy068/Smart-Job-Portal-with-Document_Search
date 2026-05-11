@@ -1,19 +1,21 @@
 import { api } from '../../api.js';
 
 let allApps = [];
-
+let currentStatus = 'all';
 export async function init() {
   await fetchApplications();
   setupTabs();
+  setupAutoRefresh();
 }
 
-async function fetchApplications() {
-  showSkeleton();
+async function fetchApplications({ showLoading = true } = {}) {
+  if (showLoading) showSkeleton();
   try {
     const res = await api.get('/candidate/applications');
-    allApps = Array.isArray(res) ? res : (res?.items ?? []);
+    const items = Array.isArray(res) ? res : (res?.items ?? res?.data ?? []);
+    allApps = items.map(normalizeApplication);
     renderStats();
-    renderList('all');
+    renderList(currentStatus);
   } catch {
     document.getElementById('appliedList').innerHTML =
       '<p class="text-sm text-slate-400 text-center py-8">Không thể tải danh sách ứng tuyển.</p>';
@@ -30,19 +32,31 @@ function renderStats() {
 function setupTabs() {
   document.querySelectorAll('.apply-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      currentStatus = btn.dataset.status || 'all';
       document.querySelectorAll('.apply-tab-btn').forEach(b => {
         b.classList.remove('bg-blue-900', 'text-white');
         b.classList.add('bg-slate-100', 'text-slate-600');
       });
       btn.classList.remove('bg-slate-100', 'text-slate-600');
       btn.classList.add('bg-blue-900', 'text-white');
-      renderList(btn.dataset.status);
+      renderList(currentStatus);
     });
   });
 }
 
+function setupAutoRefresh() {
+  if (window.__candidateAppliedRefreshTimer) clearInterval(window.__candidateAppliedRefreshTimer);
+  window.__candidateAppliedRefreshTimer = setInterval(() => fetchApplications({ showLoading: false }), 15000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) fetchApplications({ showLoading: false });
+  });
+
+  window.addEventListener('focus', () => fetchApplications({ showLoading: false }));
+}
+
 function renderList(status) {
-  const items = status === 'all' ? allApps : allApps.filter(a => a.status === status);
+  const items = !status || status === 'all' ? allApps : allApps.filter(a => a.status === status);
   const empty = document.getElementById('appliedEmpty');
   const list = document.getElementById('appliedList');
 
@@ -87,6 +101,26 @@ function renderList(status) {
       ${a.note ? `<p class="mt-3 text-xs text-slate-400 border-t border-slate-50 pt-3">${esc(a.note)}</p>` : ''}
     </div>`;
   }).join('');
+}
+
+function normalizeApplication(app = {}) {
+  return {
+    ...app,
+    status: normalizeStatus(app.status),
+    jobTitle: app.jobTitle || app.title || 'Công việc',
+    companyName: app.companyName || app.employerName || 'Nhà tuyển dụng',
+    location: app.location || '',
+    appliedAt: app.appliedAt || app.createdAt || app.applied_at || '',
+  };
+}
+
+function normalizeStatus(status = '') {
+  const normalized = String(status).trim().toLowerCase();
+  if (['pending', 'submitted', 'new'].includes(normalized)) return 'submitted';
+  if (['reviewing', 'reviewed', 'shortlisted', 'processing'].includes(normalized)) return 'reviewing';
+  if (['interview', 'interviewed', 'invited'].includes(normalized)) return 'interview';
+  if (['rejected', 'denied', 'failed'].includes(normalized)) return 'rejected';
+  return 'submitted';
 }
 
 function showSkeleton() {

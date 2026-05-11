@@ -52,6 +52,97 @@
   --tw-contain-style:  ;
 }
 
+html,
+body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "Helvetica Neue", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.candidate-dropdown-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: rgb(51 65 85);
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.candidate-dropdown-item:hover {
+  background-color: rgb(248 250 252);
+  color: rgb(2 6 23);
+}
+
+.sidebar-collapsed .candidate-panel {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-collapsed .candidate-card {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-collapsed .candidate-info {
+  display: none;
+}
+
+/* Fallback màu cho các nút chính khi CSS build chưa sinh đủ utility Tailwind. */
+.bg-blue-900 {
+  background-color: #1e3a8a;
+}
+
+.bg-blue-800 {
+  background-color: #1e40af;
+}
+
+.bg-blue-700 {
+  background-color: #1d4ed8;
+}
+
+.bg-blue-600 {
+  background-color: #2563eb;
+}
+
+.bg-red-600 {
+  background-color: #dc2626;
+}
+
+.bg-red-700 {
+  background-color: #b91c1c;
+}
+
+.text-white {
+  color: #ffffff;
+}
+
+.hover\:bg-blue-800:hover {
+  background-color: #1e40af;
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: #1d4ed8;
+}
+
+.hover\:bg-red-700:hover {
+  background-color: #b91c1c;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
 ::backdrop {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;

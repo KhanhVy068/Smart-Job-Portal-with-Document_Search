@@ -3,21 +3,15 @@ require('dotenv').config();
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '',
-  database: process.env.DB_NAME || 'smart_job_portal',
+  port: Number(process.env.DB_PORT || 3306),
+  user: process.env.DB_USER || 'job_user',
+  password: process.env.DB_PASSWORD || process.env.DB_PASS || 'job_pass',
+  database: process.env.DB_NAME || 'job_portal',
+  charset: 'utf8mb4',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  dateStrings: true
 });
-
-pool.getConnection()
-  .then(conn => {
-    console.log('Database đã kết nối thành công!');
-    conn.release();
-  })
-  .catch(err => {
-    console.error('Lỗi kết nối Database:', err.message);
-  });
 
 module.exports = pool;
