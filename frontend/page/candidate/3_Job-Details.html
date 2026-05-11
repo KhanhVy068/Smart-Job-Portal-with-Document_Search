@@ -1,0 +1,180 @@
+<!-- Candidate Job Detail -->
+<section class="p-6" id="jobDetailPage">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+    <button data-route="job-list" class="hover:text-blue-900 transition-colors">Tìm việc làm</button>
+    <span class="material-symbols-outlined text-sm">chevron_right</span>
+    <span id="jdBreadcrumbTitle" class="text-blue-900 font-medium truncate max-w-xs">...</span>
+  </nav>
+
+  <!-- Loading skeleton -->
+  <div id="jdSkeleton" class="space-y-6">
+    <div class="bg-white border border-slate-100 rounded-xl p-8 animate-pulse h-48"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-white border border-slate-100 rounded-xl p-8 animate-pulse h-96"></div>
+      <div class="bg-white border border-slate-100 rounded-xl p-8 animate-pulse h-72"></div>
+    </div>
+  </div>
+
+  <!-- Content (hidden until loaded) -->
+  <div id="jdContent" class="hidden space-y-6">
+
+    <!-- Job Header -->
+    <div class="bg-white border border-slate-100 rounded-xl p-8 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
+        <div class="flex items-start gap-5">
+          <div id="jdCompanyLogo"
+            class="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0 text-2xl font-bold text-blue-900">
+            ?
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span id="jdCategory" class="text-xs font-bold text-teal-700 uppercase tracking-widest"></span>
+              <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+              <span id="jdPostedAt" class="text-xs text-slate-400"></span>
+            </div>
+            <h1 id="jdTitle" class="text-2xl font-extrabold text-blue-900 mb-2"></h1>
+            <div class="flex flex-wrap gap-3">
+              <span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="material-symbols-outlined text-base text-slate-400">business</span><span id="jdCompany"></span></span>
+              <span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="material-symbols-outlined text-base text-slate-400">location_on</span><span id="jdLocation"></span></span>
+              <span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="material-symbols-outlined text-base text-slate-400">payments</span><span id="jdSalary"></span></span>
+              <span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="material-symbols-outlined text-base text-slate-400">work</span><span id="jdType"></span></span>
+            </div>
+          </div>
+        </div>
+        <!-- Action buttons -->
+        <div class="flex gap-3 flex-shrink-0">
+          <button id="jdSaveBtn"
+            class="p-3 bg-slate-100 text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-900 transition-all"
+            title="Lưu việc làm">
+            <span class="material-symbols-outlined">bookmark</span>
+          </button>
+          <button id="jdShareBtn"
+            class="p-3 bg-slate-100 text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-900 transition-all"
+            title="Chia sẻ">
+            <span class="material-symbols-outlined">share</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main 2-column -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left: Job Content -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white border border-slate-100 rounded-xl p-8 shadow-sm space-y-8">
+
+          <!-- Skills -->
+          <div>
+            <h2 class="text-base font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-base text-teal-700">label</span> Kỹ năng yêu cầu
+            </h2>
+            <div id="jdSkills" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <h2 class="text-base font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-base text-teal-700">description</span> Mô tả công việc
+            </h2>
+            <div id="jdDescription" class="text-sm text-slate-600 leading-relaxed space-y-2 prose max-w-none"></div>
+          </div>
+
+          <!-- Requirements -->
+          <div id="jdReqSection">
+            <h2 class="text-base font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-base text-teal-700">assignment_turned_in</span> Yêu cầu ứng viên
+            </h2>
+            <ul id="jdRequirements" class="space-y-2"></ul>
+          </div>
+
+          <!-- Benefits -->
+          <div id="jdBenSection">
+            <h2 class="text-base font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-base text-teal-700">redeem</span> Phúc lợi
+            </h2>
+            <div id="jdBenefits" class="grid grid-cols-2 gap-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Apply + Company Card -->
+      <div class="space-y-4">
+
+        <!-- Apply card -->
+        <div class="bg-white border border-slate-100 rounded-xl p-6 shadow-sm space-y-4 sticky top-20">
+          <div id="jdAppliedBadge" class="hidden flex items-center gap-2 px-3 py-2 bg-teal-50 text-teal-700 rounded-lg text-sm font-semibold">
+            <span class="material-symbols-outlined text-base">check_circle</span> Đã ứng tuyển
+          </div>
+
+          <button id="jdApplyBtn"
+            class="w-full py-3.5 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 active:scale-95 transition-all shadow-md text-sm">
+            ỨNG TUYỂN NGAY
+          </button>
+
+          <!-- Apply modal trigger note -->
+          <p class="text-xs text-slate-400 text-center">Hồ sơ của bạn sẽ được gửi kèm CV đã upload</p>
+
+          <div class="pt-3 border-t border-slate-100 space-y-2.5 text-sm text-slate-600">
+            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-slate-400">school</span><span id="jdEducation"></span></div>
+            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-slate-400">timer</span><span id="jdExperience"></span></div>
+            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-slate-400">event</span>Hạn nộp: <span id="jdDeadline" class="font-semibold text-blue-900 ml-1"></span></div>
+          </div>
+        </div>
+
+        <!-- Company card -->
+        <div class="bg-white border border-slate-100 rounded-xl p-6 shadow-sm space-y-4">
+          <div class="flex items-center gap-4">
+            <div id="jdCompanyLogoCard" class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden font-bold text-blue-900 flex-shrink-0">?</div>
+            <div>
+              <h3 id="jdCompanyCard" class="font-bold text-blue-900"></h3>
+              <p id="jdCompanySize" class="text-xs text-slate-500"></p>
+            </div>
+          </div>
+          <a id="jdCompanyWebsite" href="#" target="_blank" rel="noopener"
+            class="flex items-center gap-2 text-sm text-teal-700 hover:underline">
+            <span class="material-symbols-outlined text-base">language</span>
+            <span id="jdWebsiteText">Xem trang công ty</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Apply Modal -->
+  <div id="applyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-blue-900">Xác nhận ứng tuyển</h2>
+        <button id="applyModalClose" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <p class="text-sm text-slate-600">Bạn đang ứng tuyển vị trí <strong id="applyJobTitle" class="text-blue-900"></strong>.</p>
+
+      <div>
+        <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-2">Chọn CV</label>
+        <select id="applyCvSelect" class="w-full border border-slate-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-blue-900/20 focus:outline-none">
+          <option value="">-- Chọn CV của bạn --</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-2">Thư xin việc (tuỳ chọn)</label>
+        <textarea id="applyCoverLetter" rows="4" placeholder="Giới thiệu ngắn về bản thân..."
+          class="w-full border border-slate-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-blue-900/20 focus:outline-none resize-none"></textarea>
+      </div>
+
+      <div id="applyError" class="hidden text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2"></div>
+
+      <div class="flex gap-3 pt-2">
+        <button id="applyModalClose2"
+          class="flex-1 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">Hủy</button>
+        <button id="applySubmitBtn"
+          class="flex-1 py-2.5 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 active:scale-95 transition-all">
+          Nộp hồ sơ
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

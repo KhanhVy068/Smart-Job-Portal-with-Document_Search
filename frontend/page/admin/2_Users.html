@@ -1,0 +1,210 @@
+﻿<section id="adminUsersPage" class="w-full max-w-full space-y-6 overflow-hidden p-4 sm:p-6">
+  <!-- Phần tiêu đề và action bar: tìm kiếm, lọc role/status, tạo user mới. -->
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <h1 class="mt-1 text-3xl font-black tracking-tight text-slate-950">Quản lý tài khoản</h1>
+      <p id="usersPageSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Quản lý user, employer, admin và trạng thái tài khoản.</p>
+    </div>
+
+    <button id="btnAddUsers" class="inline-flex w-fit items-center gap-2 rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-black text-white transition-colors hover:bg-slate-800" type="button">
+      <span class="material-symbols-outlined text-xl">person_add</span>
+      Tạo tài khoản mới
+    </button>
+  </div>
+
+  <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(220px,1fr)_180px_180px_auto]">
+      <label class="relative block">
+        <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xl text-slate-400">search</span>
+        <input id="userSearchInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm font-semibold text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100" type="search" placeholder="Tìm người dùng theo tên, email..." autocomplete="off">
+      </label>
+
+      <select id="roleFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Vai trò: Tất cả</option>
+        <option value="user">Ứng viên</option>
+        <option value="employer">Nhà tuyển dụng</option>
+        <option value="admin">Quản trị viên</option>
+      </select>
+
+      <select id="statusFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Trạng thái: Tất cả</option>
+        <option value="active">Đang hoạt động</option>
+        <option value="banned">Bị khóa</option>
+        <option value="pending">Đang chờ duyệt</option>
+      </select>
+
+      <button id="btnReloadUsers" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition-colors hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">refresh</span>
+        Tải lại
+      </button>
+    </div>
+  </div>
+
+  <!-- Analytics nhẹ: tổng user, user mới hôm nay, active users. -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Tổng số người dùng</p>
+        <span class="material-symbols-outlined text-blue-600">groups</span>
+      </div>
+      <p id="statTotalUsers" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Người dùng mới hôm nay</p>
+        <span class="material-symbols-outlined text-emerald-600">group_add</span>
+      </div>
+      <p id="statNewToday" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Người dùng đang hoạt động</p>
+        <span class="material-symbols-outlined text-cyan-600">verified_user</span>
+      </div>
+      <p id="statActiveUsers" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- Bulk actions: thao tác hàng loạt khi admin chọn nhiều user. -->
+  <div id="bulkActionBar" class="hidden items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-4">
+    <p class="text-sm font-black text-blue-700"><span id="selectedUsersCount">0</span> Người dùng đang được chọn</p>
+    <div class="flex items-center gap-2">
+      <button id="btnBulkBan" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-black text-white transition-colors hover:bg-blue-700" type="button">
+        <span class="material-symbols-outlined text-xl">block</span>
+        Khóa hàng loạt
+      </button>
+      <button id="btnBulkDelete" class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-black text-white transition-colors hover:bg-red-700" type="button">
+        <span class="material-symbols-outlined text-xl">delete</span>
+        Xóa hàng loạt
+      </button>
+    </div>
+  </div>
+
+  <!-- Bảng danh sách user: phần chính chính của trang quản trị user. -->
+  <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[980px] text-left">
+        <thead class="bg-slate-50 text-xs font-black uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="w-12 px-4 py-4">
+              <input id="selectAllUsers" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" type="checkbox" aria-label="Chọn tất cả user">
+            </th>
+            <th class="px-4 py-4">Ảnh đại diện</th>
+            <th class="px-4 py-4">Tên</th>
+            <th class="px-4 py-4">Email</th>
+            <th class="px-4 py-4">Vai trò</th>
+            <th class="px-4 py-4">Status</th>
+            <th class="px-4 py-4">Ngày tạo</th>
+            <th class="px-4 py-4 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody" class="divide-y divide-slate-100">
+          <tr>
+            <td class="px-4 py-8 text-center text-sm font-bold text-slate-400" colspan="8">Loading danh sách người dùng...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Phân trang: bắt buộc để không load hàng nghìn user một lần. -->
+  <div class="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex items-center gap-3">
+      <span id="paginationSummary" class="text-sm font-bold text-slate-500">--</span>
+      <select id="itemsPerPage" class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="10">10 / trang</option>
+        <option value="20">20 / trang</option>
+        <option value="50">50 / trang</option>
+      </select>
+    </div>
+    <div id="paginationButtons" class="flex flex-wrap items-center gap-2"></div>
+  </div>
+
+  <!-- Modal tạo/sửa user: dùng chung cho Add User và Edit. -->
+  <div id="userFormModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 p-4">
+    <div class="w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 p-5">
+        <div>
+          <h2 id="userFormTitle" class="text-xl font-black text-slate-950">Add User</h2>
+          <p class="mt-1 text-sm font-semibold text-slate-500">Nhập thông tin tài khoản và phân quyền.</p>
+        </div>
+        <button class="closeUsersModal flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-50" type="button" aria-label="Đóng modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="userForm" class="space-y-4 p-5">
+        <input id="userIdInput" type="hidden">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Name</span>
+            <input id="userNameInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text" required>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Email</span>
+            <input id="userEmailInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="email" required>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Role</span>
+            <select id="userRoleInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+              <option value="user">Users</option>
+              <option value="employer">Employers</option>
+              <option value="admin">Quản trị viên</option>
+            </select>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-black text-slate-700">Status</span>
+            <select id="userStatusInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+              <option value="active">Active</option>
+              <option value="banned">Banned</option>
+              <option value="pending">Pending</option>
+            </select>
+          </label>
+          <label class="space-y-2 md:col-span-2">
+            <span class="text-sm font-black text-slate-700">Avatar URL</span>
+            <input id="userAvatarInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="url" placeholder="https://...">
+          </label>
+        </div>
+
+        <div id="passwordCreateField" class="space-y-2">
+          <span class="text-sm font-black text-slate-700">Password</span>
+          <input id="userPasswordInput" class="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="password" autocomplete="new-password">
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+          <button class="closeUsersModal rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 hover:bg-slate-50" type="button">Hủy</button>
+          <button id="btnSaveUsers" class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-black text-white hover:bg-blue-700" type="submit">Lưu người dùng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal chi tiết user: info cá nhân, role, trạng thái, lịch sử, job/CV liên quan. -->
+  <div id="userDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 p-4">
+    <div class="w-full max-w-3xl overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 p-5">
+        <div>
+          <h2 class="text-xl font-black text-slate-950">Chi tiết người dùng</h2>
+          <p class="mt-1 text-sm font-semibold text-slate-500">Info chi tiết và lịch sử hoạt động.</p>
+        </div>
+        <button class="closeUsersDetailModal flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-50" type="button" aria-label="Đóng modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="userDetailContent" class="max-h-[70vh] overflow-auto p-5"></div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+

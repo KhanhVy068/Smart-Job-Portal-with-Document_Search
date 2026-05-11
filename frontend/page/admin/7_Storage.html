@@ -1,0 +1,193 @@
+﻿<section id="adminStoragePage" class="w-full max-w-full space-y-6 overflow-hidden p-4 sm:p-6">
+  <!-- Header: tiêu đề và các công cụ cleanup nhanh. -->
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <p class="text-sm font-black uppercase tracking-wider text-blue-600">Admin Storage</p>
+      <h1 class="mt-1 text-3xl font-black tracking-tight text-slate-950">Storage Management</h1>
+      <p id="storagePageSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Quản lý dung lượng, tệp tải lên, dọn dẹp và cấu hình lưu trữ.</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button id="btnCleanupUnused" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">cleaning_services</span>
+        Xóa tệp rác
+      </button>
+      <button id="btnCleanupOld" class="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-sm font-black text-white shadow-sm hover:bg-slate-800" type="button">
+        <span class="material-symbols-outlined text-xl">auto_delete</span>
+        Xóa tệp cũ
+      </button>
+    </div>
+  </div>
+
+  <!-- Thống kê lưu trữ: tổng quan dung lượng system. -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Total Storage</p>
+        <span class="material-symbols-outlined text-blue-600">database</span>
+      </div>
+      <p id="statTotalStorage" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Files Count</p>
+        <span class="material-symbols-outlined text-cyan-600">folder</span>
+      </div>
+      <p id="statFilesCount" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Size đã dùng</p>
+        <span class="material-symbols-outlined text-emerald-600">xu hướnging_up</span>
+      </div>
+      <p id="statUsedStorage" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-500">Size còn lại</p>
+        <span class="material-symbols-outlined text-amber-600">sd_storage</span>
+      </div>
+      <p id="statAvailableStorage" class="mt-4 text-3xl font-black text-slate-950">--</p>
+    </article>
+  </div>
+
+  <!-- Chart Usage: biểu đồ dung lượng theo thời gian và phân loại file. -->
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.8fr)]">
+    <section class="min-w-0 rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-100 p-5">
+        <h2 class="text-lg font-black text-slate-950">Size đã dùng theo thời gian</h2>
+        <p class="mt-1 text-sm font-semibold text-slate-500">Theo dõi tốc độ tăng dung lượng để dự đoán cảnh báo.</p>
+      </div>
+      <div class="relative h-72 p-5">
+        <svg id="storageUsageChartSvg" class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 900 250" role="img" aria-label="Biểu đồ dung lượng theo thời gian"></svg>
+        <p id="storageUsageChartEmpty" class="absolute inset-0 hidden items-center justify-center text-sm font-bold text-slate-400">Chưa có dữ liệu biểu đồ.</p>
+        <div id="storageUsageChartLabels" class="mt-2 flex justify-between text-xs font-bold text-slate-400"></div>
+      </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Phân loại file</h2>
+      <div id="fileCategoryList" class="mt-4 space-y-3"></div>
+    </section>
+  </div>
+
+  <!-- Storage alerts và storage theo user. -->
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Storage alerts</h2>
+      <div id="storageAlertsList" class="mt-4 space-y-3">
+        <p class="rounded-lg bg-slate-50 p-4 text-sm font-bold text-slate-400">Loading cảnh báo...</p>
+      </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-black text-slate-950">Storage theo người dùng</h2>
+      <div id="userStorageList" class="mt-4 space-y-3"></div>
+    </section>
+  </div>
+
+  <!-- Search + Filter: lọc tệp theo loại, người dùng, dung lượng và ngày. -->
+  <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(220px,1fr)_150px_180px_160px_160px_auto]">
+      <label class="relative block">
+        <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xl text-slate-400">search</span>
+        <input id="storageSearchInput" class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm font-semibold text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100" type="search" placeholder="Search tệp, chủ sở hữu..." autocomplete="off">
+      </label>
+
+      <select id="storageTypeFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">File type</option>
+        <option value="pdf">PDF</option>
+        <option value="jpg">JPG</option>
+        <option value="png">PNG</option>
+        <option value="docx">DOCX</option>
+        <option value="other">Other</option>
+      </select>
+
+      <input id="storageUserFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Users">
+
+      <select id="storageSizeFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Size</option>
+        <option value="small">Nhỏ &lt; 1MB</option>
+        <option value="medium">1MB - 10MB</option>
+        <option value="large">&gt; 10MB</option>
+      </select>
+
+      <select id="storageDateFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Ngày</option>
+        <option value="today">Hôm nay</option>
+        <option value="7d">7 ngày gần nhất</option>
+        <option value="30d">30 ngày gần nhất</option>
+        <option value="old">File cũ</option>
+      </select>
+
+      <button id="btnReloadStorage" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 hover:bg-slate-50" type="button">
+        <span class="material-symbols-outlined text-xl">refresh</span>
+        Reload
+      </button>
+    </div>
+  </div>
+
+  <!-- Bảng tệp: danh sách file chính của trang Storage. -->
+  <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[980px] text-left">
+        <thead class="bg-slate-50 text-xs font-black uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="px-4 py-4">Name tệp</th>
+            <th class="px-4 py-4">Loại</th>
+            <th class="px-4 py-4">Size</th>
+            <th class="px-4 py-4">Owner</th>
+            <th class="px-4 py-4">Uploaded Date</th>
+            <th class="px-4 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="storageFilesTableBody" class="divide-y divide-slate-100">
+          <tr><td class="px-4 py-8 text-center text-sm font-bold text-slate-400" colspan="6">Loading tệp...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Phân trang: bắt buộc khi số lượng tệp lớn. -->
+  <div class="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex items-center gap-3">
+      <span id="storagePaginationSummary" class="text-sm font-bold text-slate-500">--</span>
+      <select id="storageItemsPerPage" class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="10">10 / trang</option>
+        <option value="20">20 / trang</option>
+        <option value="50">50 / trang</option>
+      </select>
+    </div>
+    <div id="storagePaginationButtons" class="flex flex-wrap items-center gap-2"></div>
+  </div>
+
+  <!-- Storage config: cấu hình nâng cao cho admin. -->
+  <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div>
+        <h2 class="text-lg font-black text-slate-950">Storage config</h2>
+        <p class="mt-1 text-sm font-semibold text-slate-500">Giới hạn dung lượng/người dùng, dung lượng tệp tải lên và loại lưu trữ.</p>
+      </div>
+      <form id="storageConfigForm" class="grid grid-cols-1 gap-3 md:grid-cols-4">
+        <input id="storageUsersLimitInput" class="h-11 rounded-lg border border-slate-200 px-3 text-sm font-bold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text" placeholder="Giới hạn/người dùng, ví dụ 1GB">
+        <input id="storageFileSizeLimitInput" class="h-11 rounded-lg border border-slate-200 px-3 text-sm font-bold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="text" placeholder="File tối đa, ví dụ 10MB">
+        <select id="storageProviderInput" class="h-11 rounded-lg border border-slate-200 px-3 text-sm font-bold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+          <option value="local">Local</option>
+          <option value="cloud">Cloud</option>
+        </select>
+        <button class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-black text-white hover:bg-blue-700" type="submit">Save config</button>
+      </form>
+    </div>
+  </section>
+</section>
+
+
+
+
+
+
+
+
+
+
+

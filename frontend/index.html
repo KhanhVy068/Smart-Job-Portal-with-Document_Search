@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+  <!-- Cấu hình cơ bản, CSS Tailwind đã build và file JS chính của app. -->
   <meta charset="UTF-8">
   <title>Smart Job Portal</title>
   <link href="./src/output.css" rel="stylesheet">
-  <script type="module" src="./js/app.js?v=header-backend"></script>
+  <script type="module" src="./js/app.js?v=admin-sidebar"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
 </head>
@@ -12,15 +13,18 @@
 <body class="bg-gray-50">
 
 
+  <!-- Vùng header và sidebar được render động bằng JavaScript. -->
   <div id="header"></div>
   <div id="sidebar"></div>
 
+  <!-- Khu vực nội dung chính, các trang con sẽ được nạp vào #app. -->
   <main id="contentShell"
     class="ml-64 min-h-screen overflow-x-auto pt-16 pb-[60px] transition-all duration-300">
     <div id="app">
     </div>
   </main>
 
+  <!-- Vùng footer được render động bằng JavaScript. -->
   <div id="footer"></div>
 
 </body>

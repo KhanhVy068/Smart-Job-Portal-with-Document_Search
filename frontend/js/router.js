@@ -1,4 +1,4 @@
-const routes = {
+let routes = {
   dashboard: "./page/employer/1_dashboard.html",
   jobs: "./page/employer/2_jobs.html",
   "job-detail": "./page/employer/4_job-detail.html",
@@ -7,8 +7,12 @@ const routes = {
   search: "./page/employer/7_search.html",
   saved: "./page/employer/8_saved.html",
   "post-job": "./page/employer/3_post-job.html",
-  settings: "./page/employer/9_settings.html",  
+  settings: "./page/employer/9_settings.html",
 };
+
+export function setRoutes(nextRoutes) {
+  routes = { ...nextRoutes };
+}
 
 export function hasRoute(route) {
   return Object.prototype.hasOwnProperty.call(routes, route);
