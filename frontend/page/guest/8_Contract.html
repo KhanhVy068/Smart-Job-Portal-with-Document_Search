@@ -1,0 +1,409 @@
+<!doctype html>
+
+<html class="light" lang="vi">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Liên hệ | Smart Job Portal</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "inverse-primary": "#b0c6ff",
+                            "on-primary-fixed": "#001945",
+                            primary: "#003178",
+                            "surface-container": "#eceef0",
+                            "primary-fixed": "#d9e2ff",
+                            "on-secondary-fixed-variant": "#005145",
+                            "surface-container-high": "#e6e8ea",
+                            "secondary-fixed-dim": "#44ddc1",
+                            "outline-variant": "#c3c6d4",
+                            "on-secondary": "#ffffff",
+                            "secondary-fixed": "#68fadd",
+                            "on-tertiary-fixed-variant": "#00513d",
+                            "surface-container-highest": "#e0e3e5",
+                            "on-secondary-container": "#007261",
+                            "on-error-container": "#93000a",
+                            "secondary-container": "#68fadd",
+                            "surface-container-lowest": "#ffffff",
+                            "surface-variant": "#e0e3e5",
+                            "tertiary-fixed": "#45fec9",
+                            "tertiary-container": "#005742",
+                            "on-primary-container": "#a1bbff",
+                            "on-tertiary-fixed": "#002117",
+                            "on-surface": "#191c1e",
+                            "tertiary-fixed-dim": "#00e1ae",
+                            "surface-bright": "#f8f9fb",
+                            "on-primary-fixed-variant": "#00429c",
+                            surface: "#f8f9fb",
+                            "on-secondary-fixed": "#00201a",
+                            "primary-fixed-dim": "#b0c6ff",
+                            "surface-tint": "#2b5bb5",
+                            "error-container": "#ffdad6",
+                            "primary-container": "#0d47a1",
+                            "surface-container-low": "#f2f4f6",
+                            "surface-dim": "#d8dadc",
+                            secondary: "#006b5c",
+                            "on-error": "#ffffff",
+                            background: "#f8f9fb",
+                            "inverse-on-surface": "#eff1f3",
+                            outline: "#737783",
+                            tertiary: "#003e2e",
+                            "on-tertiary-container": "#00d6a6",
+                            "on-surface-variant": "#434652",
+                            "on-background": "#191c1e",
+                            "on-primary": "#ffffff",
+                            "on-tertiary": "#ffffff",
+                            "inverse-surface": "#2d3133",
+                            error: "#ba1a1a",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            xl: "0.75rem",
+                            full: "0.75rem",
+                        },
+                        fontFamily: {
+                            headline: ["Manrope"],
+                            body: ["Inter"],
+                            label: ["Inter"],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 400,
+                    "GRAD" 0,
+                    "opsz" 24;
+            }
+            body {
+                font-family: "Inter", sans-serif;
+            }
+            h1,
+            h2,
+            h3,
+            .font-manrope {
+                font-family: "Manrope", sans-serif;
+            }
+        </style>
+    </head>
+    <body class="bg-surface text-on-surface">
+        <!-- TopNavBar -->
+        <nav
+            class="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm h-20 flex justify-center items-center"
+        >
+            <div class="flex justify-between items-center h-full px-8 w-full max-w-[1440px]">
+                <a class="flex items-center gap-2" href="1_LandingPage.html">
+                    <img
+                        alt="Smart Job Portal"
+                        class="w-8 h-8 rounded"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMi0Wr0vkQebekh0QTcBsz9X8oQQyLV2rw4mxBjmN_S9q8WZZibJFUryYdIIvNApMSVRkZa6FVn_IMvsoTAD7L5qRpDNWec5nBdq9Yv3SO-BLNvliGL1gkQPgKPtFKGY6aauwweRpUBmttRehQ5Sbz6TU4FdH2k3ZDd9lbHxn_eSPhWlsQzhZEDvXoi60C-EivjN8Vb_n23iZbFgoFOvcxUgXFaPT0N9jRW90zxx_yaL3PXydkIqvPKUGHYXXCkuC8w3LSVWeqyXVm"
+                    />
+                    <span class="text-xl font-bold tracking-tight text-blue-900 font-manrope">Smart Job Portal</span>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a class="text-slate-600 hover:text-blue-900 transition-colors" href="#">Tìm việc làm</a>
+                    <a class="text-slate-600 hover:text-blue-900 transition-colors" href="#">Công ty</a>
+                    <a class="text-slate-600 hover:text-blue-900 transition-colors" href="#">Về chúng tôi</a>
+                    <a class="text-blue-700 font-semibold border-b-2 border-blue-700 pb-1" href="#">Liên hệ</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="px-5 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-all font-medium">
+                        Đăng nhập
+                    </button>
+                    <button
+                        class="px-6 py-2 bg-gradient-to-br from-[#003178] to-[#0d47a1] text-white rounded-xl font-semibold shadow-md active:scale-95 transition-all"
+                    >
+                        Đăng ký
+                    </button>
+                </div>
+            </div>
+            <div class="bg-slate-200/50 h-[1px] w-full absolute bottom-0"></div>
+        </nav>
+        <main class="pt-32 pb-20 px-8 max-w-[1440px] mx-auto">
+            <!-- Editorial Header -->
+            <header class="mb-16">
+                <span
+                    class="font-inter text-sm font-bold uppercase tracking-widest text-on-primary-fixed-variant mb-3 block"
+                    >Liên hệ với chúng tôi</span
+                >
+                <h1 class="text-5xl md:text-6xl font-extrabold text-primary font-manrope tracking-tight max-w-3xl">
+                    Kết nối với mạng lưới chuyên gia của chúng tôi.
+                </h1>
+            </header>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                <!-- Focus Zone: Contact Form -->
+                <section
+                    class="lg:col-span-7 bg-surface-container-lowest rounded-xl p-8 md:p-12 shadow-[0px_20px_40px_rgba(25,28,30,0.06)]"
+                >
+                    <h2 class="text-2xl font-bold font-manrope mb-8 text-on-surface">Gửi tin nhắn cho chúng tôi</h2>
+                    <form action="#" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-on-surface-variant ml-1" for="name"
+                                    >Họ và tên</label
+                                >
+                                <input
+                                    class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-4 focus:ring-primary/10 transition-all text-on-surface placeholder:text-outline"
+                                    id="name"
+                                    placeholder="Nguyễn Văn A"
+                                    type="text"
+                                />
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-on-surface-variant ml-1" for="email"
+                                    >Địa chỉ Email</label
+                                >
+                                <input
+                                    class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-4 focus:ring-primary/10 transition-all text-on-surface placeholder:text-outline"
+                                    id="email"
+                                    placeholder="email@nexus.com"
+                                    type="email"
+                                />
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-on-surface-variant ml-1" for="subject"
+                                >Chủ đề</label
+                            >
+                            <select
+                                class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-4 focus:ring-primary/10 transition-all text-on-surface"
+                                id="subject"
+                            >
+                                <option>Hỗ trợ nghề nghiệp</option>
+                                <option>Hợp tác doanh nghiệp</option>
+                                <option>Góp ý hệ thống</option>
+                                <option>Khác</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-on-surface-variant ml-1" for="message"
+                                >Tin nhắn của bạn</label
+                            >
+                            <textarea
+                                class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-4 focus:ring-primary/10 transition-all text-on-surface placeholder:text-outline"
+                                id="message"
+                                placeholder="Hãy cho chúng tôi biết chúng tôi có thể giúp gì cho bạn..."
+                                rows="5"
+                            ></textarea>
+                        </div>
+                        <button
+                            class="w-full md:w-auto px-10 py-4 bg-gradient-to-br from-primary to-primary-container text-white font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+                            type="submit"
+                        >
+                            <span>Gửi tin nhắn</span>
+                            <span class="material-symbols-outlined text-xl">send</span>
+                        </button>
+                    </form>
+                </section>
+                <!-- Contextual Sidebar: Info & Cards -->
+                <aside class="lg:col-span-5 space-y-8">
+                    <!-- Contact Cards -->
+                    <div class="bg-surface-container-low rounded-xl p-8 space-y-8">
+                        <div class="flex gap-6">
+                            <div
+                                class="w-12 h-12 bg-primary-fixed rounded-xl flex items-center justify-center text-primary shrink-0"
+                            >
+                                <span class="material-symbols-outlined">location_on</span>
+                            </div>
+                            <div>
+                                <h3 class="font-manrope font-bold text-lg text-on-surface">Văn phòng đại diện</h3>
+                                <p class="text-on-surface-variant leading-relaxed">
+                                    Tầng 12, Tòa nhà Nexus Tower,<br />Quận 1, TP. Hồ Chí Minh, Việt Nam
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6">
+                            <div
+                                class="w-12 h-12 bg-secondary-container rounded-xl flex items-center justify-center text-on-secondary-container shrink-0"
+                            >
+                                <span class="material-symbols-outlined">call</span>
+                            </div>
+                            <div>
+                                <h3 class="font-manrope font-bold text-lg text-on-surface">Liên hệ trực tiếp</h3>
+                                <p class="text-on-surface-variant">+84 (28) 3822 1234</p>
+                                <p class="text-on-surface-variant">+84 909 123 456</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6">
+                            <div
+                                class="w-12 h-12 bg-tertiary-fixed-dim rounded-xl flex items-center justify-center text-on-tertiary-fixed shrink-0"
+                            >
+                                <span class="material-symbols-outlined">mail</span>
+                            </div>
+                            <div>
+                                <h3 class="font-manrope font-bold text-lg text-on-surface">Hỗ trợ trực tuyến</h3>
+                                <p class="text-on-surface-variant">contact@intelligentnexus.com</p>
+                                <p class="text-on-surface-variant">support@nexus.io</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Match Score Promo -->
+                    <div class="bg-tertiary text-white rounded-xl p-8 relative overflow-hidden">
+                        <div class="relative z-10">
+                            <h3 class="font-manrope font-bold text-xl mb-2">Hỗ trợ 24/7</h3>
+                            <p class="text-tertiary-fixed/80 text-sm mb-4 leading-relaxed">
+                                Đội ngũ của chúng tôi luôn sẵn sàng hỗ trợ bạn trong vòng 2 giờ làm việc.
+                            </p>
+                            <div class="flex items-center gap-2 text-tertiary-fixed font-bold">
+                                <span
+                                    class="material-symbols-outlined"
+                                    style="font-variation-settings: &quot;FILL&quot; 1"
+                                    >check_circle</span
+                                >
+                                <span>Tỷ lệ phản hồi: 100%</span>
+                            </div>
+                        </div>
+                        <div class="absolute -right-4 -bottom-4 opacity-10">
+                            <span class="material-symbols-outlined text-9xl">support_agent</span>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+            <!-- Maps Section (Intentional Asymmetry) -->
+            <section class="mt-24">
+                <div class="rounded-xl overflow-hidden shadow-sm surface-container-high h-[500px] relative group">
+                    <div class="absolute inset-0 bg-slate-300 animate-pulse group-hover:hidden"></div>
+                    <!-- Simulating a map placeholder with an image as per instructions -->
+                    <div
+                        class="w-full h-full bg-cover bg-center"
+                        data-alt="Modern satellite and minimalist street map view of Ho Chi Minh City downtown district with prominent landmarks in blue and slate tones"
+                        data-location="Ho Chi Minh City"
+                        style="
+                            background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuD0z-SPKOL-Ul8e1bsxQd_7ALZKEu7k3JPHg_Gl58IGJ0O8grGUBRnmaTGtEh6GAvdvbFtMOPYBMdIyjU5iZzKeTXgW3KJPjRMyuoXyx3dlK1sLSKKx9rEyeL8J2r8-qlad15Y6-GOcbx0dOxkcbYlzG-loNDTDsYwSGJftKqS6t1zySTWzU10dm9iS4v8u0YMTXhvV3zUB5VwK5bjh4T1UZWK9BUwREtHjVbrF-oQJ0zpBYLDApb1_C18Xaqrr7uE44lifj19eAKQ&quot;);
+                        "
+                    ></div>
+                    <div
+                        class="absolute top-6 left-6 bg-surface-container-lowest/90 backdrop-blur p-6 rounded-xl shadow-lg max-w-sm"
+                    >
+                        <h3 class="font-manrope font-bold text-primary text-xl mb-1">Nexus HQ</h3>
+                        <p class="text-on-surface-variant text-sm mb-4">
+                            Dễ dàng tìm thấy chúng tôi tại trung tâm tài chính của thành phố.
+                        </p>
+                        <a
+                            class="inline-flex items-center gap-2 text-primary font-bold text-sm hover:underline"
+                            href="#"
+                        >
+                            <span>Chỉ đường trên Google Maps</span>
+                            <span class="material-symbols-outlined text-sm">open_in_new</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <!-- Footer -->
+        <footer class="w-full py-12 px-8 border-t border-outline-variant/30 bg-surface-container-low">
+            <div class="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+                <div class="md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img
+                            alt="Smart Job Portal"
+                            class="w-7 h-7 rounded bg-primary"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMi0Wr0vkQebekh0QTcBsz9X8oQQyLV2rw4mxBjmN_S9q8WZZibJFUryYdIIvNApMSVRkZa6FVn_IMvsoTAD7L5qRpDNWec5nBdq9Yv3SO-BLNvliGL1gkQPgKPtFKGY6aauwweRpUBmttRehQ5Sbz6TU4FdH2k3ZDd9lbHxn_eSPhWlsQzhZEDvXoi60C-EivjN8Vb_n23iZbFgoFOvcxUgXFaPT0N9jRW90zxx_yaL3PXydkIqvPKUGHYXXCkuC8w3LSVWeqyXVm"
+                        />
+                        <span class="font-bold font-manrope text-xl text-on-surface">Smart Job Portal</span>
+                    </div>
+                    <p class="text-sm text-on-surface-variant font-medium leading-relaxed">
+                        Hệ thống tuyển dụng thông minh, kết nối nhân tài và doanh nghiệp thông qua công nghệ trí tuệ
+                        nhân tạo.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Liên kết nhanh
+                    </h4>
+                    <ul class="space-y-2">
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Về chúng tôi</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Quy định bảo mật</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Điều khoản sử dụng</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Liên hệ</a
+                            >
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Thông tin hỗ trợ
+                    </h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-sm">call</span>Hotline: 1900 xxxx
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-sm">mail</span>Email: support@smartjob.vn
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Mạng xã hội
+                    </h4>
+                    <div class="flex gap-4">
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">public</span></a
+                        >
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">share</span></a
+                        >
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">person_add</span></a
+                        >
+                    </div>
+                </div>
+            </div>
+            <div
+                class="max-w-[1440px] mx-auto pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-4"
+            >
+                <p class="text-xs text-on-surface-variant font-medium">
+                    © 2024 Smart Job Portal. Tất cả quyền được bảo lưu.
+                </p>
+                <div class="flex gap-6 text-xs text-on-surface-variant">
+                    <span>Ngôn ngữ: Tiếng Việt</span>
+                    <span class="flex items-center gap-1"
+                        ><span class="w-2 h-2 rounded-full bg-secondary inline-block"></span> Hệ thống đang hoạt
+                        động</span
+                    >
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
