@@ -97,6 +97,26 @@ const roleConfigs = {
 };
 
 let appConfig = roleConfigs.employer;
+let isPublicMode = false;
+
+const publicConfig = {
+  routes: {
+    home: "./page/public/home.html",
+    jobs: "./page/public/jobs.html",
+    "job-detail": "./page/public/job-detail.html",
+    login: "./page/public/login.html",
+    register: "./page/public/register.html",
+    "forgot-password": "./page/public/forgot-password.html",
+  },
+  pageScripts: {
+    home: "./pages/public/home.js",
+    jobs: "./pages/public/jobs.js",
+    "job-detail": "./pages/public/job-detail.js",
+    login: "./pages/public/login.js",
+    register: "./pages/public/register.js",
+    "forgot-password": "./pages/public/forgot-password.js",
+  },
+};
 
 const logoutButtonIds = new Set([
   "headerLogoutButton",
@@ -126,7 +146,7 @@ async function loadComponent(id, path) {
 
 async function init() {
   if (!getUser()) {
-    renderLoginScreen();
+    initPublicApp();
     return;
   }
 
@@ -143,6 +163,93 @@ async function init() {
 }
 
 init();
+
+function initPublicApp() {
+  isPublicMode = true;
+  appConfig = publicConfig;
+  setRoutes(publicConfig.routes);
+
+  document.getElementById("header").innerHTML = "";
+  document.getElementById("sidebar").innerHTML = "";
+  renderPublicHeader();
+  renderPublicFooter();
+
+  const contentShell = document.getElementById("contentShell");
+  contentShell?.classList.remove("ml-64", "ml-20", "pt-16");
+  contentShell?.classList.add("pt-16");
+
+  setupRouter();
+}
+
+function renderPublicHeader() {
+  const header = document.getElementById("header");
+  if (!header) return;
+
+  header.innerHTML = `
+    <header class="fixed left-0 right-0 top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
+      <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <a class="flex items-center gap-2 text-lg font-black tracking-tight text-slate-950" href="#home" data-route="home">
+          <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
+            <span class="material-symbols-outlined text-xl">work</span>
+          </span>
+          Smart Job Portal
+        </a>
+        <div class="hidden items-center gap-6 text-sm font-bold text-slate-600 md:flex">
+          <a class="public-nav-link hover:text-blue-600" href="#jobs" data-route="jobs">Việc làm</a>
+          <a class="public-nav-link hover:text-blue-600" href="#home" data-route="home" data-scroll-target="companies">Công ty</a>
+          <a class="public-nav-link hover:text-blue-600" href="#home" data-route="home" data-scroll-target="about">Giới thiệu</a>
+          <a class="public-nav-link hover:text-blue-600" href="#home" data-route="home" data-scroll-target="contact">Liên hệ</a>
+        </div>
+        <div class="flex items-center gap-3">
+          <a class="public-nav-link rounded-lg px-3 py-2 text-sm font-black text-slate-700 hover:bg-slate-100" href="#login" data-route="login">Đăng nhập</a>
+          <a class="public-nav-link rounded-lg bg-blue-600 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-blue-700" href="#register" data-route="register">Đăng ký</a>
+        </div>
+      </nav>
+    </header>
+  `;
+}
+
+function renderPublicFooter() {
+  const footer = document.getElementById("footer");
+  if (!footer) return;
+
+  footer.innerHTML = `
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-4">
+        <div>
+          <p class="text-lg font-black text-slate-950">Smart Job Portal</p>
+          <p class="mt-4 max-w-xs text-sm font-semibold leading-6 text-slate-500">Nền tảng tuyển dụng hỗ trợ CV PDF, tìm kiếm full-text và quản lý ứng tuyển.</p>
+        </div>
+        <div>
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Nền tảng</p>
+          <div class="mt-4 space-y-3 text-sm font-semibold text-slate-500">
+            <a class="block hover:text-blue-600" href="#jobs" data-route="jobs">Tìm việc</a>
+            <a class="block hover:text-blue-600" href="#home" data-route="home">Công ty</a>
+            <a class="block hover:text-blue-600" href="#register" data-route="register">Phân tích CV</a>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Hỗ trợ</p>
+          <div class="mt-4 space-y-3 text-sm font-semibold text-slate-500">
+            <a class="block hover:text-blue-600" href="#forgot-password" data-route="forgot-password">Quên mật khẩu</a>
+            <a class="block hover:text-blue-600" href="#home" data-route="home">Hướng dẫn</a>
+            <a class="block hover:text-blue-600" href="#home" data-route="home">Liên hệ</a>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Pháp lý</p>
+          <div class="mt-4 space-y-3 text-sm font-semibold text-slate-500">
+            <a class="block hover:text-blue-600" href="#home" data-route="home">Chính sách bảo mật</a>
+            <a class="block hover:text-blue-600" href="#home" data-route="home">Điều khoản dịch vụ</a>
+          </div>
+        </div>
+      </div>
+      <div class="mx-auto max-w-7xl border-t border-slate-200 px-4 py-6 text-sm font-semibold text-slate-500 sm:px-6">
+        © 2024 Smart Job Portal.
+      </div>
+    </footer>
+  `;
+}
 
 function renderLoginScreen() {
   document.getElementById("header").innerHTML = "";
@@ -307,7 +414,11 @@ function setupRouter() {
     if (!link) return;
 
     e.preventDefault();
-    navigateTo(link.dataset.route, true);
+    navigateTo(link.dataset.route, true).then(() => {
+      const targetId = link.dataset.scrollTarget;
+      if (!targetId) return;
+      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   });
 
   window.addEventListener("hashchange", () => {
@@ -323,11 +434,13 @@ function setupRouter() {
 
 function getRouteFromHash() {
   const route = window.location.hash.replace("#", "");
-  return hasRoute(route) ? route : "dashboard";
+  const fallback = isPublicMode ? "home" : "dashboard";
+  return hasRoute(route) ? route : fallback;
 }
 
 async function navigateTo(route, updateHash = false) {
-  const nextRoute = hasRoute(route) ? route : "dashboard";
+  const fallback = isPublicMode ? "home" : "dashboard";
+  const nextRoute = hasRoute(route) ? route : fallback;
 
   try {
     await navigate(nextRoute);

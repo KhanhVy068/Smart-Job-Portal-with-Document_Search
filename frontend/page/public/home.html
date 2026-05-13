@@ -1,0 +1,77 @@
+<section class="bg-slate-50">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <span class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">
+          <span class="material-symbols-outlined text-base">manage_search</span>
+          Tìm kiếm CV/JD thông minh
+        </span>
+        <h1 class="mt-5 max-w-3xl text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
+          Cổng tuyển dụng tích hợp tìm kiếm full-text trên CV và tin tuyển dụng.
+        </h1>
+        <p class="mt-4 max-w-2xl text-sm font-semibold leading-7 text-slate-500">
+          Ứng viên tìm việc, upload CV PDF; nhà tuyển dụng đăng tin, xem hồ sơ và tìm kiếm ứng viên bằng nội dung đã trích xuất.
+        </p>
+        <form id="homeSearchForm" class="mt-6 grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_auto_auto]">
+          <label class="flex min-w-0 items-center gap-3 rounded-lg bg-white px-3">
+            <span class="material-symbols-outlined text-slate-400">search</span>
+            <input id="homeSearchInput" class="h-12 min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none placeholder:text-slate-400" placeholder="Tìm việc theo kỹ năng, vị trí..." type="search">
+          </label>
+          <a class="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 hover:bg-slate-100" href="#register" data-route="register">
+            <span class="material-symbols-outlined text-base">upload_file</span>
+            Upload CV
+          </a>
+          <button class="h-12 rounded-lg bg-blue-600 px-6 text-sm font-black text-white shadow-sm hover:bg-blue-700" type="submit">Tìm kiếm</button>
+        </form>
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
+          <span>Từ khóa phổ biến:</span>
+          <button class="home-tag rounded-full bg-white px-3 py-1 text-blue-700 ring-1 ring-slate-200" type="button">React</button>
+          <button class="home-tag rounded-full bg-white px-3 py-1 text-blue-700 ring-1 ring-slate-200" type="button">Node.js</button>
+          <button class="home-tag rounded-full bg-white px-3 py-1 text-blue-700 ring-1 ring-slate-200" type="button">Backend</button>
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <article class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Search engine</p>
+          <p class="mt-3 text-3xl font-black text-slate-950">Meilisearch</p>
+          <p class="mt-2 text-sm font-semibold text-slate-500">Fallback MySQL FULLTEXT khi chưa bật search engine riêng.</p>
+        </article>
+        <article class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <p class="text-xs font-black uppercase tracking-wider text-slate-400">Background worker</p>
+          <p class="mt-3 text-3xl font-black text-slate-950">BullMQ + Redis</p>
+          <p class="mt-2 text-sm font-semibold text-slate-500">Trích xuất nội dung PDF bằng worker nền.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="mt-6 grid gap-4 md:grid-cols-3">
+      <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-3xl font-black text-blue-600">12.5k+</p><p class="mt-2 text-sm font-semibold text-slate-500">Cơ hội nghề nghiệp được index</p></article>
+      <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-3xl font-black text-blue-600">450ms</p><p class="mt-2 text-sm font-semibold text-slate-500">Latency đánh giá tìm kiếm</p></article>
+      <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-3xl font-black text-blue-600">PDF</p><p class="mt-2 text-sm font-semibold text-slate-500">Lưu trữ và trích xuất CV</p></article>
+    </section>
+
+    <section id="companies" class="mt-10">
+      <div class="mb-5 flex items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-black uppercase tracking-wider text-blue-600">Tin tuyển dụng</p>
+          <h2 class="mt-2 text-2xl font-black text-slate-950">Cơ hội nổi bật</h2>
+        </div>
+        <a class="text-sm font-black text-blue-600 hover:underline" href="#jobs" data-route="jobs">Xem tất cả</a>
+      </div>
+      <div id="featuredJobs" class="grid gap-4 lg:grid-cols-3"></div>
+    </section>
+
+    <section id="about" class="mt-10 rounded-lg border border-slate-200 bg-blue-600 p-6 text-white shadow-sm">
+      <div class="grid gap-5 md:grid-cols-[1fr_auto_auto] md:items-center">
+        <div>
+          <h2 class="text-2xl font-black">Sẵn sàng bắt đầu hành trình tuyển dụng?</h2>
+          <p class="mt-2 text-sm font-semibold text-blue-50">Tạo tài khoản để tìm việc, upload CV hoặc quản lý tuyển dụng.</p>
+        </div>
+        <a class="rounded-lg bg-white px-6 py-3 text-center text-sm font-black text-blue-700" href="#register" data-route="register">Đăng ký miễn phí</a>
+        <a class="rounded-lg border border-white/50 px-6 py-3 text-center text-sm font-black text-white" href="#login" data-route="login">Đăng nhập</a>
+      </div>
+    </section>
+  </div>
+  <div id="contact" class="sr-only">Liên hệ</div>
+</section>

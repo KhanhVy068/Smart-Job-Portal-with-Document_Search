@@ -1,0 +1,44 @@
+<section class="bg-slate-50 px-4 py-8 sm:px-6">
+  <div class="mx-auto max-w-5xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div class="grid lg:grid-cols-[0.9fr_1fr]">
+      <aside class="hidden bg-slate-950 p-8 text-white lg:flex lg:flex-col lg:justify-between">
+        <div>
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
+            <span class="material-symbols-outlined text-2xl">work</span>
+          </div>
+          <h1 class="mt-8 text-3xl font-black tracking-tight">Smart Job Portal</h1>
+          <p class="mt-4 max-w-md text-sm font-semibold leading-7 text-slate-300">
+            Đăng nhập để truy cập dashboard theo vai trò ứng viên, nhà tuyển dụng hoặc quản trị viên.
+          </p>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-sm font-bold text-slate-300">
+          <div class="rounded-lg bg-white/10 p-4">Jobs</div>
+          <div class="rounded-lg bg-white/10 p-4">CV PDF</div>
+          <div class="rounded-lg bg-white/10 p-4">Admin</div>
+        </div>
+      </aside>
+      <form id="publicLoginForm" class="p-6 sm:p-10">
+        <h2 class="text-3xl font-black text-slate-950">Đăng nhập</h2>
+        <p class="mt-2 text-sm font-semibold text-slate-500">Chọn vai trò và nhập tài khoản của bạn.</p>
+        <div class="mt-6 grid grid-cols-2 gap-2">
+          <button class="login-role rounded-lg border border-blue-600 bg-blue-50 px-3 py-3 text-sm font-black text-blue-700" type="button" data-role="candidate">Ứng viên</button>
+          <button class="login-role rounded-lg border border-slate-200 px-3 py-3 text-sm font-black text-slate-700" type="button" data-role="employer">Nhà tuyển dụng</button>
+        </div>
+        <label class="mt-6 block space-y-2">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-500">Email</span>
+          <input id="publicLoginEmail" class="h-12 w-full rounded-lg border border-slate-200 px-4 text-sm font-semibold outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100" type="email" placeholder="name@company.com" required>
+        </label>
+        <label class="mt-4 block space-y-2">
+          <span class="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-500">
+            Mật khẩu
+            <a class="normal-case tracking-normal text-blue-600" href="#forgot-password" data-route="forgot-password">Quên mật khẩu?</a>
+          </span>
+          <input id="publicLoginPassword" class="h-12 w-full rounded-lg border border-slate-200 px-4 text-sm font-semibold outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100" type="password" required>
+        </label>
+        <p id="publicLoginMessage" class="mt-4 min-h-5 text-sm font-bold text-red-600"></p>
+        <button id="publicLoginSubmit" class="mt-2 flex h-12 w-full items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white shadow-sm transition hover:bg-blue-700" type="submit">Đăng nhập</button>
+        <p class="mt-6 text-center text-sm font-bold text-slate-500">Chưa có tài khoản? <a class="text-blue-600" href="#register" data-route="register">Đăng ký ngay</a></p>
+      </form>
+    </div>
+  </div>
+</section>

@@ -9,7 +9,7 @@ const isAuth = (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'smart_job_portal_secret_key_2026');
         req.user = decoded;
         next();
     } catch (error) {

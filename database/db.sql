@@ -125,7 +125,30 @@ CREATE TABLE IF NOT EXISTS documents (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 5. Bảng Applications: Quản lý đơn ứng tuyển
+-- 5. Bảng EmployerProfiles: Thông tin công ty khi nhà tuyển dụng đăng ký
+-- ==========================================
+CREATE TABLE IF NOT EXISTS employer_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    company_name VARCHAR(255) NOT NULL,
+    website VARCHAR(255) NULL,
+    logo_url TEXT NULL,
+    industry VARCHAR(255) NULL,
+    company_size VARCHAR(100) NULL,
+    address TEXT NULL,
+    description TEXT NULL,
+    tax_code VARCHAR(100) NULL,
+    business_license_url TEXT NULL,
+    company_email VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_employer_profiles_company (company_name),
+    INDEX idx_employer_profiles_industry (industry)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ==========================================
+-- 6. Bảng Applications: Quản lý đơn ứng tuyển
 -- ==========================================
 CREATE TABLE IF NOT EXISTS applications (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -160,7 +183,7 @@ CREATE TABLE IF NOT EXISTS applications (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 6. Bảng ApplicationStatusLog: Lịch sử thay đổi trạng thái
+-- 7. Bảng ApplicationStatusLog: Lịch sử thay đổi trạng thái
 -- ==========================================
 CREATE TABLE IF NOT EXISTS application_status_log (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -177,7 +200,7 @@ CREATE TABLE IF NOT EXISTS application_status_log (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 7. Bảng SavedSearches: Lưu tìm kiếm đã lưu của người dùng
+-- 8. Bảng SavedSearches: Lưu tìm kiếm đã lưu của người dùng
 -- ==========================================
 CREATE TABLE IF NOT EXISTS saved_searches (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -193,7 +216,7 @@ CREATE TABLE IF NOT EXISTS saved_searches (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 8. Bảng PerformanceLogs: Lưu latency search/filter để đánh giá hiệu năng
+-- 9. Bảng PerformanceLogs: Lưu latency search/filter để đánh giá hiệu năng
 -- ==========================================
 CREATE TABLE IF NOT EXISTS performance_logs (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -213,7 +236,7 @@ CREATE TABLE IF NOT EXISTS performance_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 9. KHỞI TẠO FOREIGN KEY (ALTER TABLE)
+-- 10. KHỞI TẠO FOREIGN KEY (ALTER TABLE)
 -- ==========================================
 
 ALTER TABLE job_categories 
@@ -230,6 +253,10 @@ FOREIGN KEY (category_id) REFERENCES job_categories(id) ON DELETE CASCADE;
 
 ALTER TABLE documents 
 ADD CONSTRAINT fk_docs_user 
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE employer_profiles
+ADD CONSTRAINT fk_employer_profiles_user
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE applications 
@@ -261,7 +288,7 @@ ADD CONSTRAINT fk_perf_user
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
 
 -- ==========================================
--- 10. INDEX TỐI ƯU TRUY VẤN
+-- 11. INDEX TỐI ƯU TRUY VẤN
 -- ==========================================
 
 CREATE INDEX idx_jobs_category_status ON jobs(category_id, status);
@@ -275,7 +302,7 @@ CREATE FULLTEXT INDEX ft_jobs_text ON jobs(title, description, requirements, ben
 CREATE FULLTEXT INDEX ft_documents_text ON documents(file_name, extracted_text);
 
 -- ==========================================
--- 11. TRIGGER: Tự động đóng job khi hết hạn
+-- 12. TRIGGER: Tự động đóng job khi hết hạn
 -- ⚠️ LƯU Ý: Chỉ dùng trong đồ án, production sẽ thay bằng background job (cron/BullMQ)
 -- ==========================================
 DELIMITER $$
@@ -301,7 +328,7 @@ END$$
 DELIMITER ;
 
 -- ==========================================
--- 12. DỮ LIỆU MẪU (DUMMY DATA)
+-- 13. DỮ LIỆU MẪU (DUMMY DATA)
 -- ==========================================
 
 INSERT INTO job_categories (id, name, slug, parent_id) VALUES 
