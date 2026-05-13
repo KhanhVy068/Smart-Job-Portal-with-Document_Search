@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const https = require('https');
 const db = require('../config/db');
-const documentWorker = require('../services/documentWorker');
+const documentQueue = require('../services/documentQueue');
 const searchService = require('../services/searchService');
 
 function getUserId(req, fallback = 2) {
@@ -45,7 +45,7 @@ exports.uploadCV = async (req, res) => {
     );
 
     const [[row]] = await db.query('SELECT * FROM documents WHERE id = ?', [result.insertId]);
-    documentWorker.enqueueDocument(result.insertId);
+    await documentQueue.enqueueDocument(result.insertId);
     res.status(201).json(toDocumentResponse(row));
   } catch (error) {
     console.error('Upload CV error:', error);

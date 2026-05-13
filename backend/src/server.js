@@ -21,6 +21,9 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const userRoutes = require('./routes/userRoutes');
 const documentWorker = require('./services/documentWorker');
 const searchService = require('./services/searchService');
+const documentQueue = require('./services/documentQueue');
+const performanceLogService = require('./services/performanceLogService');
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -58,10 +61,18 @@ app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(err.status || 500).json({ message: err.message || 'Lỗi server' });
 });
-
+ 
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
+  performanceLogService.ensurePerformanceLogsTable()
+    .then(() => console.log('Performance log table ready.'))
+    .catch(err => console.warn('Performance log table warning:', err.message));
+
   documentWorker.start();
+  documentQueue.enqueuePendingDocuments(db)
+    .then(count => console.log(`Pending documents enqueued: ${count}`))
+    .catch(err => console.warn('Enqueue pending documents warning:', err.message));
+
   searchService.reindexAll()
     .then(result => console.log(`Search index ready (${result.engine}, indexed: ${result.indexed}).`))
     .catch(err => console.warn('Search index startup warning:', err.message));

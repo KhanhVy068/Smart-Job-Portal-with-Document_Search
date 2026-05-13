@@ -332,7 +332,9 @@ const {
     getAllCategories, createCategory, updateCategory, deleteCategory,
     getStats,
     getAdminDocuments, getAdminDocumentById, updateDocumentStatus, deleteDocument,
-    getStorage, getReports, getSettings, getBackgroundJobs, getSearchAnalytics, genericOk
+    getStorage, getReports, getSettings, getBackgroundJobs, getSearchAnalytics, genericOk, 
+    getBackgroundJobById, retryBackgroundJob, deleteBackgroundJob, controlBackgroundQueue,
+
 } = require('../controllers/AdminController');
 
 const router = express.Router();
@@ -383,13 +385,13 @@ router.post('/storage/:action', genericOk);
 router.patch('/storage/config', genericOk);
 
 router.get('/reports', getReports);
-router.get('/settings', getSettings);
-router.patch('/settings/:section', genericOk);
+router.get('/settings', getSettings);   
+router.patch('/settings/:section', genericOk);  
 router.get('/background-jobs', getBackgroundJobs);
-router.get('/background-jobs/:id', (req, res) => res.json({ id: req.params.id, status: 'idle' }));
-router.post('/background-jobs/:id/:action', genericOk);
-router.delete('/background-jobs/:id', genericOk);
-router.post('/background-jobs/queue/:action', genericOk);
+router.post('/background-jobs/queue/:action', controlBackgroundQueue);
+router.get('/background-jobs/:id', getBackgroundJobById);
+router.post('/background-jobs/:id/retry', retryBackgroundJob);
+router.delete('/background-jobs/:id', deleteBackgroundJob);
 router.get('/search-analytics', getSearchAnalytics);
 
 

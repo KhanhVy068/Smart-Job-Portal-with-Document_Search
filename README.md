@@ -1,76 +1,106 @@
 # Smart Job Portal with Document Search
 
-Hệ thống tuyển dụng hỗ trợ đăng tin, ứng tuyển bằng CV PDF, lưu trữ hồ sơ, trích xuất nội dung CV/JD và tìm kiếm full-text.
+Hệ thống tuyển dụng hỗ trợ đăng tin, ứng tuyển bằng CV PDF, trích xuất nội dung hồ sơ, tìm kiếm full-text CV/JD và đo hiệu năng search/filter.
 
-## Tính năng chính
-
-- Nhà tuyển dụng đăng và quản lý tin tuyển dụng.
-- Ứng viên tìm kiếm, lọc việc làm và ứng tuyển bằng CV.
-- Chỉ cho phép upload CV định dạng PDF.
-- Lưu trữ CV PDF trên Cloudinary.
-- Background worker tự động tải PDF, trích xuất văn bản và lưu vào cơ sở dữ liệu.
-- Tìm kiếm full-text trên CV và JD bằng Meilisearch nếu được cấu hình, tự động fallback sang MySQL FULLTEXT khi chưa bật Meilisearch.
-- Nhà tuyển dụng xem CV ứng viên, tải CV và cập nhật trạng thái ứng tuyển.
-- Ứng viên theo dõi trạng thái: Đã nộp, Đang xét duyệt, Phỏng vấn, Không đạt.
-- Admin quản lý người dùng, tin tuyển dụng, tài liệu và thống kê hệ thống.
-
-## Công nghệ sử dụng
+## Công Nghệ
 
 - Frontend: HTML, CSS, JavaScript ES Modules.
 - Backend: Node.js, Express.
-- Database: MySQL.
-- Authentication: JWT.
-- File storage: Cloudinary.
-- PDF text extraction: `pdf-parse`.
-- Search engine: Meilisearch hoặc MySQL FULLTEXT fallback.
+- Database: MySQL 8.
+- Queue/Worker: BullMQ + Redis.
+- Search: Meilisearch, fallback MySQL FULLTEXT.
+- Storage: Cloudinary.
+- PDF extraction: `pdf-parse`.
 
-## Yêu cầu môi trường
+## Yêu Cầu
 
 - Node.js 18 trở lên.
-- MySQL 8.x khuyến nghị.
-- Tài khoản Cloudinary để upload và xem CV PDF.
-- Meilisearch là tùy chọn, chỉ cần nếu muốn test search engine riêng.
+- MySQL 8.
+- Redis.
+- Meilisearch.
+- Tài khoản Cloudinary.
 
-## Cài đặt database
+Có thể chạy MySQL, Redis, Meilisearch bằng Docker Compose trong thư mục `backend`.
 
-Tạo database:
+## Cấu Trúc
 
-```sql
-CREATE DATABASE job_portal CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```text
+backend/
+  src/
+    config/
+    controllers/
+    routes/
+    services/
+  scripts/
+    benchmark-search.js
+database/
+  db.sql
+frontend/
+  components/
+  js/
+  page/
 ```
 
-Import schema và dữ liệu mẫu:
+`database/db.sql` là file database final duy nhất của hệ thống.
 
-```powershell
-mysql -u root -p job_portal < database/db.sql
-```
+## Chạy Local
 
-Nếu muốn dùng đúng user trong file `.env` mẫu:
-
-```sql
-CREATE USER 'job_user'@'localhost' IDENTIFIED BY 'job_pass';
-GRANT ALL PRIVILEGES ON job_portal.* TO 'job_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-## Cấu hình backend
-
-Vào thư mục backend và cài dependencies:
+### 1. Cài Dependencies
 
 ```powershell
 cd backend
 npm install
 ```
 
-Tạo file `backend/.env`:
-
-```env
-
-```
-
-Chạy backend:
+### 2. Chạy MySQL, Redis, Meilisearch
 
 ```powershell
+cd backend
+docker compose up -d
+```
+
+Docker Compose sẽ mount `../database/db.sql` để khởi tạo MySQL lần đầu. Nếu MySQL volume đã tồn tại từ trước, import lại thủ công:
+
+```powershell
+mysql -u root -p job_portal < ..\database\db.sql
+```
+
+### 3. Cấu Hình Backend
+
+Tạo file `backend/.env` dựa trên `backend/.env.example`:
+
+```env
+PORT=5000
+JWT_SECRET=job_portal_secret_key
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=job_user
+DB_PASSWORD=job_pass
+DB_NAME=job_portal
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+MEILI_HOST=http://127.0.0.1:7700
+MEILI_API_KEY=smart_job_portal_meili_key
+MEILI_INDEX=smart_job_portal
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+DOCUMENT_QUEUE_NAME=document-extraction
+DOCUMENT_WORKER_CONCURRENCY=3
+CV_PDF_MAX_BYTES=26214400
+PDF_DOWNLOAD_TIMEOUT_MS=30000
+PDF_MAX_EXTRACTED_TEXT_CHARS=5000000
+```
+
+### 4. Chạy Backend
+
+```powershell
+cd backend
 npm start
 ```
 
@@ -80,7 +110,15 @@ Kiểm tra API:
 http://localhost:5000/
 ```
 
-## Chạy frontend
+Khi backend khởi động, hệ thống sẽ:
+
+- Kết nối MySQL.
+- Khởi động BullMQ document worker.
+- Enqueue lại CV đang `pending` hoặc `failed`.
+- Tạo bảng `performance_logs` nếu DB cũ chưa có.
+- Reindex dữ liệu vào Meilisearch nếu Meilisearch được cấu hình.
+
+### 5. Chạy Frontend
 
 Mở terminal mới:
 
@@ -95,14 +133,14 @@ Truy cập:
 http://localhost:5500/
 ```
 
-Nếu frontend gọi sai API, mở DevTools Console và chạy:
+Nếu frontend gọi sai backend, mở DevTools Console và chạy:
 
 ```js
 localStorage.setItem('apiBaseUrl', 'http://localhost:5000/api');
 location.reload();
 ```
 
-## Tài khoản demo
+## Tài Khoản Demo
 
 ```text
 Admin:
@@ -118,164 +156,286 @@ Email: tuyet.mai@student.uit.edu.vn
 Password: 123456
 ```
 
-## Luồng sử dụng cho ứng viên
+## Test Hệ Thống
+
+### Test Nhanh API
+
+```powershell
+Invoke-RestMethod http://localhost:5000/
+Invoke-RestMethod "http://localhost:5000/api/search?q=node&type=all"
+Invoke-RestMethod "http://localhost:5000/api/jobs?keyword=node&location=Remote"
+```
+
+### Test Luồng Ứng Viên
 
 1. Đăng nhập bằng tài khoản ứng viên.
-2. Vào mục Tìm việc làm.
-3. Nhập từ khóa, chọn địa điểm hoặc loại hình rồi bấm Áp dụng bộ lọc.
-4. Mở chi tiết việc làm và ứng tuyển.
-5. Vào Upload CV để tải CV PDF lên hệ thống.
-6. Vào Quản lý CV để xem CV đã upload và trạng thái xử lý.
-7. Vào Việc đã ứng tuyển để lọc theo Đã nộp, Đang xét duyệt, Phỏng vấn hoặc Không đạt.
+2. Tìm việc bằng keyword, địa điểm, loại hình.
+3. Upload CV PDF.
+4. Kiểm tra CV chuyển trạng thái từ `pending` sang `processing`, rồi `completed`.
+5. Ứng tuyển vào một tin tuyển dụng.
+6. Xem lại trạng thái ứng tuyển.
 
-## Luồng sử dụng cho nhà tuyển dụng
+### Test Luồng Nhà Tuyển Dụng
 
 1. Đăng nhập bằng tài khoản nhà tuyển dụng.
 2. Đăng tin tuyển dụng mới.
-3. Vào danh sách hồ sơ ứng tuyển.
-4. Click biểu tượng xem để mở CV ứng viên.
-5. Dùng nút Tải CV nếu muốn tải file gốc.
-6. Cập nhật trạng thái ứng viên. Trạng thái này sẽ được lưu vào database và hiển thị lại bên ứng viên.
-7. Tìm kiếm ứng viên theo tên, kỹ năng hoặc nội dung CV.
+3. Cập nhật tin tuyển dụng.
+4. Tìm kiếm CV ứng viên theo keyword.
+5. Mở/xem CV PDF.
+6. Cập nhật trạng thái ứng viên.
 
-## Luồng sử dụng cho admin
+### Test Luồng Admin
 
 1. Đăng nhập bằng tài khoản admin.
-2. Theo dõi dashboard tổng quan.
-3. Quản lý người dùng, tin tuyển dụng, tài liệu và báo cáo hệ thống.
+2. Kiểm tra dashboard.
+3. Kiểm tra danh sách người dùng, jobs, CV.
+4. Kiểm tra Search Analytics.
+5. Kiểm tra Background Jobs.
 
-## Pipeline trích xuất và tìm kiếm CV/JD
+### Test Meilisearch Và MySQL Fallback
 
-Khi ứng viên upload CV:
-
-1. Backend nhận file PDF.
-2. File được upload lên Cloudinary dạng `raw`.
-3. Bản ghi tài liệu được lưu trong bảng `documents` với trạng thái `pending`.
-4. Background worker tự động lấy tài liệu đang chờ xử lý.
-5. Worker tải PDF từ Cloudinary, trích xuất text bằng `pdf-parse`.
-6. Nội dung text được lưu vào cột `extracted_text`.
-7. Tài liệu được index vào Meilisearch nếu có cấu hình.
-8. Nếu không có Meilisearch, hệ thống tìm kiếm bằng MySQL FULLTEXT.
-
-JD được index khi nhà tuyển dụng tạo hoặc cập nhật tin tuyển dụng.
-
-## API tìm kiếm quan trọng
+Khi `MEILI_HOST` được cấu hình, `/api/search` dùng Meilisearch.
 
 ```http
 GET /api/search?q=node&type=all
-GET /api/search?q=react&type=cv
-GET /api/search?q=backend&type=jd
-POST /api/search/reindex
-GET /api/documents/:id/view
 ```
 
-Response tìm kiếm có `latencyMs` để đánh giá độ trễ full-text search.
+Response có:
 
-## Bật Meilisearch tùy chọn
+```json
+{
+  "engine": "meilisearch",
+  "latencyMs": 12
+}
+```
 
-Chạy Meilisearch bằng Docker:
+Nếu tắt Meilisearch hoặc bỏ `MEILI_HOST`, hệ thống fallback sang MySQL FULLTEXT:
+
+```json
+{
+  "engine": "mysql-fallback",
+  "latencyMs": 20
+}
+```
+
+## Benchmark Hiệu Năng
+
+Script benchmark vừa seed dữ liệu lớn, vừa đo latency các API chính.
 
 ```powershell
-docker run --rm -p 7700:7700 getmeili/meilisearch:v1.7
+cd backend
+npm run benchmark:search
 ```
 
-Cập nhật `backend/.env`:
+Biến môi trường:
 
 ```env
-MEILI_HOST=http://127.0.0.1:7700
-MEILI_API_KEY=
-MEILI_INDEX=smart_job_portal
+BENCHMARK_BASE_URL=http://localhost:5000
+BENCHMARK_JOB_ROWS=5000
+BENCHMARK_DOC_ROWS=2000
+BENCHMARK_BATCH_SIZE=250
 ```
 
-Khởi động lại backend. Nếu Meilisearch không khả dụng, hệ thống vẫn chạy bằng MySQL fallback.
+Script sẽ đo:
 
-## Checklist test như người dùng cuối
+- Full-text CV/JD search: `/api/search`.
+- Filter việc làm dữ liệu lớn: `/api/jobs`.
+- Search/filter ứng viên: `/api/candidates/search`.
 
-- Đăng nhập được bằng 3 vai trò: Admin, Nhà tuyển dụng, Ứng viên.
-- Ứng viên tìm việc bằng từ khóa, địa điểm và loại hình.
-- Ứng viên upload được PDF, không upload được file khác PDF.
-- CV upload xong được worker xử lý và hiện trạng thái hoàn tất.
-- Nhà tuyển dụng mở được CV thật của ứng viên.
-- Nhà tuyển dụng đổi trạng thái ứng viên, reload vẫn giữ trạng thái mới.
-- Ứng viên thấy trạng thái mới sau khi nhà tuyển dụng cập nhật.
-- Search CV/JD trả kết quả đúng với nội dung đã trích xuất.
-- Admin xem được dữ liệu quản trị.
+Kết quả benchmark in ra JSON, dùng để đưa vào báo cáo phần:
 
-## Đánh giá hiệu năng
+- Full-text search latency.
+- Thời gian phản hồi khi filter dữ liệu lớn.
+- Search engine đang dùng: `meilisearch` hoặc `mysql-fallback`.
 
-Các tiêu chí chính:
+## Pipeline Upload Và Search
 
-- Full-text search latency: xem `latencyMs` trong response `/api/search`.
-- Thời gian phản hồi khi lọc dữ liệu lớn: test danh sách việc làm và danh sách ứng viên với nhiều bản ghi.
-- Thời gian xử lý CV: theo dõi log worker từ `pending` đến `completed`.
-
-## Lỗi thường gặp
-
-### Frontend báo `Failed to fetch`
-
-- Kiểm tra backend đã chạy ở `http://localhost:5000`.
-- Kiểm tra `apiBaseUrl` trong `localStorage`.
-- Refresh mạnh trình duyệt bằng `Ctrl + F5`.
-
-### CV không mở được
-
-- Chỉ dùng file PDF.
-- Upload CV mới sau khi đã cấu hình đúng Cloudinary.
-- Dùng endpoint xem file qua backend: `/api/documents/:id/view`.
-
-### Tiếng Việt bị lỗi font
-
-- Đảm bảo database dùng `utf8mb4`.
-- Import lại `database/db.sql` với charset UTF-8.
-- Khởi động lại backend sau khi chỉnh database.
-
-### Trạng thái ứng tuyển bị quay lại sau khi reload
-
-- Kiểm tra backend đang chạy bản mới nhất.
-- Đổi trạng thái từ màn hình nhà tuyển dụng rồi reload lại trang.
-- Kiểm tra API `PATCH /api/applications/:id/status` trả về thành công.
-
-### Search không ra kết quả
-
-- Kiểm tra CV đã được worker xử lý sang trạng thái `completed`.
-- Thử gọi `POST /api/search/reindex`.
-- Nếu chưa bật Meilisearch, đảm bảo database đã có FULLTEXT index từ `database/db.sql`.
-
-## Cấu trúc thư mục
+Luồng upload CV:
 
 ```text
-backend/
-  src/
-    controllers/
-    routes/
-    services/
-    config/
-frontend/
-  components/
-  css/
-  js/
-  page/
-database/
-  db.sql
+Frontend upload PDF
+-> Backend nhận file
+-> Cloudinary lưu PDF dạng raw
+-> MySQL lưu document status = pending
+-> BullMQ enqueue job
+-> Redis lưu queue state
+-> Worker tải PDF
+-> pdf-parse trích xuất text
+-> MySQL lưu extracted_text, status = completed
+-> Meilisearch index document
 ```
 
-## Lệnh chạy nhanh
+Luồng search:
+
+```text
+Request /api/search
+-> Meilisearch nếu bật
+-> MySQL FULLTEXT MATCH ... AGAINST nếu Meilisearch lỗi hoặc chưa cấu hình
+-> Trả items + latencyMs
+-> Ghi performance_logs
+```
+
+## Deploy
+
+### 1. Chuẩn Bị Production
+
+- Tạo MySQL production.
+- Tạo Redis production.
+- Tạo Meilisearch production.
+- Tạo Cloudinary account.
+- Tạo file `.env` production.
+- Import `database/db.sql`.
+- Không deploy file `.env` thật lên Git.
+
+### 2. Deploy Backend
+
+Backend cần chạy Node.js service:
+
+```powershell
+cd backend
+npm install --omit=dev
+npm start
+```
+
+Production process nên dùng PM2 hoặc service manager:
+
+```powershell
+npm install -g pm2
+pm2 start src/server.js --name smart-job-backend
+pm2 save
+```
+
+Các biến production quan trọng:
+
+```env
+NODE_ENV=production
+PORT=5000
+DB_HOST=...
+DB_USER=...
+DB_PASSWORD=...
+DB_NAME=job_portal
+REDIS_HOST=...
+MEILI_HOST=...
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+```
+
+### 3. Deploy Frontend
+
+Frontend là static site, có thể deploy lên Nginx, Netlify, Vercel hoặc bất kỳ static hosting nào.
+
+Nếu dùng Nginx, trỏ root tới thư mục `frontend`:
+
+```nginx
+server {
+  listen 80;
+  server_name your-domain.com;
+
+  root /var/www/smart-job-portal/frontend;
+  index index.html;
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+}
+```
+
+Cấu hình frontend gọi backend bằng:
+
+```js
+localStorage.setItem('apiBaseUrl', 'https://api.your-domain.com/api');
+```
+
+Hoặc chỉnh mặc định trong `frontend/js/api.js` nếu muốn cố định URL production.
+
+### 4. Reverse Proxy Backend
+
+Ví dụ Nginx proxy backend:
+
+```nginx
+server {
+  listen 80;
+  server_name api.your-domain.com;
+
+  location / {
+    proxy_pass http://127.0.0.1:5000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+### 5. Checklist Sau Deploy
+
+- API `/` trả message thành công.
+- Frontend gọi được backend production.
+- Đăng nhập được 3 vai trò.
+- Upload PDF thành công.
+- Worker xử lý CV sang `completed`.
+- Search trả kết quả và có `latencyMs`.
+- Admin Search Analytics có dữ liệu.
+- Benchmark chạy được trên môi trường demo.
+
+## Lỗi Thường Gặp
+
+### Frontend Báo `Failed to fetch`
+
+- Kiểm tra backend đang chạy.
+- Kiểm tra CORS.
+- Kiểm tra `localStorage.apiBaseUrl`.
+- Kiểm tra URL có đúng `/api`.
+
+### CV Không Chuyển Sang `completed`
+
+- Kiểm tra Redis đang chạy.
+- Kiểm tra backend log có dòng `BullMQ document worker started`.
+- Kiểm tra Cloudinary URL có tải được không.
+- Kiểm tra file đúng PDF và không vượt `CV_PDF_MAX_BYTES`.
+
+### Search Không Có Kết Quả
+
+- Kiểm tra CV đã `completed`.
+- Gọi:
+
+```http
+POST /api/search/reindex
+```
+
+- Nếu không bật Meilisearch, kiểm tra FULLTEXT index trong `database/db.sql`.
+
+### Database Import Lỗi
+
+- Dùng MySQL 8.
+- Đảm bảo file `database/db.sql` là UTF-8.
+- Nếu dùng Docker volume cũ, xóa volume hoặc import lại thủ công.
+
+## Lệnh Chạy Nhanh
 
 Terminal 1:
+
+```powershell
+cd backend
+docker compose up -d
+```
+
+Terminal 2:
 
 ```powershell
 cd backend
 npm start
 ```
 
-Terminal 2:
+Terminal 3:
 
 ```powershell
 cd frontend
 python -m http.server 5500
 ```
 
-Sau đó mở:
+Mở:
 
 ```text
 http://localhost:5500/

@@ -1,8 +1,35 @@
 const db = require('../config/db');
+const { documentQueue, DOCUMENT_QUEUE_NAME } = require('../services/documentQueue');
+
 
 function nowIso() {
   return new Date().toISOString();
 }
+
+async function formatBullJob(job) {
+  const state = await job.getState();
+
+  return {
+    id: job.id,
+    name: job.name,
+    queueName: DOCUMENT_QUEUE_NAME,
+    status: state,
+    state,
+    progress: job.progress,
+    attempts: job.attemptsMade,
+    maxAttempts: job.opts?.attempts || 1,
+    createdAt: job.timestamp ? new Date(job.timestamp).toISOString() : null,
+    startedAt: job.processedOn ? new Date(job.processedOn).toISOString() : null,
+    finishedAt: job.finishedOn ? new Date(job.finishedOn).toISOString() : null,
+    duration: job.finishedOn && job.processedOn ? job.finishedOn - job.processedOn : null,
+    payload: job.data,
+    result: job.returnvalue,
+    error: job.failedReason || '',
+    logs: [],
+    retryHistory: []
+  };
+}
+
 
 exports.getMe = async (req, res) => {
   try {
@@ -263,12 +290,139 @@ exports.getSettings = async (req, res) => {
 };
 
 exports.getBackgroundJobs = async (req, res) => {
-  res.json({ total: 0, items: [], jobs: [], data: [], queue: { status: 'idle' } });
+  try {
+    const counts = await documentQueue.getJobCounts(
+      'waiting',
+      'active',
+      'completed',
+      'failed',
+      'delayed',
+      'paused'
+    );
+
+    const jobs = await documentQueue.getJobs(
+      ['waiting', 'active', 'completed', 'failed', 'delayed'],
+      0,
+      99,
+      false
+    );
+
+    const items = await Promise.all(jobs.map(formatBullJob));
+
+    res.json({
+      total: items.length,
+      items,
+      jobs: items,
+      data: items,
+      stats: {
+        totalJobs:
+          Number(counts.waiting || 0) +
+          Number(counts.active || 0) +
+          Number(counts.completed || 0) +
+          Number(counts.failed || 0) +
+          Number(counts.delayed || 0),
+        pendingJobs: counts.waiting || 0,
+        runningJobs: counts.active || 0,
+        completedJobs: counts.completed || 0,
+        failedJobs: counts.failed || 0,
+        retryJobs: counts.delayed || 0
+      },
+      queue: {
+        name: DOCUMENT_QUEUE_NAME,
+        waiting: counts.waiting || 0,
+        active: counts.active || 0,
+        completed: counts.completed || 0,
+        failed: counts.failed || 0,
+        delayed: counts.delayed || 0,
+        retry: counts.delayed || 0,
+        paused: counts.paused || 0,
+        status: counts.paused ? 'paused' : 'running',
+        workerStatus: counts.active > 0 ? 'processing' : 'idle',
+        retrySystem: 'enabled'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Lỗi đọc trạng thái background jobs',
+      error: error.message
+    });
+  }
 };
 
+
 exports.getSearchAnalytics = async (req, res) => {
-  res.json({ total: 0, items: [], data: [], latency: [], filters: [] });
+  try {
+    const [items] = await db.query(
+      `
+      SELECT
+        id,
+        event_type AS eventType,
+        engine,
+        query_text AS queryText,
+        filters,
+        result_count AS resultCount,
+        latency_ms AS latencyMs,
+        user_id AS userId,
+        created_at AS createdAt
+      FROM performance_logs
+      ORDER BY created_at DESC
+      LIMIT 100
+      `
+    );
+
+    const [[summary]] = await db.query(
+      `
+      SELECT
+        COUNT(*) AS total,
+        ROUND(AVG(latency_ms), 2) AS avgLatencyMs,
+        MAX(latency_ms) AS maxLatencyMs,
+        MIN(latency_ms) AS minLatencyMs
+      FROM performance_logs
+      WHERE event_type IN ('search', 'filter_jobs', 'filter_candidates')
+      `
+    );
+
+    const [byEventType] = await db.query(
+      `
+      SELECT
+        event_type AS eventType,
+        COUNT(*) AS total,
+        ROUND(AVG(latency_ms), 2) AS avgLatencyMs
+      FROM performance_logs
+      GROUP BY event_type
+      ORDER BY total DESC
+      `
+    );
+
+    const [latency] = await db.query(
+      `
+      SELECT
+        DATE_FORMAT(MIN(created_at), '%H:%i') AS label,
+        ROUND(AVG(latency_ms), 2) AS value
+      FROM performance_logs
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+      GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d %H:%i')
+      ORDER BY MIN(created_at)
+      LIMIT 60
+      `
+    );
+
+    res.json({
+      total: summary.total,
+      summary,
+      items,
+      data: items,
+      latency,
+      filters: byEventType
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Lỗi lấy search analytics',
+      error: error.message
+    });
+  }
 };
+
 
 exports.getAllCategories = async (req, res) => {
   try {
@@ -316,5 +470,95 @@ exports.deleteCategory = async (req, res) => {
     res.json({ success: true, message: 'Đã xóa danh mục' });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi xóa danh mục', error: error.message });
+  }
+};
+
+exports.getBackgroundJobById = async (req, res) => {
+  try {
+    const job = await documentQueue.getJob(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ message: 'Không tìm thấy background job' });
+    }
+
+    const detail = await formatBullJob(job);
+
+    res.json({
+      job: detail,
+      detail,
+      ...detail
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Lỗi lấy chi tiết background job',
+      error: error.message
+    });
+  }
+};
+
+exports.retryBackgroundJob = async (req, res) => {
+  try {
+    const job = await documentQueue.getJob(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ message: 'Không tìm thấy background job' });
+    }
+
+    await job.retry();
+
+    res.json({
+      success: true,
+      message: `Đã retry job #${job.id}`
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Không retry được background job',
+      error: error.message
+    });
+  }
+};
+
+exports.deleteBackgroundJob = async (req, res) => {
+  try {
+    const job = await documentQueue.getJob(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ message: 'Không tìm thấy background job' });
+    }
+
+    await job.remove();
+
+    res.json({
+      success: true,
+      message: `Đã xóa job #${req.params.id}`
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Không xóa được background job',
+      error: error.message
+    });
+  }
+};
+
+exports.controlBackgroundQueue = async (req, res) => {
+  try {
+    const action = req.params.action;
+
+    if (action === 'pause') {
+      await documentQueue.pause();
+      return res.json({ success: true, status: 'paused' });
+    }
+
+    if (action === 'resume') {
+      await documentQueue.resume();
+      return res.json({ success: true, status: 'running' });
+    }
+
+    return res.status(400).json({ message: 'Action không hợp lệ' });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Không điều khiển được queue',
+      error: error.message
+    });
   }
 };

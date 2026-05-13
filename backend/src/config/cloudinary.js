@@ -3,6 +3,8 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 require('dotenv').config();
 
+const CV_PDF_MAX_BYTES = Number(process.env.CV_PDF_MAX_BYTES || 25 * 1024 * 1024);
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -39,7 +41,7 @@ const upload = multer({
 
 const pdfUpload = multer({
   storage: pdfStorage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: CV_PDF_MAX_BYTES },
   fileFilter: (req, file, cb) => {
     const isPdf = file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
     if (!isPdf) {
@@ -51,4 +53,4 @@ const pdfUpload = multer({
   }
 });
 
-module.exports = { cloudinary, upload, pdfUpload };
+module.exports = { cloudinary, upload, pdfUpload, CV_PDF_MAX_BYTES };

@@ -210,7 +210,6 @@ async function searchWithMeili(options = {}) {
 
 async function searchWithMySql(options = {}) {
   const q = normalizeText(options.q);
-  const like = `%${q}%`;
   const type = options.type || 'all';
   const page = Math.max(Number(options.page || 1), 1);
   const limit = Math.min(Math.max(Number(options.limit || 10), 1), 100);
@@ -219,21 +218,25 @@ async function searchWithMySql(options = {}) {
 
   if (type === 'all' || type === 'cv') {
     const where = ['d.deleted_at IS NULL', 'd.doc_type = "cv"'];
-    const params = [];
+    const selectParams = [];
+    const whereParams = [];
+    const relevanceExpr = 'MATCH(d.file_name, d.extracted_text) AGAINST (? IN NATURAL LANGUAGE MODE)';
+    const relevanceSelect = q ? `${relevanceExpr} AS relevance` : '0 AS relevance';
     if (q) {
-      where.push('(d.file_name LIKE ? OR d.extracted_text LIKE ? OR u.full_name LIKE ? OR u.email LIKE ?)');
-      params.push(like, like, like, like);
+      selectParams.push(q);
+      where.push(`${relevanceExpr} > 0`);
+      whereParams.push(q);
     }
     const [rows] = await db.query(
       `
-      SELECT d.*, u.full_name AS candidate_name, u.email
+      SELECT d.*, u.full_name AS candidate_name, u.email, ${relevanceSelect}
       FROM documents d
       JOIN users u ON u.id = d.user_id
       WHERE ${where.join(' AND ')}
-      ORDER BY d.updated_at DESC
+      ORDER BY relevance DESC, d.updated_at DESC
       LIMIT ? OFFSET ?
       `,
-      [...params, limit, offset]
+      [...selectParams, ...whereParams, limit, offset]
     );
     rows.forEach(row => items.push({
       id: row.id,
@@ -247,7 +250,7 @@ async function searchWithMySql(options = {}) {
       fileName: row.file_name,
       status: row.status,
       summary: clip(row.extracted_text || row.file_name, 360),
-      score: q ? scoreText(row.extracted_text || row.file_name, q) : 70,
+      score: q ? scoreFromRelevance(row.relevance) : 70,
       createdAt: row.created_at,
       updatedAt: row.updated_at
     }));
@@ -255,25 +258,29 @@ async function searchWithMySql(options = {}) {
 
   if (type === 'all' || type === 'jd' || type === 'job') {
     const where = ['j.deleted_at IS NULL'];
-    const params = [];
+    const selectParams = [];
+    const whereParams = [];
+    const relevanceExpr = 'MATCH(j.title, j.description, j.requirements, j.benefits, j.location) AGAINST (? IN NATURAL LANGUAGE MODE)';
+    const relevanceSelect = q ? `${relevanceExpr} AS relevance` : '0 AS relevance';
     if (q) {
-      where.push('(j.title LIKE ? OR j.description LIKE ? OR j.requirements LIKE ? OR j.benefits LIKE ? OR j.location LIKE ?)');
-      params.push(like, like, like, like, like);
+      selectParams.push(q);
+      where.push(`${relevanceExpr} > 0`);
+      whereParams.push(q);
     }
     if (options.location) {
       where.push('j.location LIKE ?');
-      params.push(`%${options.location}%`);
+      whereParams.push(`%${options.location}%`);
     }
     const [rows] = await db.query(
       `
-      SELECT j.*, u.full_name AS employer_name
+      SELECT j.*, u.full_name AS employer_name, ${relevanceSelect}
       FROM jobs j
       LEFT JOIN users u ON u.id = j.employer_id
       WHERE ${where.join(' AND ')}
-      ORDER BY j.posted_at DESC
+      ORDER BY relevance DESC, j.posted_at DESC
       LIMIT ? OFFSET ?
       `,
-      [...params, limit, offset]
+      [...selectParams, ...whereParams, limit, offset]
     );
     rows.forEach(row => {
       const content = [row.description, row.requirements, row.benefits].filter(Boolean).join('\n');
@@ -286,7 +293,7 @@ async function searchWithMySql(options = {}) {
         location: row.location,
         status: row.status,
         summary: clip(content || row.title, 360),
-        score: q ? scoreText(`${row.title}\n${content}`, q) : 70,
+        score: q ? scoreFromRelevance(row.relevance) : 70,
         createdAt: row.posted_at,
         updatedAt: row.updated_at
       });
@@ -304,12 +311,10 @@ async function searchWithMySql(options = {}) {
   };
 }
 
-function scoreText(text = '', keyword = '') {
-  if (!keyword) return 70;
-  const haystack = normalizeText(text).toLowerCase();
-  const words = normalizeText(keyword).toLowerCase().split(/\s+/).filter(Boolean);
-  const hits = words.reduce((sum, word) => sum + (haystack.includes(word) ? 1 : 0), 0);
-  return Math.min(100, Math.round((hits / Math.max(words.length, 1)) * 100));
+function scoreFromRelevance(relevance = 0) {
+  const score = Number(relevance || 0);
+  if (!Number.isFinite(score) || score <= 0) return 0;
+  return Math.min(100, Math.max(1, Math.round(score * 20)));
 }
 
 async function search(options = {}) {

@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const searchService = require('../services/searchService');
+const performanceLogService = require('../services/performanceLogService');
 
 function fixMojibake(value) {
   if (typeof value !== 'string') return value;
@@ -101,7 +102,8 @@ function parseSalary(payload = {}) {
 }
 
 exports.getJobs = async (req, res) => {
-  try {
+  try { 
+    const startedAt = Date.now();
     const page = Math.max(Number(req.query.page || 1), 1);
     const limit = Math.min(Math.max(Number(req.query.limit || 50), 1), 100);
     const offset = (page - 1) * limit;
@@ -162,10 +164,30 @@ exports.getJobs = async (req, res) => {
     );
 
     const items = rows.map(toJobResponse);
+
+    const latencyMs = Date.now() - startedAt;
+
+    await performanceLogService.logPerformance({
+      eventType: 'filter_jobs',
+      engine: 'mysql',
+      queryText: req.query.q || req.query.keyword || req.query.search || '',
+      filters: {
+        location: req.query.location || '',
+        category_id: req.query.category_id || '',
+        job_type: req.query.job_type || req.query.jobType || req.query.type || '',
+        page,
+        limit
+      },
+      resultCount: countRow.total,
+      latencyMs,
+      userId: req.user?.id || null
+    });
+ 
     res.json({
       total: countRow.total,
       page,
       limit,
+      latencyMs,
       items,
       jobs: items,
       data: items,

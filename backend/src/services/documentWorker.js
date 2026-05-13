@@ -5,25 +5,50 @@ const { PDFParse } = require('pdf-parse');
 const db = require('../config/db');
 const searchService = require('./searchService');
 
-let isRunning = false;
-let timer = null;
+const MAX_PDF_BYTES = Number(process.env.CV_PDF_MAX_BYTES || 25 * 1024 * 1024);
+const DOWNLOAD_TIMEOUT_MS = Number(process.env.PDF_DOWNLOAD_TIMEOUT_MS || 30000);
+const MAX_EXTRACTED_TEXT_CHARS = Number(process.env.PDF_MAX_EXTRACTED_TEXT_CHARS || 5_000_000);
 
-function downloadBuffer(url) {
+function downloadBuffer(url, redirectCount = 0) {
   return new Promise((resolve, reject) => {
+    if (redirectCount > 5) return reject(new Error('Download failed: too many redirects'));
+
     const client = String(url).startsWith('https:') ? https : http;
-    client.get(url, (res) => {
+    const req = client.get(url, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return downloadBuffer(res.headers.location).then(resolve, reject);
+        res.resume();
+        return downloadBuffer(res.headers.location, redirectCount + 1).then(resolve, reject);
       }
       if (res.statusCode !== 200) {
         reject(new Error(`Download failed with status ${res.statusCode}`));
         res.resume();
         return;
       }
+
+      const contentLength = Number(res.headers['content-length'] || 0);
+      if (contentLength > MAX_PDF_BYTES) {
+        reject(new Error(`PDF is too large (${contentLength} bytes). Max allowed is ${MAX_PDF_BYTES} bytes.`));
+        res.destroy();
+        return;
+      }
+
       const chunks = [];
-      res.on('data', chunk => chunks.push(chunk));
+      let receivedBytes = 0;
+      res.on('data', chunk => {
+        receivedBytes += chunk.length;
+        if (receivedBytes > MAX_PDF_BYTES) {
+          reject(new Error(`PDF is too large (${receivedBytes} bytes). Max allowed is ${MAX_PDF_BYTES} bytes.`));
+          res.destroy();
+          return;
+        }
+        chunks.push(chunk);
+      });
       res.on('end', () => resolve(Buffer.concat(chunks)));
     }).on('error', reject);
+
+    req.setTimeout(DOWNLOAD_TIMEOUT_MS, () => {
+      req.destroy(new Error(`PDF download timed out after ${DOWNLOAD_TIMEOUT_MS}ms`));
+    });
   });
 }
 
@@ -31,7 +56,11 @@ async function extractPdfText(buffer) {
   const parser = new PDFParse({ data: buffer });
   const result = await parser.getText();
   await parser.destroy();
-  return String(result.text || '').replace(/\s+/g, ' ').trim();
+  const text = String(result.text || '').replace(/\s+/g, ' ').trim();
+  if (text.length > MAX_EXTRACTED_TEXT_CHARS) {
+    return text.slice(0, MAX_EXTRACTED_TEXT_CHARS);
+  }
+  return text;
 }
 
 async function processDocument(documentId) {
@@ -78,54 +107,50 @@ async function processDocument(documentId) {
   }
 }
 
-async function processPendingBatch(limit = 3) {
-  if (isRunning) return;
-  isRunning = true;
-  try {
-    const [rows] = await db.query(
-      `
-      SELECT id
-      FROM documents
-      WHERE deleted_at IS NULL
-        AND doc_type = 'cv'
-        AND status IN ('pending', 'failed')
-        AND retry_count < 3
-      ORDER BY created_at ASC
-      LIMIT ?
-      `,
-      [limit]
-    );
 
-    for (const row of rows) {
-      try {
-        await processDocument(row.id);
-      } catch (err) {
-        console.error(`Document worker failed for #${row.id}:`, err.message);
-      }
-    }
-  } finally {
-    isRunning = false;
-  }
-}
 
-function enqueueDocument(documentId) {
-  setTimeout(() => processDocument(documentId).catch(err => {
-    console.error(`Document worker failed for #${documentId}:`, err.message);
-  }), 0);
-}
+const { Worker } = require('bullmq');
+const { redisConnection } = require('../config/queue');
+const { DOCUMENT_QUEUE_NAME } = require('./documentQueue');
+
+let worker = null;
 
 function start() {
-  if (timer) return;
-  timer = setInterval(() => processPendingBatch().catch(err => {
-    console.error('Document worker batch error:', err.message);
-  }), Number(process.env.WORKER_INTERVAL_MS || 15000));
-  processPendingBatch().catch(err => console.error('Document worker initial error:', err.message));
-  console.log('Document extraction worker started.');
+  if (worker) return worker;
+
+  worker = new Worker(
+    DOCUMENT_QUEUE_NAME,
+    async (job) => {
+      const { documentId } = job.data;
+
+      await job.updateProgress(10);
+
+      const result = await processDocument(documentId);
+
+      await job.updateProgress(100);
+
+      return result;
+    },
+    {
+      connection: redisConnection,
+      concurrency: Number(process.env.DOCUMENT_WORKER_CONCURRENCY || 3)
+    }
+  );
+
+  worker.on('completed', (job, result) => {
+    console.log(`Document job completed #${job.id}:`, result);
+  });
+
+  worker.on('failed', (job, error) => {
+    console.error(`Document job failed #${job?.id}:`, error.message);
+  });
+
+  console.log(`BullMQ document worker started: ${DOCUMENT_QUEUE_NAME}`);
+
+  return worker;
 }
 
 module.exports = {
   start,
-  enqueueDocument,
-  processDocument,
-  processPendingBatch
+  processDocument
 };

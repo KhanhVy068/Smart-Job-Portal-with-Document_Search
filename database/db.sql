@@ -4,6 +4,12 @@
 -- DATABASE SCHEMA FOR MySQL 
 -- ==========================================
 
+CREATE DATABASE IF NOT EXISTS job_portal
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE job_portal;
+
 -- ==========================================
 -- 1. Bảng JobCategories: Danh mục ngành nghề (có phân cấp)
 -- ==========================================
@@ -187,7 +193,27 @@ CREATE TABLE IF NOT EXISTS saved_searches (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 8. KHỞI TẠO FOREIGN KEY (ALTER TABLE)
+-- 8. Bảng PerformanceLogs: Lưu latency search/filter để đánh giá hiệu năng
+-- ==========================================
+CREATE TABLE IF NOT EXISTS performance_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    event_type ENUM('search', 'filter_jobs', 'filter_candidates', 'benchmark') NOT NULL,
+    engine VARCHAR(50) NULL,
+    query_text VARCHAR(500) NULL,
+    filters JSON NULL,
+    result_count INT DEFAULT 0,
+    latency_ms INT NOT NULL,
+    user_id INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_perf_event_created (event_type, created_at),
+    INDEX idx_perf_engine_created (engine, created_at),
+    INDEX idx_perf_latency (latency_ms),
+    INDEX idx_perf_user_created (user_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ==========================================
+-- 9. KHỞI TẠO FOREIGN KEY (ALTER TABLE)
 -- ==========================================
 
 ALTER TABLE job_categories 
@@ -230,8 +256,12 @@ ALTER TABLE saved_searches
 ADD CONSTRAINT fk_saved_user 
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE performance_logs
+ADD CONSTRAINT fk_perf_user
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
 -- ==========================================
--- 9. INDEX TỐI ƯU TRUY VẤN
+-- 10. INDEX TỐI ƯU TRUY VẤN
 -- ==========================================
 
 CREATE INDEX idx_jobs_category_status ON jobs(category_id, status);
@@ -245,7 +275,7 @@ CREATE FULLTEXT INDEX ft_jobs_text ON jobs(title, description, requirements, ben
 CREATE FULLTEXT INDEX ft_documents_text ON documents(file_name, extracted_text);
 
 -- ==========================================
--- 10. TRIGGER: Tự động đóng job khi hết hạn
+-- 11. TRIGGER: Tự động đóng job khi hết hạn
 -- ⚠️ LƯU Ý: Chỉ dùng trong đồ án, production sẽ thay bằng background job (cron/BullMQ)
 -- ==========================================
 DELIMITER $$
@@ -271,7 +301,7 @@ END$$
 DELIMITER ;
 
 -- ==========================================
--- 11. DỮ LIỆU MẪU (DUMMY DATA)
+-- 12. DỮ LIỆU MẪU (DUMMY DATA)
 -- ==========================================
 
 INSERT INTO job_categories (id, name, slug, parent_id) VALUES 

@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const searchService = require('../services/searchService');
+const performanceLogService = require('../services/performanceLogService');
 
 function toCandidate(row = {}) {
   return {
@@ -79,6 +80,21 @@ exports.searchCandidates = async (req, res) => {
       matchScore: item.score || 0,
       skills: []
     }));
+
+    await performanceLogService.logPerformance({
+      eventType: 'filter_candidates',
+      engine: result.engine,
+      queryText: req.query.q || req.query.keyword || '',
+      filters: {
+        location: req.query.location || '',
+        page: req.query.page || 1,
+        limit: req.query.limit || 10
+      },
+      resultCount: result.total || items.length,
+      latencyMs: result.latencyMs,
+      userId: req.user?.id || null
+    });
+
     res.json({ ...result, items, candidates: items, data: items });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi tìm ứng viên', error: error.message });
