@@ -47,7 +47,7 @@ function setLoadingState() {
   if (jobList) {
     jobList.innerHTML = `
       <tr>
-        <td class="px-6 py-5 text-sm font-semibold text-slate-400" colspan="5">Dang tai tin tuyen dung...</td>
+        <td class="px-6 py-5 text-sm font-semibold text-slate-400" colspan="5">Đang tải tin tuyển dụng...</td>
       </tr>
     `;
   }
@@ -300,9 +300,9 @@ function normalizeJobs(payload) {
 
     return {
       id: job.id || job._id,
-      title: job.title || job.name || 'Tin tuyen dung',
-      type: job.type || job.employmentType || 'Chua cap nhat',
-      location: job.location || job.city || 'Chua cap nhat',
+      title: job.title || job.name || 'Tin tuyển dụng',
+      type: job.type || job.employmentType || 'Chưa cập nhật',
+      location: job.location || job.city || 'Chưa cập nhật',
       createdAt: formatDate(job.createdAt || job.publishedAt),
       status: normalizedStatus,
       statusLabel: getStatusLabel(normalizedStatus),
@@ -340,9 +340,9 @@ function getStatusClass(status) {
 
 // Nhan trang thai
 function getStatusLabel(status) {
-  if (status === 'active') return 'Dang tuyen';
-  if (status === 'closed') return 'Da dong';
-  return 'Nhap';
+  if (status === 'active') return 'Đang tuyển';
+  if (status === 'closed') return 'Đã đóng';
+  return 'Nháp';
 }
 
 // Hien thi loi
@@ -372,7 +372,7 @@ function formatNumber(value) {
 
 // Dinh dang ngay
 function formatDate(value) {
-  if (!value) return 'Chua cap nhat';
+  if (!value) return 'Chưa cập nhật';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleDateString('vi-VN');

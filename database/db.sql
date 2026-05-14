@@ -1,8 +1,13 @@
 
 -- ==========================================
 -- SMART JOB PORTAL WITH DOCUMENT SEARCH
--- DATABASE SCHEMA FOR MySQL 
+-- DATABASE SCHEMA FOR MySQL
 -- ==========================================
+
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET character_set_client = utf8mb4;
+SET character_set_connection = utf8mb4;
+SET character_set_results = utf8mb4;
 
 CREATE DATABASE IF NOT EXISTS job_portal
 CHARACTER SET utf8mb4
@@ -337,10 +342,13 @@ INSERT INTO job_categories (id, name, slug, parent_id) VALUES
 (3, 'Marketing & Sales', 'marketing', NULL),
 (4, 'Graphic Design', 'graphic-design', NULL);
 
-INSERT INTO users (id, full_name, email, password_hash, role, is_verified) VALUES 
+INSERT INTO users (id, full_name, email, password_hash, role, is_verified) VALUES
 (1, 'Công ty Công nghệ ABC', 'hr@abc.tech', '$2b$10$YourRealHashHere', 'employer', TRUE),
 (2, 'Mai Thi Anh Tuyet', 'tuyet.mai@student.uit.edu.vn', '$2b$10$YourRealHashHere', 'candidate', FALSE),
 (3, 'Quản trị hệ thống', 'admin@smartjob.vn', '$2b$10$YourRealHashHere', 'admin', TRUE);
+
+INSERT INTO employer_profiles (user_id, company_name, website, industry, company_size, address, description, company_email) VALUES
+(1, 'Công ty Công nghệ ABC', 'https://abc.tech', 'Công nghệ thông tin', '50-200 nhân viên', 'Quận 1, TP. Hồ Chí Minh', 'Công ty công nghệ chuyên phát triển phần mềm và giải pháp AI', 'hr@abc.tech');
 
 INSERT INTO jobs (
     id, employer_id, category_id, title, description, location,

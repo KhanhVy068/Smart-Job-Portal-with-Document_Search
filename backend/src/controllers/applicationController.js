@@ -124,13 +124,16 @@ exports.getApplicantsByJob = async (req, res) => {
     const [rows] = await db.query(
       `
       SELECT a.id AS application_id, a.job_id, a.status, a.applied_at, a.updated_at,
-             u.full_name AS candidate_name, u.email AS candidate_email,
+             u.full_name AS candidate_name, u.email AS candidate_email, u.phone AS candidate_phone,
              d.file_url AS cv_link, d.file_name AS cv_name, d.status AS cv_status,
-             j.title AS job_title
+             j.title AS job_title, j.location,
+             COALESCE(ep.company_name, eu.full_name) AS company_name
       FROM applications a
       JOIN users u ON a.candidate_id = u.id
       JOIN documents d ON a.cv_document_id = d.id
       JOIN jobs j ON a.job_id = j.id
+      LEFT JOIN users eu ON j.employer_id = eu.id
+      LEFT JOIN employer_profiles ep ON ep.user_id = j.employer_id
       WHERE ${whereSql}
       ORDER BY a.applied_at DESC
       `,

@@ -57,7 +57,7 @@ function setDashboardLoading() {
   const activities = document.getElementById('recentActivities');
   if (activities) {
     activities.innerHTML = `
-      <div class="p-4 text-sm font-semibold text-slate-400">Dang tai hoat dong gan day...</div>
+      <div class="p-4 text-sm font-semibold text-slate-400">Đang tải hoạt động gần đây...</div>
     `;
   }
 
@@ -65,7 +65,7 @@ function setDashboardLoading() {
   if (recentJobs) {
     recentJobs.innerHTML = `
       <tr>
-        <td class="px-8 py-6 text-sm font-semibold text-slate-400" colspan="5">Dang tai tin tuyen dung...</td>
+        <td class="px-8 py-6 text-sm font-semibold text-slate-400" colspan="5">Đang tải tin tuyển dụng...</td>
       </tr>
     `;
   }
@@ -315,7 +315,7 @@ function buildRecentJobs(jobs) {
       title: job.title || job.name || 'Tin tuyen dung',
       shortName: job.shortName || getShortName(job.title || job.name),
       type: job.type || job.employmentType || 'Toan thoi gian',
-      location: job.location || job.city || 'Chua cap nhat',
+      location: job.location || job.city || 'Chưa cập nhật',
       count: Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.applicationsCount ?? 0),
       createdAt: formatDate(job.createdAt || job.publishedAt),
       status: normalizeJobStatus(job.status),
@@ -376,7 +376,7 @@ function normalizeJobStatus(status = '') {
 function getJobStatusLabel(status = '') {
   const normalized = normalizeJobStatus(status);
   if (normalized === 'active') return 'Dang hien thi';
-  if (normalized === 'closed') return 'Da dong';
+  if (normalized === 'closed') return 'Đã đóng';
   return 'Nhap';
 }
 
@@ -387,7 +387,7 @@ function renderDashboardError(err) {
 
   target.innerHTML = `
     <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-      Khong tai duoc dashboard: ${escapeHtml(err.message || 'Unknown error')}
+      Không tải được dashboard: ${escapeHtml(err.message || 'Unknown error')}
     </div>
   `;
 }
@@ -405,7 +405,7 @@ function formatNumber(value) {
 
 // Định dạng ngày
 function formatDate(value) {
-  if (!value) return 'Chua cap nhat';
+  if (!value) return 'Chưa cập nhật';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleDateString('vi-VN');
@@ -414,7 +414,7 @@ function formatDate(value) {
 // Định dạng thời gian tương đối
 function formatRelativeTime(value) {
   const timestamp = toTime(value);
-  if (!timestamp) return 'Chua cap nhat';
+  if (!timestamp) return 'Chưa cập nhật';
 
   const diffMs = Date.now() - timestamp;
   const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));

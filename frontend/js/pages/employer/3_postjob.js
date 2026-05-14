@@ -46,7 +46,7 @@ async function loadEditingJob(id) {
   }
 
   if (!editingJob) {
-    setMessage('Khong tim thay tin can sua.', 'error');
+    setMessage('Không tìm thấy tin cần sửa.', 'error');
     return;
   }
 
@@ -60,7 +60,7 @@ async function saveJob(status) {
   try {
     isSaving = true;
     setBusy(true);
-    setMessage(status === 'draft' ? 'Dang luu ban nhap...' : 'Dang dang tin...', 'info');
+    setMessage(status === 'draft' ? 'Đang lưu bản nháp...' : 'Đang đăng tin...', 'info');
 
     const payload = collectFormData(status);
     const savedJob = await persistJob(payload);
@@ -69,7 +69,7 @@ async function saveJob(status) {
     clearEditState();
     navigateJobs();
   } catch (err) {
-    setMessage(err.message || 'Khong luu duoc tin tuyen dung.', 'error');
+    setMessage(err.message || 'Không lưu được tin tuyển dụng.', 'error');
   } finally {
     isSaving = false;
     setBusy(false);
@@ -93,10 +93,14 @@ async function persistJob(payload) {
 // Lay du lieu form
 function collectFormData(status) {
   const title = getValue('jobTitle').trim();
-  if (!title) throw new Error('Vui long nhap tieu de cong viec.');
+  if (!title) throw new Error('Vui lòng nhập tiêu đề công việc.');
 
   const now = new Date().toISOString();
   const id = editingJobId || createLocalId();
+
+  const salaryMin = getValue('jobSalaryMin');
+  const salaryMax = getValue('jobSalaryMax');
+  const deadline = getValue('jobDeadline');
 
   return {
     ...(editingJob || {}),
@@ -104,10 +108,15 @@ function collectFormData(status) {
     title,
     position: getValue('jobPosition'),
     type: getValue('jobType'),
+    jobType: getValue('jobType'),
     employmentType: getValue('jobType'),
     category: getValue('jobCategory'),
     specialization: getValue('jobSpecialization'),
     skills: getSkills(),
+    location: getValue('jobLocation') || undefined,
+    deadline: deadline || undefined,
+    salaryMin: salaryMin ? Number(salaryMin) : undefined,
+    salaryMax: salaryMax ? Number(salaryMax) : undefined,
     description: getValue('jobDescription'),
     requirements: getValue('jobRequirements'),
     benefits: getValue('jobBenefits'),
@@ -133,9 +142,13 @@ function toLocalJob(savedJob, fallback) {
 function fillForm(job) {
   setValue('jobTitle', job.title || job.name);
   setValue('jobPosition', job.position);
-  setValue('jobType', job.type || job.employmentType);
+  setValue('jobType', job.type || job.jobType || job.employmentType);
   setValue('jobCategory', job.category);
   setValue('jobSpecialization', job.specialization);
+  setValue('jobLocation', job.location);
+  setValue('jobDeadline', (job.deadline || job.expiry_date || '').slice(0, 10));
+  setValue('jobSalaryMin', job.salaryMin || job.salary_min || '');
+  setValue('jobSalaryMax', job.salaryMax || job.salary_max || '');
   setValue('jobDescription', job.description);
   setValue('jobRequirements', job.requirements);
   setValue('jobBenefits', job.benefits);

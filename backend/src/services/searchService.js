@@ -217,7 +217,7 @@ async function searchWithMySql(options = {}) {
   const items = [];
 
   if (type === 'all' || type === 'cv') {
-    const where = ['d.deleted_at IS NULL', 'd.doc_type = "cv"'];
+    const where = ['d.deleted_at IS NULL', 'd.doc_type = "cv"', 'u.role = "candidate"'];
     const selectParams = [];
     const whereParams = [];
     const relevanceExpr = 'MATCH(d.file_name, d.extracted_text) AGAINST (? IN NATURAL LANGUAGE MODE)';

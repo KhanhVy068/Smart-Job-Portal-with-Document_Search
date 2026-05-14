@@ -14,4 +14,9 @@ const pool = mysql.createPool({
   dateStrings: true
 });
 
+// Ensure every new connection uses utf8mb4 so Vietnamese text is handled correctly.
+pool.pool.on('connection', (conn) => {
+  conn.query("SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'");
+});
+
 module.exports = pool;
