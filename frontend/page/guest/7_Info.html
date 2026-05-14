@@ -1,0 +1,476 @@
+<!doctype html>
+
+<html class="light" lang="vi">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Về chúng tôi | Smart Job Portal</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "inverse-primary": "#b0c6ff",
+                            "on-primary-fixed": "#001945",
+                            primary: "#003178",
+                            "surface-container": "#eceef0",
+                            "primary-fixed": "#d9e2ff",
+                            "on-secondary-fixed-variant": "#005145",
+                            "surface-container-high": "#e6e8ea",
+                            "secondary-fixed-dim": "#44ddc1",
+                            "outline-variant": "#c3c6d4",
+                            "on-secondary": "#ffffff",
+                            "secondary-fixed": "#68fadd",
+                            "on-tertiary-fixed-variant": "#00513d",
+                            "surface-container-highest": "#e0e3e5",
+                            "on-secondary-container": "#007261",
+                            "on-error-container": "#93000a",
+                            "secondary-container": "#68fadd",
+                            "surface-container-lowest": "#ffffff",
+                            "surface-variant": "#e0e3e5",
+                            "tertiary-fixed": "#45fec9",
+                            "tertiary-container": "#005742",
+                            "on-primary-container": "#a1bbff",
+                            "on-tertiary-fixed": "#002117",
+                            "on-surface": "#191c1e",
+                            "tertiary-fixed-dim": "#00e1ae",
+                            "surface-bright": "#f8f9fb",
+                            "on-primary-fixed-variant": "#00429c",
+                            surface: "#f8f9fb",
+                            "on-secondary-fixed": "#00201a",
+                            "primary-fixed-dim": "#b0c6ff",
+                            "surface-tint": "#2b5bb5",
+                            "error-container": "#ffdad6",
+                            "primary-container": "#0d47a1",
+                            "surface-container-low": "#f2f4f6",
+                            "surface-dim": "#d8dadc",
+                            secondary: "#006b5c",
+                            "on-error": "#ffffff",
+                            background: "#f8f9fb",
+                            "inverse-on-surface": "#eff1f3",
+                            outline: "#737783",
+                            tertiary: "#003e2e",
+                            "on-tertiary-container": "#00d6a6",
+                            "on-surface-variant": "#434652",
+                            "on-background": "#191c1e",
+                            "on-primary": "#ffffff",
+                            "on-tertiary": "#ffffff",
+                            "inverse-surface": "#2d3133",
+                            error: "#ba1a1a",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            xl: "0.75rem",
+                            full: "0.75rem",
+                        },
+                        fontFamily: {
+                            headline: ["Manrope"],
+                            body: ["Inter"],
+                            label: ["Inter"],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 400,
+                    "GRAD" 0,
+                    "opsz" 24;
+            }
+            body {
+                font-family: "Inter", sans-serif;
+            }
+            h1,
+            h2,
+            h3,
+            h4 {
+                font-family: "Manrope", sans-serif;
+            }
+            .glass-effect {
+                background: rgba(248, 249, 251, 0.8);
+                backdrop-filter: blur(24px);
+            }
+        </style>
+    </head>
+    <body class="bg-surface text-on-surface">
+        <!-- TopNavBar -->
+        <nav
+            class="fixed top-0 w-full z-50 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none"
+        >
+            <div class="flex justify-between items-center h-20 px-8 max-w-[1440px] mx-auto relative">
+                <a class="flex items-center gap-2" href="1_LandingPage.html">
+                    <img
+                        alt="Smart Job Portal"
+                        class="w-8 h-8 rounded"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMi0Wr0vkQebekh0QTcBsz9X8oQQyLV2rw4mxBjmN_S9q8WZZibJFUryYdIIvNApMSVRkZa6FVn_IMvsoTAD7L5qRpDNWec5nBdq9Yv3SO-BLNvliGL1gkQPgKPtFKGY6aauwweRpUBmttRehQ5Sbz6TU4FdH2k3ZDd9lbHxn_eSPhWlsQzhZEDvXoi60C-EivjN8Vb_n23iZbFgoFOvcxUgXFaPT0N9jRW90zxx_yaL3PXydkIqvPKUGHYXXCkuC8w3LSVWeqyXVm"
+                    />
+                    <span class="text-xl font-bold tracking-tight text-blue-900 dark:text-blue-100 font-manrope"
+                        >Smart Job Portal</span
+                    >
+                </a>
+                <div class="hidden md:flex items-center gap-8 font-inter">
+                    <a
+                        class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+                        href="#"
+                        >Tìm việc làm</a
+                    >
+                    <a
+                        class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+                        href="#"
+                        >Công ty</a
+                    >
+                    <a
+                        class="text-blue-700 dark:text-blue-300 font-semibold border-b-2 border-blue-700 dark:border-blue-300 pb-1"
+                        href="#"
+                        >Về chúng tôi</a
+                    >
+                    <a
+                        class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+                        href="#"
+                        >Liên hệ</a
+                    >
+                </div>
+                <div class="flex items-center gap-4">
+                    <button
+                        class="px-5 py-2.5 text-blue-900 dark:text-blue-400 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95"
+                    >
+                        Đăng nhập
+                    </button>
+                    <button
+                        class="px-6 py-2.5 bg-gradient-to-br from-primary to-primary-container text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all"
+                    >
+                        Đăng ký
+                    </button>
+                </div>
+                <div class="bg-slate-200/50 dark:bg-slate-800/50 h-[1px] w-full absolute bottom-0 left-0"></div>
+            </div>
+        </nav>
+        <main class="pt-20">
+            <!-- Hero Section: Editorial Style -->
+            <section class="relative min-h-[819px] flex items-center px-8 max-w-[1440px] mx-auto overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-12 items-center w-full">
+                    <div class="md:col-span-7 z-10">
+                        <span
+                            class="inline-block text-on-primary-fixed-variant font-label font-semibold tracking-[0.2em] uppercase text-xs mb-4"
+                            >Kỷ Nguyên Tuyển Dụng Mới</span
+                        >
+                        <h1 class="text-5xl md:text-7xl font-extrabold text-primary leading-[1.1] mb-6">
+                            Kiến Trúc Hóa <br />
+                            <span class="text-secondary italic">Sự Nghiệp</span> Công Nghệ
+                        </h1>
+                        <p class="text-lg text-on-surface-variant max-w-xl mb-10 leading-relaxed">
+                            Smart Job Portal không chỉ là một sàn việc làm. Chúng tôi là một hệ sinh thái dữ liệu, sử
+                            dụng thuật toán Elasticsearch và AI để kết nối ứng viên xuất sắc với những cơ hội nghề
+                            nghiệp xứng tầm.
+                        </p>
+                        <div class="flex gap-4">
+                            <button
+                                class="px-8 py-4 bg-gradient-to-br from-primary to-primary-container text-white font-bold rounded-xl shadow-xl hover:scale-[1.02] transition-transform flex items-center gap-2"
+                            >
+                                Xem các vị trí đang tuyển
+                                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="md:col-span-5 relative">
+                        <div
+                            class="aspect-square rounded-full bg-secondary-fixed-dim/20 absolute -top-20 -right-20 blur-3xl"
+                        ></div>
+                        <div class="relative z-10 rounded-xl overflow-hidden shadow-2xl rotate-3 scale-110">
+                            <img
+                                alt="Modern Tech Office"
+                                class="w-full h-[600px] object-cover"
+                                data-alt="professional modern minimalist tech office with floor to ceiling windows showing a city skyline at dusk with blue and orange tones"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0usSTe0iV_6uvcLFlYvy6bmFnLKWN3iSM1aLfwj03PgIRr7MpAG5rNLwwXnm5ouo7w7Lfhv3ofOeH5T_zDCuowqpKwRb8oCYzPoGBJgZTquKYGG71GUonghPQprbr6Z_MV493O15rAZgNi3vv-2KgxM5b_vRdh7f96ro3m9YIGvPTu6w5kcMqm_lshTg94zpMP7kuJpO72Cv_7Nh98yfJpsAH6nAoErs25aF2Quwgz6R1TysKbGU5jVlmU35EO4Un6Mri46R6EAo"
+                            />
+                        </div>
+                        <div
+                            class="absolute -bottom-10 -left-10 z-20 glass-effect p-8 rounded-xl shadow-2xl max-w-xs border border-white/20"
+                        >
+                            <div class="text-4xl font-black text-primary mb-1">98%</div>
+                            <div class="text-sm font-semibold text-on-surface-variant leading-tight">
+                                Độ chính xác trong việc khớp hồ sơ bằng AI
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Mission Section: Tonal Architecture -->
+            <section class="py-24 bg-surface-container-low">
+                <div class="max-w-[1440px] mx-auto px-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                        <div class="space-y-8">
+                            <div>
+                                <h2 class="text-3xl font-bold text-primary mb-4">Sứ Mệnh Của Chúng Tôi</h2>
+                                <p class="text-on-surface-variant text-lg leading-relaxed">
+                                    Chúng tôi tin rằng mỗi dòng code đều mang một mục đích, và mỗi kỹ sư đều xứng đáng
+                                    có một môi trường để tối ưu hóa tiềm năng của mình. Sứ mệnh của Smart Job Portal là
+                                    phá bỏ rào cản thông tin trong ngành IT toàn cầu.
+                                </p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="p-6 bg-surface-container-lowest rounded-xl">
+                                    <span class="material-symbols-outlined text-secondary text-4xl mb-3" data-icon="hub"
+                                        >hub</span
+                                    >
+                                    <h3 class="font-bold text-primary mb-1">Kết Nối</h3>
+                                    <p class="text-sm text-on-surface-variant">
+                                        Xây dựng mạng lưới tri thức thay vì chỉ danh sách hồ sơ.
+                                    </p>
+                                </div>
+                                <div class="p-6 bg-surface-container-lowest rounded-xl">
+                                    <span
+                                        class="material-symbols-outlined text-secondary text-4xl mb-3"
+                                        data-icon="insights"
+                                        >insights</span
+                                    >
+                                    <h3 class="font-bold text-primary mb-1">Tăng Trưởng</h3>
+                                    <p class="text-sm text-on-surface-variant">
+                                        Dùng dữ liệu để định hướng lộ trình thăng tiến bền vững.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <img
+                                alt="Abstract Data Architecture"
+                                class="rounded-xl shadow-lg grayscale hover:grayscale-0 transition-all duration-700"
+                                data-alt="abstract architectural representation of data flow and networks with glowing cyan lines on a deep navy blue background"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAVoHwLH3M-iht_6RXtR9Ia9RHi9lpaSBcB8qb0HkTmYJOidHHNYbjDhkAk8VCys4PkW4Z4mJRJ28b4kkHtW7fq-6TbARZxxu2snVX2pFrRH43Ph4dfhhyPcTMPCm-pn-AnNI358U7xnH2jMHcmgR1uJdWY3NsB1ClEAENPX0Afe4-ToQiHD5QK2JVIekJgFHplIyAjM_JcboLAwU_i7lyAYK9DUI5cD5k5Grzd4CZzjsYQMIOtsulzE0k_n5C_nK2wgsA4Z7Zuxc"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Technology Bento Grid -->
+            <section class="py-24 px-8 max-w-[1440px] mx-auto">
+                <div class="text-center mb-16">
+                    <span class="text-secondary font-bold tracking-widest text-xs uppercase mb-2 block"
+                        >Công Nghệ Cốt Lõi</span
+                    >
+                    <h2 class="text-4xl font-extrabold text-primary">Cột Mốc Đột Phá</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Elasticsearch Card -->
+                    <div
+                        class="md:col-span-2 bg-primary-container text-white p-10 rounded-xl flex flex-col justify-between relative overflow-hidden group"
+                    >
+                        <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <span class="material-symbols-outlined text-[120px]" data-icon="search">search</span>
+                        </div>
+                        <div class="z-10">
+                            <div
+                                class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full text-xs font-bold inline-block mb-6"
+                            >
+                                EST. 2021
+                            </div>
+                            <h3 class="text-3xl font-bold mb-4">Elasticsearch Integration</h3>
+                            <p class="text-primary-fixed max-w-md text-lg">
+                                Hệ thống tìm kiếm phân tán cho phép xử lý hàng triệu dữ liệu kỹ năng chỉ trong mili
+                                giây, mang lại trải nghiệm tìm kiếm "Elastic" mượt mà nhất.
+                            </p>
+                        </div>
+                        <div class="z-10 mt-12 flex gap-8">
+                            <div>
+                                <div class="text-2xl font-bold">0.02s</div>
+                                <div class="text-xs opacity-70">Tốc độ phản hồi trung bình</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold">15M+</div>
+                                <div class="text-xs opacity-70">Điểm dữ liệu được chỉ mục</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- AI Matching Card -->
+                    <div
+                        class="bg-surface-container-high p-10 rounded-xl border border-outline-variant/15 flex flex-col justify-center"
+                    >
+                        <span class="material-symbols-outlined text-secondary text-5xl mb-6" data-icon="neurology"
+                            >neurology</span
+                        >
+                        <h3 class="text-2xl font-bold text-primary mb-4">Neural Matching</h3>
+                        <p class="text-on-surface-variant">
+                            Thuật toán AI của chúng tôi phân tích không chỉ từ khóa mà còn là ngữ cảnh dự án và tiềm
+                            năng phát triển của ứng viên.
+                        </p>
+                        <div class="mt-8 flex items-center gap-2 text-secondary font-bold">
+                            <span>Tìm hiểu thêm</span>
+                            <span class="material-symbols-outlined text-sm" data-icon="north_east">north_east</span>
+                        </div>
+                    </div>
+                    <!-- Global Network -->
+                    <div
+                        class="bg-surface-container-low p-10 rounded-xl flex flex-col items-center text-center justify-center border border-outline-variant/15"
+                    >
+                        <h3 class="text-5xl font-black text-primary mb-2">50+</h3>
+                        <p class="font-bold text-on-surface mb-4">Quốc gia tham gia</p>
+                        <p class="text-sm text-on-surface-variant">
+                            Mạng lưới nhân tài không biên giới trải dài từ Silicon Valley đến Đông Nam Á.
+                        </p>
+                    </div>
+                    <!-- Real-time Analytics -->
+                    <div
+                        class="md:col-span-2 bg-surface-container-lowest p-10 rounded-xl flex flex-col md:flex-row gap-10 items-center border border-outline-variant/15 shadow-sm"
+                    >
+                        <div class="w-full md:w-1/2">
+                            <img
+                                alt="Data Visualization"
+                                class="rounded-lg"
+                                data-alt="sleek professional dashboard with neon green and blue bar charts and line graphs showing growth metrics on a clean white interface"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEacw7f-QB0106lEO-2u0YV4fauL5NJ093i12A1Wqyw44jAGRAhzP7fXiXo_Mbh35DwvX5xWLujEdqHYMSuSbPHOiAPYexwMeSvErRGwAW9rYfdsTEQOr9ZHT-4vcFPUiLdnxvOmBy3si3OSAq_CV6VKpSgOlgiy5b0ur52cUYGFynTr0l-hRk6UMimScPrSJnAGhsyX5hu6lxhZSmHa6FJFYxjIHebUOAWWOcztPAKxj1xF5nYmZrkTA8HWgzRCl_QAUfLC0mVKk"
+                            />
+                        </div>
+                        <div class="w-full md:w-1/2">
+                            <h3 class="text-2xl font-bold text-primary mb-4">Phân Tích Thời Gian Thực</h3>
+                            <p class="text-on-surface-variant mb-6">
+                                Cập nhật xu hướng thị trường lao động và mức lương trần của ngành theo từng biến động
+                                kinh tế toàn cầu.
+                            </p>
+                            <button
+                                class="text-on-primary-fixed-variant font-bold flex items-center gap-2 hover:underline"
+                            >
+                                Truy cập báo cáo thị trường
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Final CTA -->
+            <section class="py-24 px-8 max-w-[1440px] mx-auto">
+                <div class="bg-primary-container rounded-3xl p-16 text-center relative overflow-hidden">
+                    <div class="absolute -top-24 -left-24 w-96 h-96 bg-secondary/20 blur-[100px] rounded-full"></div>
+                    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-primary/20 blur-[100px] rounded-full"></div>
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-8 relative z-10">
+                        Bạn đã sẵn sàng để nâng tầm <br />
+                        sự nghiệp công nghệ?
+                    </h2>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+                        <button
+                            class="px-8 py-4 bg-tertiary-fixed text-on-tertiary-fixed font-bold rounded-xl hover:scale-105 transition-transform"
+                        >
+                            Khám phá cơ hội việc làm
+                        </button>
+                        <button
+                            class="px-8 py-4 bg-white/10 text-white font-bold rounded-xl backdrop-blur-md hover:bg-white/20 transition-all border border-white/20"
+                        >
+                            Liên hệ hợp tác doanh nghiệp
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <!-- Footer -->
+        <footer class="w-full py-12 px-8 border-t border-outline-variant/30 bg-surface-container-low">
+            <div class="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+                <div class="md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img
+                            alt="Smart Job Portal"
+                            class="w-7 h-7 rounded bg-primary"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMi0Wr0vkQebekh0QTcBsz9X8oQQyLV2rw4mxBjmN_S9q8WZZibJFUryYdIIvNApMSVRkZa6FVn_IMvsoTAD7L5qRpDNWec5nBdq9Yv3SO-BLNvliGL1gkQPgKPtFKGY6aauwweRpUBmttRehQ5Sbz6TU4FdH2k3ZDd9lbHxn_eSPhWlsQzhZEDvXoi60C-EivjN8Vb_n23iZbFgoFOvcxUgXFaPT0N9jRW90zxx_yaL3PXydkIqvPKUGHYXXCkuC8w3LSVWeqyXVm"
+                        />
+                        <span class="font-bold font-manrope text-xl text-on-surface">Smart Job Portal</span>
+                    </div>
+                    <p class="text-sm text-on-surface-variant font-medium leading-relaxed">
+                        Hệ thống tuyển dụng thông minh, kết nối nhân tài và doanh nghiệp thông qua công nghệ trí tuệ
+                        nhân tạo.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Liên kết nhanh
+                    </h4>
+                    <ul class="space-y-2">
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Về chúng tôi</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Quy định bảo mật</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Điều khoản sử dụng</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Liên hệ</a
+                            >
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Thông tin hỗ trợ
+                    </h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-sm">call</span>Hotline: 1900 xxxx
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-sm">mail</span>Email: support@smartjob.vn
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Mạng xã hội
+                    </h4>
+                    <div class="flex gap-4">
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">public</span></a
+                        >
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">share</span></a
+                        >
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">person_add</span></a
+                        >
+                    </div>
+                </div>
+            </div>
+            <div
+                class="max-w-[1440px] mx-auto pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-4"
+            >
+                <p class="text-xs text-on-surface-variant font-medium">
+                    © 2024 Smart Job Portal. Tất cả quyền được bảo lưu.
+                </p>
+                <div class="flex gap-6 text-xs text-on-surface-variant">
+                    <span>Ngôn ngữ: Tiếng Việt</span>
+                    <span class="flex items-center gap-1"
+                        ><span class="w-2 h-2 rounded-full bg-secondary inline-block"></span> Hệ thống đang hoạt
+                        động</span
+                    >
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>

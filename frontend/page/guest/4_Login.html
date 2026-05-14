@@ -1,0 +1,307 @@
+<!doctype html>
+
+<html class="light" lang="vi">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Đăng nhập | Smart Job Portal</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "inverse-primary": "#b0c6ff",
+                            "on-primary-fixed": "#001945",
+                            primary: "#003178",
+                            "surface-container": "#eceef0",
+                            "primary-fixed": "#d9e2ff",
+                            "on-secondary-fixed-variant": "#005145",
+                            "surface-container-high": "#e6e8ea",
+                            "secondary-fixed-dim": "#44ddc1",
+                            "outline-variant": "#c3c6d4",
+                            "on-secondary": "#ffffff",
+                            "secondary-fixed": "#68fadd",
+                            "on-tertiary-fixed-variant": "#00513d",
+                            "surface-container-highest": "#e0e3e5",
+                            "on-secondary-container": "#007261",
+                            "on-error-container": "#93000a",
+                            "secondary-container": "#68fadd",
+                            "surface-container-lowest": "#ffffff",
+                            "surface-variant": "#e0e3e5",
+                            "tertiary-fixed": "#45fec9",
+                            "tertiary-container": "#005742",
+                            "on-primary-container": "#a1bbff",
+                            "on-tertiary-fixed": "#002117",
+                            "on-surface": "#191c1e",
+                            "tertiary-fixed-dim": "#00e1ae",
+                            "surface-bright": "#f8f9fb",
+                            "on-primary-fixed-variant": "#00429c",
+                            surface: "#f8f9fb",
+                            "on-secondary-fixed": "#00201a",
+                            "primary-fixed-dim": "#b0c6ff",
+                            "surface-tint": "#2b5bb5",
+                            "error-container": "#ffdad6",
+                            "primary-container": "#0d47a1",
+                            "surface-container-low": "#f2f4f6",
+                            "surface-dim": "#d8dadc",
+                            secondary: "#006b5c",
+                            "on-error": "#ffffff",
+                            background: "#f8f9fb",
+                            "inverse-on-surface": "#eff1f3",
+                            outline: "#737783",
+                            tertiary: "#003e2e",
+                            "on-tertiary-container": "#00d6a6",
+                            "on-surface-variant": "#434652",
+                            "on-background": "#191c1e",
+                            "on-primary": "#ffffff",
+                            "on-tertiary": "#ffffff",
+                            "inverse-surface": "#2d3133",
+                            error: "#ba1a1a",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            xl: "0.5rem",
+                            full: "0.75rem",
+                        },
+                        fontFamily: {
+                            headline: ["Manrope"],
+                            body: ["Inter"],
+                            label: ["Inter"],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            body {
+                font-family: "Inter", sans-serif;
+            }
+            h1,
+            h2,
+            h3,
+            .font-headline {
+                font-family: "Manrope", sans-serif;
+            }
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 400,
+                    "GRAD" 0,
+                    "opsz" 24;
+            }
+            .bg-primary-gradient {
+                background: linear-gradient(135deg, #003178 0%, #0d47a1 100%);
+            }
+            /* Custom focus ring as per design system */
+            .input-focus-ring:focus {
+                outline: none;
+                box-shadow: 0 0 0 4px rgba(0, 49, 120, 0.1);
+            }
+        </style>
+    </head>
+    <body
+        class="bg-surface text-on-surface min-h-screen flex flex-col justify-center items-center px-4 relative overflow-hidden"
+    >
+        <!-- Decorative Architectural Background Elements -->
+        <div
+            class="absolute top-0 right-0 w-1/2 h-full bg-surface-container-low -skew-x-12 translate-x-1/4 -z-10"
+        ></div>
+        <div class="absolute bottom-0 left-0 w-1/4 h-1/2 bg-surface-container-highest opacity-30 blur-3xl -z-10"></div>
+        <!-- Main Login Shell -->
+        <main class="w-full max-w-[480px] z-10">
+            <!-- Logo/Brand Identity -->
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center gap-3 mb-2">
+                    <img
+                        alt="Smart Job Portal"
+                        class="w-10 h-10 rounded-xl"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMi0Wr0vkQebekh0QTcBsz9X8oQQyLV2rw4mxBjmN_S9q8WZZibJFUryYdIIvNApMSVRkZa6FVn_IMvsoTAD7L5qRpDNWec5nBdq9Yv3SO-BLNvliGL1gkQPgKPtFKGY6aauwweRpUBmttRehQ5Sbz6TU4FdH2k3ZDd9lbHxn_eSPhWlsQzhZEDvXoi60C-EivjN8Vb_n23iZbFgoFOvcxUgXFaPT0N9jRW90zxx_yaL3PXydkIqvPKUGHYXXCkuC8w3LSVWeqyXVm"
+                    />
+                    <h1 class="text-3xl font-extrabold tracking-tight text-primary font-headline">Smart Job Portal</h1>
+                </div>
+                <p class="text-on-surface-variant mt-2 text-sm uppercase tracking-widest font-semibold font-label">
+                    Hệ thống tuyển dụng thông minh
+                </p>
+            </div>
+            <!-- Auth Card -->
+            <div
+                class="bg-surface-container-lowest rounded-full p-8 md:p-12 shadow-sm border border-outline-variant/10"
+            >
+                <div class="mb-8">
+                    <span class="text-[10px] font-bold tracking-[0.1em] text-secondary uppercase font-label block mb-1"
+                        >Chào mừng trở lại</span
+                    >
+                    <h2 class="text-2xl font-bold text-on-surface font-headline">Đăng nhập tài khoản</h2>
+                </div>
+                <div class="flex p-1 bg-surface-container-low rounded-xl mb-6 relative">
+                    <button
+                        class="flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 bg-primary text-white shadow-sm z-10"
+                        id="role-candidate"
+                        type="button"
+                    >
+                        Ứng viên
+                    </button>
+                    <button
+                        class="flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-surface-variant/50"
+                        id="role-employer"
+                        type="button"
+                    >
+                        Nhà tuyển dụng
+                    </button>
+                </div>
+                <form action="#" class="space-y-6" method="POST">
+                    <!-- Username/Email Field -->
+                    <div class="space-y-2">
+                        <label
+                            class="block text-xs font-semibold text-on-surface-variant font-label uppercase tracking-wider"
+                            for="identifier"
+                            >Email hoặc Tên đăng nhập</label
+                        >
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-[20px]"
+                                >person</span
+                            >
+                            <input
+                                class="w-full bg-surface-container-low border-none rounded-xl py-4 pl-12 pr-4 text-on-surface placeholder:text-outline/60 input-focus-ring transition-all"
+                                id="identifier"
+                                name="identifier"
+                                placeholder="example@nexus.com"
+                                type="text"
+                            />
+                        </div>
+                    </div>
+                    <!-- Password Field -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label
+                                class="block text-xs font-semibold text-on-surface-variant font-label uppercase tracking-wider"
+                                for="password"
+                                >Mật khẩu</label
+                            >
+                            <a class="text-xs font-semibold text-on-primary-fixed-variant hover:underline" href="#"
+                                >Quên mật khẩu?</a
+                            >
+                        </div>
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-[20px]"
+                                >lock</span
+                            >
+                            <input
+                                class="w-full bg-surface-container-low border-none rounded-xl py-4 pl-12 pr-12 text-on-surface placeholder:text-outline/60 input-focus-ring transition-all"
+                                id="password"
+                                name="password"
+                                placeholder="••••••••"
+                                type="password"
+                            />
+                            <button
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors"
+                                type="button"
+                            >
+                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Remember Me -->
+                    <div class="flex items-center">
+                        <input
+                            class="w-5 h-5 rounded-lg border-outline-variant text-primary focus:ring-primary/20 bg-surface-container-low transition-all"
+                            id="remember"
+                            name="remember"
+                            type="checkbox"
+                        />
+                        <label class="ml-3 text-sm text-on-surface-variant font-medium cursor-pointer" for="remember"
+                            >Ghi nhớ tôi</label
+                        >
+                    </div>
+                    <!-- Submit Button -->
+                    <button
+                        class="w-full bg-primary-gradient text-on-primary py-4 rounded-full font-bold text-base shadow-sm hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
+                        type="submit"
+                    >
+                        Đăng nhập
+                    </button>
+                </form>
+                <!-- Divider -->
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full h-[1px] bg-surface-container-highest"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs uppercase">
+                        <span class="bg-surface-container-lowest px-4 text-outline font-bold tracking-widest font-label"
+                            >Hoặc đăng nhập bằng</span
+                        >
+                    </div>
+                </div>
+                <!-- Social Logins -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button
+                        class="flex items-center justify-center gap-3 bg-surface-container-high py-3 rounded-xl hover:bg-surface-dim transition-all group"
+                    >
+                        <img
+                            alt="Google Logo"
+                            class="w-5 h-5 group-hover:scale-110 transition-transform"
+                            data-alt="Official Google icon with its signature colors used for social authentication buttons"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYnghzXifQrykMzN9q8oFNf0PFVrS7BsDlujBaDRfpnCjr_ssg1HUGxSNmplvFqzRMmO4pbDlFbvKpHldUdR7yZe6yhlJqywNOZjy4EykeHN-9DjmXB8KAfoq9zfa1ZEyYbXawM1VL_is2xL2SBmifLy8m0DXB-koVXemNpDfM6DSZrUOAXfFxBzls1JEG6PEVhlxj4DWUIkP6H-Dx0vjd8od6q_tWkztLnJl-l_YxLTgedapJR2CsEItUenWNDF64hi3F1lLFStg"
+                        />
+                        <span class="text-sm font-semibold text-on-surface-variant">Google</span>
+                    </button>
+                    <button
+                        class="flex items-center justify-center gap-3 bg-surface-container-high py-3 rounded-xl hover:bg-surface-dim transition-all group"
+                    >
+                        <img
+                            alt="LinkedIn Logo"
+                            class="w-5 h-5 group-hover:scale-110 transition-transform"
+                            data-alt="Professional LinkedIn social icon in blue for enterprise social login integrations"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvrPyJ4f0nmge6vgkFw7JSgzIb2qK8Z-zemxRIltO1nVxR3OFgYTvAXIaTtOJ6kqLZ0AEMeEC6GyWq7K-VMBY97PxeLn3yUVE1lGHl7y3NfGywIOSvVL-PyXLb0izSiKPyb641KZX1iLsmJIiYf5jkntxbchqP5guMqP8K4wJuGWHcLKJveSQtaXCpNC0dtBJTvRvS-jxxo6BefuvZY0_EVDhwLboLJx0NvxK6h8dh-TT2u0li_8ztkIEtpZz2ax-PcNqdHocPmRE"
+                        />
+                        <span class="text-sm font-semibold text-on-surface-variant">LinkedIn</span>
+                    </button>
+                </div>
+                <!-- Footer Link -->
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-on-surface-variant">
+                        Bạn chưa có tài khoản?
+                        <a class="font-bold text-primary hover:underline ml-1" href="#">Đăng ký ngay</a>
+                    </p>
+                </div>
+            </div>
+            <!-- System Status Bar (Asymmetric Focus Zone) -->
+            <div
+                class="mt-8 flex justify-center items-center gap-6 text-[10px] text-outline font-bold uppercase tracking-[0.15em] font-label"
+            >
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                    Hệ thống hoạt động bình thường
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[14px]">verified_user</span>
+                    Truy cập bảo mật
+                </div>
+            </div>
+        </main>
+        <!-- Footer Copyright (Standalone) -->
+        <footer class="absolute bottom-8 w-full text-center px-4">
+            <p class="text-[11px] text-outline font-medium font-body uppercase tracking-wider">
+                © 2024 Smart Job Portal. Tất cả quyền được bảo lưu.
+            </p>
+        </footer>
+        <script type="module" src="../../js/guest/auth.js"></script>
+    </body>
+</html>

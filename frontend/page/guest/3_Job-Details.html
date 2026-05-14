@@ -1,0 +1,550 @@
+<!doctype html>
+
+<html class="light" lang="vi">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Chi tiết việc làm | Smart Job Portal</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "inverse-primary": "#b0c6ff",
+                            "on-primary-fixed": "#001945",
+                            primary: "#003178",
+                            "surface-container": "#eceef0",
+                            "primary-fixed": "#d9e2ff",
+                            "on-secondary-fixed-variant": "#005145",
+                            "surface-container-high": "#e6e8ea",
+                            "secondary-fixed-dim": "#44ddc1",
+                            "outline-variant": "#c3c6d4",
+                            "on-secondary": "#ffffff",
+                            "secondary-fixed": "#68fadd",
+                            "on-tertiary-fixed-variant": "#00513d",
+                            "surface-container-highest": "#e0e3e5",
+                            "on-secondary-container": "#007261",
+                            "on-error-container": "#93000a",
+                            "secondary-container": "#68fadd",
+                            "surface-container-lowest": "#ffffff",
+                            "surface-variant": "#e0e3e5",
+                            "tertiary-fixed": "#45fec9",
+                            "tertiary-container": "#005742",
+                            "on-primary-container": "#a1bbff",
+                            "on-tertiary-fixed": "#002117",
+                            "on-surface": "#191c1e",
+                            "tertiary-fixed-dim": "#00e1ae",
+                            "surface-bright": "#f8f9fb",
+                            "on-primary-fixed-variant": "#00429c",
+                            surface: "#f8f9fb",
+                            "on-secondary-fixed": "#00201a",
+                            "primary-fixed-dim": "#b0c6ff",
+                            "surface-tint": "#2b5bb5",
+                            "error-container": "#ffdad6",
+                            "primary-container": "#0d47a1",
+                            "surface-container-low": "#f2f4f6",
+                            "surface-dim": "#d8dadc",
+                            secondary: "#006b5c",
+                            "on-error": "#ffffff",
+                            background: "#f8f9fb",
+                            "inverse-on-surface": "#eff1f3",
+                            outline: "#737783",
+                            tertiary: "#003e2e",
+                            "on-tertiary-container": "#00d6a6",
+                            "on-surface-variant": "#434652",
+                            "on-background": "#191c1e",
+                            "on-primary": "#ffffff",
+                            "on-tertiary": "#ffffff",
+                            "inverse-surface": "#2d3133",
+                            error: "#ba1a1a",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            xl: "0.5rem",
+                            full: "0.75rem",
+                        },
+                        fontFamily: {
+                            headline: ["Manrope"],
+                            body: ["Inter"],
+                            label: ["Inter"],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 400,
+                    "GRAD" 0,
+                    "opsz" 24;
+            }
+            body {
+                font-family: "Inter", sans-serif;
+            }
+            h1,
+            h2,
+            h3,
+            .font-manrope {
+                font-family: "Manrope", sans-serif;
+            }
+            .glass-effect {
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+            }
+            .primary-gradient {
+                background: linear-gradient(135deg, #003178 0%, #0d47a1 100%);
+            }
+        </style>
+    </head>
+    <body class="bg-surface text-on-surface">
+        <!-- TopNavBar -->
+        <nav
+            class="fixed top-0 w-full z-50 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none"
+        >
+            <div class="flex justify-between items-center h-20 px-8 max-w-[1440px] mx-auto relative">
+                <a class="flex items-center gap-2" href="1_LandingPage.html">
+                    <img
+                        alt="Smart Job Portal"
+                        class="w-8 h-8 rounded"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMi0Wr0vkQebekh0QTcBsz9X8oQQyLV2rw4mxBjmN_S9q8WZZibJFUryYdIIvNApMSVRkZa6FVn_IMvsoTAD7L5qRpDNWec5nBdq9Yv3SO-BLNvliGL1gkQPgKPtFKGY6aauwweRpUBmttRehQ5Sbz6TU4FdH2k3ZDd9lbHxn_eSPhWlsQzhZEDvXoi60C-EivjN8Vb_n23iZbFgoFOvcxUgXFaPT0N9jRW90zxx_yaL3PXydkIqvPKUGHYXXCkuC8w3LSVWeqyXVm"
+                    />
+                    <span class="text-xl font-bold tracking-tight text-blue-900 dark:text-blue-100 font-manrope"
+                        >Smart Job Portal</span
+                    >
+                </a>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a
+                        class="text-blue-700 dark:text-blue-300 font-semibold border-b-2 border-blue-700 dark:border-blue-300 pb-1"
+                        href="#"
+                        >Tìm việc làm</a
+                    >
+                    <a
+                        class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+                        href="#"
+                        >Công ty</a
+                    >
+                    <a
+                        class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+                        href="#"
+                        >Về chúng tôi</a
+                    >
+                    <a
+                        class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+                        href="#"
+                        >Liên hệ</a
+                    >
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button
+                        class="px-5 py-2 text-slate-600 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95 duration-150"
+                    >
+                        Đăng nhập
+                    </button>
+                    <button
+                        class="px-6 py-2 bg-primary text-on-primary font-bold rounded-lg hover:bg-primary-container transition-all active:scale-95 duration-150"
+                    >
+                        Đăng ký
+                    </button>
+                </div>
+                <div class="bg-slate-200/50 dark:bg-slate-800/50 h-[1px] w-full absolute bottom-0 left-0"></div>
+            </div>
+        </nav>
+        <main class="pt-32 pb-20 px-8 max-w-[1440px] mx-auto">
+            <!-- Job Header Hero -->
+            <section class="mb-12">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="text-xs font-bold tracking-widest uppercase text-on-primary-fixed-variant font-label"
+                                >KỸ THUẬT PHẦN MỀM</span
+                            >
+                            <span class="w-1 h-1 rounded-full bg-outline"></span>
+                            <span class="text-xs font-medium text-outline">Đăng 2 ngày trước</span>
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-primary tracking-tight font-headline">
+                            Kỹ sư Trí tuệ Nhân tạo Cao cấp (Senior AI Engineer)
+                        </h1>
+                        <div class="flex flex-wrap gap-4">
+                            <div class="flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-full">
+                                <span class="material-symbols-outlined text-secondary text-lg">payments</span>
+                                <span class="text-sm font-semibold">3.000 - 5.500 USD</span>
+                            </div>
+                            <div class="flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-full">
+                                <span class="material-symbols-outlined text-secondary text-lg">location_on</span>
+                                <span class="text-sm font-semibold">Quận 1, TP. Hồ Chí Minh</span>
+                            </div>
+                            <div class="flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-full">
+                                <span class="material-symbols-outlined text-secondary text-lg">work</span>
+                                <span class="text-sm font-semibold">Toàn thời gian</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button
+                            class="p-3 bg-surface-container-high text-on-primary-fixed-variant rounded-xl hover:bg-surface-container-highest transition-all"
+                        >
+                            <span class="material-symbols-outlined">bookmark</span>
+                        </button>
+                        <button
+                            class="p-3 bg-surface-container-high text-on-primary-fixed-variant rounded-xl hover:bg-surface-container-highest transition-all"
+                        >
+                            <span class="material-symbols-outlined">share</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <!-- Main Layout: 2 Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Main Content Column -->
+                <div class="lg:col-span-8 space-y-12">
+                    <!-- Description Section -->
+                    <article class="bg-surface-container-lowest p-8 md:p-10 rounded-xl space-y-8">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-6 font-headline flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-primary text-sm">description</span>
+                                </span>
+                                Mô tả công việc
+                            </h2>
+                            <div class="text-on-surface-variant leading-relaxed space-y-4 font-body">
+                                <p>
+                                    Chào mừng bạn đến với Nexus Lab – nơi định hình tương lai của kiến trúc dữ liệu.
+                                    Chúng tôi đang tìm kiếm một Kỹ sư AI tài năng để dẫn dắt các dự án nghiên cứu và
+                                    triển khai mô hình học sâu vào hệ sinh thái của chúng tôi.
+                                </p>
+                                <ul class="list-none space-y-3">
+                                    <li class="flex gap-3">
+                                        <span class="material-symbols-outlined text-secondary flex-shrink-0"
+                                            >check_circle</span
+                                        >
+                                        <span
+                                            >Thiết kế và tối ưu hóa các kiến trúc mạng Neural cho bài toán xử lý ngôn
+                                            ngữ tự nhiên (NLP).</span
+                                        >
+                                    </li>
+                                    <li class="flex gap-3">
+                                        <span class="material-symbols-outlined text-secondary flex-shrink-0"
+                                            >check_circle</span
+                                        >
+                                        <span
+                                            >Làm việc trực tiếp với đội ngũ Elasticsearch để cải thiện hiệu suất tìm
+                                            kiếm thông minh.</span
+                                        >
+                                    </li>
+                                    <li class="flex gap-3">
+                                        <span class="material-symbols-outlined text-secondary flex-shrink-0"
+                                            >check_circle</span
+                                        >
+                                        <span
+                                            >Xây dựng pipeline dữ liệu tự động cho việc huấn luyện mô hình quy mô
+                                            lớn.</span
+                                        >
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold mb-6 font-headline flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-primary text-sm"
+                                        >assignment_turned_in</span
+                                    >
+                                </span>
+                                Yêu cầu ứng viên
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-5 bg-surface-container-low rounded-xl">
+                                    <span class="text-xs font-bold text-outline block mb-2 uppercase tracking-tighter"
+                                        >Học vấn</span
+                                    >
+                                    <p class="text-sm font-semibold">
+                                        Thạc sĩ hoặc Tiến sĩ về Khoa học Máy tính, Toán học hoặc lĩnh vực liên quan.
+                                    </p>
+                                </div>
+                                <div class="p-5 bg-surface-container-low rounded-xl">
+                                    <span class="text-xs font-bold text-outline block mb-2 uppercase tracking-tighter"
+                                        >Kỹ năng</span
+                                    >
+                                    <p class="text-sm font-semibold">
+                                        Thành thạo Python, PyTorch/TensorFlow và kinh nghiệm với LLMs.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-6 text-on-surface-variant leading-relaxed space-y-3">
+                                <p class="flex gap-3">
+                                    <span class="material-symbols-outlined text-secondary flex-shrink-0">verified</span>
+                                    <span>Ít nhất 5 năm kinh nghiệm trong lĩnh vực AI/Machine Learning.</span>
+                                </p>
+                                <p class="flex gap-3">
+                                    <span class="material-symbols-outlined text-secondary flex-shrink-0">verified</span>
+                                    <span>Khả năng đọc hiểu tài liệu nghiên cứu chuyên sâu bằng tiếng Anh.</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold mb-6 font-headline flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-primary text-sm">redeem</span>
+                                </span>
+                                Phúc lợi &amp; Đãi ngộ
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div
+                                    class="flex flex-col items-center text-center p-6 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-all"
+                                >
+                                    <span class="material-symbols-outlined text-3xl text-secondary mb-3">flight</span>
+                                    <span class="text-sm font-bold">Du lịch hàng năm</span>
+                                </div>
+                                <div
+                                    class="flex flex-col items-center text-center p-6 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-all"
+                                >
+                                    <span class="material-symbols-outlined text-3xl text-secondary mb-3"
+                                        >medical_services</span
+                                    >
+                                    <span class="text-sm font-bold">Bảo hiểm cao cấp</span>
+                                </div>
+                                <div
+                                    class="flex flex-col items-center text-center p-6 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-all"
+                                >
+                                    <span class="material-symbols-outlined text-3xl text-secondary mb-3"
+                                        >laptop_mac</span
+                                    >
+                                    <span class="text-sm font-bold">Thiết bị đời mới</span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    <!-- PDF Preview Section -->
+                    <section class="bg-surface-container-lowest p-8 md:p-10 rounded-xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold font-headline flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-primary text-sm">picture_as_pdf</span>
+                                </span>
+                                Xem trước tài liệu công việc
+                            </h2>
+                            <button class="text-primary text-sm font-bold hover:underline">Tải về PDF</button>
+                        </div>
+                        <div
+                            class="relative w-full aspect-[3/4] md:aspect-video bg-surface-container-highest rounded-xl overflow-hidden border border-outline-variant/15 group"
+                        >
+                            <div
+                                class="absolute inset-0 flex flex-col items-center justify-center text-outline group-hover:text-primary transition-colors"
+                            >
+                                <img
+                                    alt="PDF Preview"
+                                    class="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-700"
+                                    data-alt="Close up view of a professional job description document with clean typography and modern branding layout"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXplPjGP0kOg-NCvJfUGMhcMZJVji3AmF1iZ3c1rnxa11bDf1oIab_1Xmlup5Nm_rOrS_839e4AMT-QF9qSy_i73n26s0CmlNUqfgq9AbfooAwRbpfUY4sldel8mhY0sn657yAc5OY437KXcvtRmo0zha9rlopp5hoEv7xbGq9vXerPJXUnjHji_M2drP4XkN_0YM94r5Tc_bDibj55uyD9Bn52CsxHWhPwW_EPgOGwihFNhdnpDL8cGIC1N8kk8iFtc4Gqb5hVRM"
+                                />
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent"
+                                ></div>
+                                <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-center w-full px-6">
+                                    <p class="text-on-surface font-bold text-lg mb-2">
+                                        Job_Package_Nexus_Senior_AI.pdf
+                                    </p>
+                                    <p class="text-on-surface-variant text-xs">Trang 1 / 12 • 4.2 MB</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- Secondary Column (Sidebar) -->
+                <aside class="lg:col-span-4 space-y-8">
+                    <!-- Employer Card -->
+                    <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-5 mb-6">
+                            <div
+                                class="w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center p-2"
+                            >
+                                <img
+                                    alt="Smart Job Portal"
+                                    class="w-full h-full object-contain"
+                                    data-alt="Smart Job Portal company logo"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjAke_duLQ0HoZUETHZFGxHYjijXgiskwkGWirVDIber5lmS7RQ8dXUucsqut17uDU2aOGwbJuxsOsj6amIb99sNuQfGOqQ18RoL2NvouIk1hXRsPd8gNetnwXinp-Zkry3PuYYQ1LkUVcCimm_TZvUhRLfd2-T5ZST1rP_9vMaR3B61KzZCZqhhULwOG38loVlWywtGXj9YsJB846ZJKfTQ9HyumKe9v9k2K4rH43ggwa0Kqiat1TdaetEYqU05DKUj-E0G17idc"
+                                />
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl font-headline">Nexus Lab</h3>
+                                <p class="text-sm text-outline">Công nghệ &amp; Phần mềm</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-center gap-3 text-sm">
+                                <span class="material-symbols-outlined text-outline">groups</span>
+                                <span class="font-medium">500 - 1000 nhân viên</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm">
+                                <span class="material-symbols-outlined text-outline">language</span>
+                                <a class="text-primary hover:underline font-medium" href="#">www.nexuslab.ai</a>
+                            </div>
+                        </div>
+                        <button
+                            class="w-full primary-gradient text-on-primary font-extrabold py-4 rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all mb-4"
+                        >
+                            ỨNG TUYỂN NGAY
+                        </button>
+                        <button
+                            class="w-full bg-surface-container-high text-on-primary-fixed-variant font-bold py-4 rounded-xl hover:bg-surface-container-highest transition-all"
+                        >
+                            Xem trang công ty
+                        </button>
+                    </div>
+                    <!-- Location Map -->
+                    <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm overflow-hidden">
+                        <h3 class="font-bold text-lg font-headline mb-4">Vị trí làm việc</h3>
+                        <div
+                            class="relative w-full h-48 bg-surface-container-low rounded-xl mb-4 overflow-hidden group"
+                        >
+                            <img
+                                alt="Map"
+                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                data-alt="Aerial topographic map view of Ho Chi Minh City downtown area with modern road networks and urban layout"
+                                data-location="Ho Chi Minh City"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6NtUauI4JGd9lxb8l5ByivyFzXvYhUGabgbN23QYcMT0FXBsRknhhxCvS9sqUjgxwosXR6LDhu46bu6NVgHAo0YAfVwsHohwp3VHRX3C9-Rhp9XnSWrnhUXJlgqbwjm26bpIU2WiiUBrE0WX6TTKGTFZD6CkaZCkz1BzkqnznKlolCY-05r5JG9S0WYUl1doKsjutL5vFpA5u8_QUhcGVk7QBK0vxZHtbaZMdD24EUCKZDzf7q3cbZBHjofywYkbjFSiWoLlP2v8"
+                            />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span
+                                    class="material-symbols-outlined text-primary text-4xl"
+                                    style="font-variation-settings: &quot;FILL&quot; 1"
+                                    >location_on</span
+                                >
+                            </div>
+                        </div>
+                        <p class="text-sm text-on-surface-variant font-medium leading-relaxed">
+                            Tầng 24, Bitexco Financial Tower, 2 Hải Triều, Bến Nghé, Quận 1, TP. Hồ Chí Minh.
+                        </p>
+                    </div>
+                    <!-- Match Score (Success Metric) -->
+                    <div class="bg-tertiary-container text-on-tertiary-container p-6 rounded-xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-bold uppercase tracking-widest">Độ tương thích hồ sơ</span>
+                            <span class="text-2xl font-black font-manrope">98%</span>
+                        </div>
+                        <div class="w-full h-2 bg-black/10 rounded-full overflow-hidden">
+                            <div class="w-[98%] h-full bg-tertiary-fixed rounded-full"></div>
+                        </div>
+                        <p class="text-xs mt-4 opacity-80 italic">
+                            Kỹ năng và kinh nghiệm của bạn rất phù hợp với vị trí này. Đừng bỏ lỡ cơ hội!
+                        </p>
+                    </div>
+                </aside>
+            </div>
+        </main>
+        <!-- Footer -->
+        <footer class="w-full py-12 px-8 border-t border-outline-variant/30 bg-surface-container-low">
+            <div class="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+                <div class="md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img
+                            alt="Smart Job Portal"
+                            class="w-7 h-7 rounded bg-primary"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMi0Wr0vkQebekh0QTcBsz9X8oQQyLV2rw4mxBjmN_S9q8WZZibJFUryYdIIvNApMSVRkZa6FVn_IMvsoTAD7L5qRpDNWec5nBdq9Yv3SO-BLNvliGL1gkQPgKPtFKGY6aauwweRpUBmttRehQ5Sbz6TU4FdH2k3ZDd9lbHxn_eSPhWlsQzhZEDvXoi60C-EivjN8Vb_n23iZbFgoFOvcxUgXFaPT0N9jRW90zxx_yaL3PXydkIqvPKUGHYXXCkuC8w3LSVWeqyXVm"
+                        />
+                        <span class="font-bold font-manrope text-xl text-on-surface">Smart Job Portal</span>
+                    </div>
+                    <p class="text-sm text-on-surface-variant font-medium leading-relaxed">
+                        Hệ thống tuyển dụng thông minh, kết nối nhân tài và doanh nghiệp thông qua công nghệ trí tuệ
+                        nhân tạo.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Liên kết nhanh
+                    </h4>
+                    <ul class="space-y-2">
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Về chúng tôi</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Quy định bảo mật</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Điều khoản sử dụng</a
+                            >
+                        </li>
+                        <li>
+                            <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="#"
+                                >Liên hệ</a
+                            >
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Thông tin hỗ trợ
+                    </h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-sm">call</span>Hotline: 1900 xxxx
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-sm">mail</span>Email: support@smartjob.vn
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold font-manrope text-sm mb-4 uppercase tracking-wider text-on-surface">
+                        Mạng xã hội
+                    </h4>
+                    <div class="flex gap-4">
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">public</span></a
+                        >
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">share</span></a
+                        >
+                        <a
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-white transition-all"
+                            href="#"
+                            ><span class="material-symbols-outlined text-base">person_add</span></a
+                        >
+                    </div>
+                </div>
+            </div>
+            <div
+                class="max-w-[1440px] mx-auto pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-4"
+            >
+                <p class="text-xs text-on-surface-variant font-medium">
+                    © 2024 Smart Job Portal. Tất cả quyền được bảo lưu.
+                </p>
+                <div class="flex gap-6 text-xs text-on-surface-variant">
+                    <span>Ngôn ngữ: Tiếng Việt</span>
+                    <span class="flex items-center gap-1"
+                        ><span class="w-2 h-2 rounded-full bg-secondary inline-block"></span> Hệ thống đang hoạt
+                        động</span
+                    >
+                </div>
+            </div>
+        </footer>
+        <script type="module" src="../../js/guest/jobs.js"></script>
+    </body>
+</html>
