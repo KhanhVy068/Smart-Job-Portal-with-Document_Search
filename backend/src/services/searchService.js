@@ -83,20 +83,8 @@ async function addDocuments(items = []) {
   return true;
 }
 
-async function indexDocument(documentId) {
-  const [[row]] = await db.query(
-    `
-    SELECT d.*, u.full_name AS candidate_name, u.email
-    FROM documents d
-    JOIN users u ON u.id = d.user_id
-    WHERE d.id = ? AND d.deleted_at IS NULL
-    LIMIT 1
-    `,
-    [documentId]
-  );
-  if (!row) return null;
-
-  const item = {
+function buildDocumentSearchItem(row) {
+  return {
     uid: `document-${row.id}`,
     kind: row.doc_type || 'cv',
     documentId: row.id,
@@ -111,6 +99,49 @@ async function indexDocument(documentId) {
     createdAt: row.created_at,
     score: 0
   };
+}
+
+function buildJobSearchItem(row) {
+  const content = [row.title, row.description, row.requirements, row.benefits, row.location, row.category_name]
+    .map(stripHtml)
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    uid: `job-${row.id}`,
+    kind: 'jd',
+    jobId: row.id,
+    title: row.title,
+    companyName: row.employer_name || 'Smart Job Portal',
+    location: row.location,
+    status: row.status,
+    content,
+    summary: clip(content, 360),
+    createdAt: row.posted_at,
+    score: 0
+  };
+}
+
+async function addDocumentsInBatches(items = [], batchSize = 500) {
+  for (let start = 0; start < items.length; start += batchSize) {
+    await addDocuments(items.slice(start, start + batchSize));
+  }
+}
+
+async function indexDocument(documentId) {
+  const [[row]] = await db.query(
+    `
+    SELECT d.*, u.full_name AS candidate_name, u.email
+    FROM documents d
+    JOIN users u ON u.id = d.user_id
+    WHERE d.id = ? AND d.deleted_at IS NULL
+    LIMIT 1
+    `,
+    [documentId]
+  );
+  if (!row) return null;
+
+  const item = buildDocumentSearchItem(row);
 
   await addDocuments([item]);
   return item;
@@ -130,23 +161,7 @@ async function indexJob(jobId) {
   );
   if (!row) return null;
 
-  const content = [row.title, row.description, row.requirements, row.benefits, row.location, row.category_name]
-    .map(stripHtml)
-    .filter(Boolean)
-    .join('\n');
-  const item = {
-    uid: `job-${row.id}`,
-    kind: 'jd',
-    jobId: row.id,
-    title: row.title,
-    companyName: row.employer_name || 'Smart Job Portal',
-    location: row.location,
-    status: row.status,
-    content,
-    summary: clip(content, 360),
-    createdAt: row.posted_at,
-    score: 0
-  };
+  const item = buildJobSearchItem(row);
 
   await addDocuments([item]);
   return item;
@@ -156,20 +171,31 @@ async function reindexAll() {
   if (!isMeiliEnabled()) return { engine: 'mysql-fallback', indexed: 0 };
   await ensureIndex();
 
-  const [docs] = await db.query('SELECT id FROM documents WHERE deleted_at IS NULL AND extracted_text IS NOT NULL');
-  const [jobs] = await db.query('SELECT id FROM jobs WHERE deleted_at IS NULL');
-  let indexed = 0;
+  const [docs] = await db.query(
+    `
+    SELECT d.*, u.full_name AS candidate_name, u.email
+    FROM documents d
+    JOIN users u ON u.id = d.user_id
+    WHERE d.deleted_at IS NULL AND d.extracted_text IS NOT NULL
+    `
+  );
+  const [jobs] = await db.query(
+    `
+    SELECT j.*, u.full_name AS employer_name, c.name AS category_name
+    FROM jobs j
+    LEFT JOIN users u ON u.id = j.employer_id
+    LEFT JOIN job_categories c ON c.id = j.category_id
+    WHERE j.deleted_at IS NULL
+    `
+  );
+  const items = [
+    ...docs.map(buildDocumentSearchItem),
+    ...jobs.map(buildJobSearchItem)
+  ];
 
-  for (const doc of docs) {
-    await indexDocument(doc.id);
-    indexed += 1;
-  }
-  for (const job of jobs) {
-    await indexJob(job.id);
-    indexed += 1;
-  }
+  await addDocumentsInBatches(items);
 
-  return { engine: 'meilisearch', indexed };
+  return { engine: 'meilisearch', indexed: items.length };
 }
 
 async function searchWithMeili(options = {}) {
@@ -179,7 +205,7 @@ async function searchWithMeili(options = {}) {
     const kind = options.type === 'job' ? 'jd' : options.type;
     filter.push(`kind = "${kind}"`);
   }
-  if (options.location) filter.push(`location CONTAINS "${String(options.location).replaceAll('"', '\\"')}"`);
+  if (options.location) filter.push(`location = "${String(options.location).replaceAll('"', '\\"')}"`);
 
   const page = Math.max(Number(options.page || 1), 1);
   const limit = Math.min(Math.max(Number(options.limit || 10), 1), 100);
