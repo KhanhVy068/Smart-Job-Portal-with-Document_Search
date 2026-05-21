@@ -39,7 +39,7 @@ function renderJob(job) {
 
   setText('jdTitle', job.title);
   setText('jdCompany', job.companyName);
-  setText('jdLocation', job.location);
+  setText('jdLocation', job.location || job.company_address || job.companyAddress || 'Chưa cập nhật địa điểm');
   setText('jdSalary', job.salary);
   setText('jdType', job.jobType);
   setText('jdDeadline', job.deadline ? `Hạn nộp: ${fmt(job.deadline)}` : '');
@@ -57,9 +57,10 @@ function renderJob(job) {
 
   const skills = document.getElementById('jdSkills');
   if (skills) {
-    skills.innerHTML = (job.skills || []).map(s =>
-      `<span class="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">${esc(s)}</span>`
-    ).join('');
+    const items = normalizeSkills(job.skills);
+    skills.innerHTML = items.length
+      ? items.map(s => `<span class="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">${esc(s)}</span>`).join('')
+      : '<span class="text-sm font-semibold text-slate-500">Chưa cập nhật kỹ năng</span>';
   }
 
   setHtml('jdDescription', job.description ?? '<p class="text-slate-400">Chưa có mô tả.</p>');
@@ -146,4 +147,16 @@ function setHtml(id, html) {
 
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function normalizeSkills(value) {
+  if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return normalizeSkills(parsed);
+  } catch {
+    // Accept comma-separated skills from older API rows.
+  }
+  return String(value).split(',').map(item => item.trim()).filter(Boolean);
 }

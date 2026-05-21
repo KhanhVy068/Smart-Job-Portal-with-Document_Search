@@ -12,14 +12,66 @@ function fixMojibake(value) {
   }
 }
 
+let ensureJobColumnsPromise = null;
+
 function getUserId(req, fallback) {
   return req.user?.id || fallback;
+}
+
+async function addColumnIfMissing(table, column, definition) {
+  try {
+    await db.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  } catch (error) {
+    if (error.code !== 'ER_DUP_FIELDNAME') throw error;
+  }
+}
+
+async function ensureJobColumns() {
+  if (!ensureJobColumnsPromise) {
+    ensureJobColumnsPromise = Promise.all([
+      addColumnIfMissing('jobs', 'skills', 'TEXT NULL')
+    ]).catch(error => {
+      ensureJobColumnsPromise = null;
+      throw error;
+    });
+  }
+  return ensureJobColumnsPromise;
+}
+
+function normalizeSkills(value) {
+  if (Array.isArray(value)) {
+    return value.map(item => String(item).trim()).filter(Boolean);
+  }
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return normalizeSkills(parsed);
+  } catch {
+    // Old rows may store comma-separated skills.
+  }
+  return String(value).split(',').map(item => item.trim()).filter(Boolean);
+}
+
+function serializeSkills(value) {
+  const skills = normalizeSkills(value);
+  return skills.length ? JSON.stringify(skills) : null;
+}
+
+function isEmptyLocation(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return !normalized || ['chưa cập nhật', 'chua cap nhat', 'đang cập nhật', 'dang cap nhat'].includes(normalized);
+}
+
+function firstLocation(...values) {
+  return values.find(value => !isEmptyLocation(value)) || '';
 }
 
 function toJobResponse(row = {}) {
   const salary = row.salary_min || row.salary_max
     ? `${Number(row.salary_min || 0).toLocaleString('vi-VN')} - ${Number(row.salary_max || 0).toLocaleString('vi-VN')} ${row.currency || 'VND'}`
     : 'Thỏa thuận';
+  const companyAddress = fixMojibake(row.company_address || '');
+  const location = fixMojibake(firstLocation(row.location, row.company_address));
 
   return {
     id: row.id,
@@ -27,9 +79,14 @@ function toJobResponse(row = {}) {
     categoryId: row.category_id,
     title: fixMojibake(row.title),
     companyName: fixMojibake(row.company_name || row.employer_name || 'Smart Job Portal'),
+    company_name: fixMojibake(row.company_name || row.employer_name || 'Smart Job Portal'),
+    companyAddress,
+    company_address: companyAddress,
     companyLogo: row.company_logo || '',
     description: fixMojibake(row.description),
-    location: fixMojibake(row.location),
+    location,
+    city: fixMojibake(row.city || ''),
+    province: fixMojibake(row.province || ''),
     salary,
     salaryMin: row.salary_min,
     salaryMax: row.salary_max,
@@ -49,6 +106,7 @@ function toJobResponse(row = {}) {
     count: Number(row.application_count || 0),
     applicationCount: Number(row.application_count || 0),
     views: 0,
+    skills: normalizeSkills(row.skills),
     isApplied: Boolean(row.is_applied)
   };
 }
@@ -84,6 +142,15 @@ async function getDefaultCategoryId() {
   return category?.id || 1;
 }
 
+async function getEmployerAddress(employerId) {
+  if (!employerId) return '';
+  const [[profile]] = await db.query(
+    'SELECT address FROM employer_profiles WHERE user_id = ? LIMIT 1',
+    [employerId]
+  );
+  return profile?.address || '';
+}
+
 function parseSalary(payload = {}) {
   const min = payload.salaryMin ?? payload.salary_min;
   const max = payload.salaryMax ?? payload.salary_max;
@@ -105,6 +172,7 @@ function parseSalary(payload = {}) {
 
 exports.getJobs = async (req, res) => {
   try { 
+    await ensureJobColumns();
     const startedAt = Date.now();
     const page = Math.max(Number(req.query.page || 1), 1);
     const limit = Math.min(Math.max(Number(req.query.limit || 50), 1), 100);
@@ -120,17 +188,19 @@ exports.getJobs = async (req, res) => {
         j.requirements LIKE ? OR
         j.benefits LIKE ? OR
         j.location LIKE ? OR
+        ep.address LIKE ? OR
         u.full_name LIKE ? OR
+        ep.company_name LIKE ? OR
         c.name LIKE ?
       )`);
       const like = `%${keyword}%`;
-      params.push(like, like, like, like, like, like, like);
+      params.push(like, like, like, like, like, like, like, like, like);
     }
 
     if (req.query.location) {
       const locationKeywords = getLocationKeywords(req.query.location);
-      where.push(`(${locationKeywords.map(() => 'j.location LIKE ?').join(' OR ')})`);
-      params.push(...locationKeywords.map(item => `%${item}%`));
+      where.push(`(${locationKeywords.map(() => '(j.location LIKE ? OR ep.address LIKE ?)').join(' OR ')})`);
+      params.push(...locationKeywords.flatMap(item => [`%${item}%`, `%${item}%`]));
     }
 
     if (req.query.category_id) {
@@ -153,12 +223,16 @@ exports.getJobs = async (req, res) => {
     const fromSql = `
       FROM jobs j
       LEFT JOIN users u ON u.id = j.employer_id
+      LEFT JOIN employer_profiles ep ON ep.user_id = j.employer_id
       LEFT JOIN job_categories c ON c.id = j.category_id
     `;
     const [[countRow]] = await db.query(`SELECT COUNT(DISTINCT j.id) AS total ${fromSql} ${whereSql}`, params);
     const [rows] = await db.query(
       `
-      SELECT j.*, u.full_name AS employer_name, u.avatar_url AS company_logo,
+      SELECT j.*, u.full_name AS employer_name,
+             COALESCE(ep.company_name, u.full_name) AS company_name,
+             ep.address AS company_address,
+             COALESCE(ep.logo_url, u.avatar_url) AS company_logo,
              c.name AS category_name, COUNT(a.id) AS application_count
       ${fromSql}
       LEFT JOIN applications a ON a.job_id = j.id AND a.deleted_at IS NULL
@@ -219,12 +293,17 @@ exports.getAllJobs = exports.getJobs;
 
 exports.getJobById = async (req, res) => {
   try {
+    await ensureJobColumns();
     const [rows] = await db.query(
       `
-      SELECT j.*, u.full_name AS employer_name, u.avatar_url AS company_logo,
+      SELECT j.*, u.full_name AS employer_name,
+             COALESCE(ep.company_name, u.full_name) AS company_name,
+             ep.address AS company_address,
+             COALESCE(ep.logo_url, u.avatar_url) AS company_logo,
              c.name AS category_name, COUNT(a.id) AS application_count
       FROM jobs j
       LEFT JOIN users u ON u.id = j.employer_id
+      LEFT JOIN employer_profiles ep ON ep.user_id = j.employer_id
       LEFT JOIN job_categories c ON c.id = j.category_id
       LEFT JOIN applications a ON a.job_id = j.id AND a.deleted_at IS NULL
       WHERE j.id = ? AND j.deleted_at IS NULL
@@ -244,6 +323,7 @@ exports.getJobById = async (req, res) => {
 
 exports.createJob = async (req, res) => {
   try {
+    await ensureJobColumns();
     const title = String(req.body.title || '').trim();
     if (title.length < 5) {
       return res.status(400).json({ message: 'Tiêu đề công việc phải có ít nhất 5 ký tự.' });
@@ -253,21 +333,23 @@ exports.createJob = async (req, res) => {
     const employerId = getUserId(req, 1);
     const { salaryMin, salaryMax } = parseSalary(req.body);
     const expiryDate = req.body.expiry_date || req.body.deadline || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+    const skills = serializeSkills(req.body.skills || req.body.skillNames || req.body.tags);
+    const location = firstLocation(req.body.location, await getEmployerAddress(employerId), 'Chưa cập nhật');
 
     const [result] = await db.query(
       `
       INSERT INTO jobs (
         employer_id, category_id, title, description, location,
         salary_min, salary_max, currency, job_type, status,
-        expiry_date, experience_required, positions_available, benefits, requirements
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        expiry_date, experience_required, positions_available, benefits, requirements, skills
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         employerId,
         categoryId,
         title,
         req.body.description || 'Chưa có mô tả.',
-        req.body.location || 'Chưa cập nhật',
+        location,
         salaryMin,
         salaryMax,
         req.body.currency || 'VND',
@@ -277,7 +359,8 @@ exports.createJob = async (req, res) => {
         Number(req.body.experience_required || req.body.experience || 0),
         Number(req.body.positions_available || req.body.positions || 1),
         req.body.benefits || null,
-        req.body.requirements || null
+        req.body.requirements || null,
+        skills
       ]
     );
 
@@ -292,18 +375,22 @@ exports.createJob = async (req, res) => {
 
 exports.updateJob = async (req, res) => {
   try {
+    await ensureJobColumns();
     const current = await db.query('SELECT * FROM jobs WHERE id = ? AND deleted_at IS NULL', [req.params.id]);
     if (!current[0].length) return res.status(404).json({ message: 'Không tìm thấy việc làm' });
 
     const job = current[0][0];
     const { salaryMin, salaryMax } = parseSalary(req.body);
+    const skills = Object.prototype.hasOwnProperty.call(req.body, 'skills')
+      ? serializeSkills(req.body.skills)
+      : job.skills;
 
     await db.query(
       `
       UPDATE jobs
       SET title = ?, description = ?, location = ?, salary_min = ?, salary_max = ?,
           currency = ?, job_type = ?, status = ?, expiry_date = ?,
-          experience_required = ?, positions_available = ?, benefits = ?, requirements = ?
+          experience_required = ?, positions_available = ?, benefits = ?, requirements = ?, skills = ?
       WHERE id = ?
       `,
       [
@@ -320,6 +407,7 @@ exports.updateJob = async (req, res) => {
         Number(req.body.positions_available || req.body.positions || job.positions_available || 1),
         req.body.benefits ?? job.benefits,
         req.body.requirements ?? job.requirements,
+        skills,
         req.params.id
       ]
     );

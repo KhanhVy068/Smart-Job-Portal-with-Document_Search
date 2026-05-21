@@ -99,6 +99,10 @@ function renderJobs(jobs) {
     return;
   }
   el.innerHTML = jobs.map(j => `
+    ${(() => {
+      const skills = normalizeSkills(j.skills);
+      const location = j.location || j.company_address || j.companyAddress || 'Chưa cập nhật địa điểm';
+      return `
     <article class="cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md group"
              data-job-id="${j.id}">
       <div class="flex flex-col sm:flex-row sm:items-start gap-4">
@@ -117,17 +121,19 @@ function renderJobs(jobs) {
             </button>
           </div>
           <div class="mt-3 flex flex-wrap gap-3 text-xs font-semibold text-slate-500">
-            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span>${esc(j.location)}</span>
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span>${esc(location)}</span>
             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">payments</span>${esc(j.salary)}</span>
             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span>${timeAgo(j.postedAt)}</span>
           </div>
           <div class="mt-3 flex flex-wrap gap-2">
             <span class="text-[10px] font-bold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">${esc(j.jobType)}</span>
-            ${(j.skills || []).slice(0,3).map(s => `<span class="text-[10px] font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">${esc(s)}</span>`).join('')}
+            ${skills.length ? skills.slice(0,3).map(s => `<span class="text-[10px] font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">${esc(s)}</span>`).join('') : '<span class="text-[10px] font-bold px-2.5 py-1 bg-slate-100 text-slate-500 rounded-full">Chưa cập nhật kỹ năng</span>'}
           </div>
         </div>
       </div>
-    </article>`).join('');
+    </article>
+      `;
+    })()}`).join('');
 
   // Attach click events
   el.querySelectorAll('article[data-job-id]').forEach(card => {
@@ -201,4 +207,16 @@ function setText(id, val) {
 
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function normalizeSkills(value) {
+  if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return normalizeSkills(parsed);
+  } catch {
+    // Accept comma-separated skills from older API rows.
+  }
+  return String(value).split(',').map(item => item.trim()).filter(Boolean);
 }

@@ -123,7 +123,6 @@ function collectFormData(status) {
     experienceRequired: Number(getValue('jobExperience')) || 0,
     status,
     count: Number(editingJob?.count ?? editingJob?.cvCount ?? editingJob?.applicationCount ?? 0),
-    views: Number(editingJob?.views ?? editingJob?.viewCount ?? 0),
     createdAt: editingJob?.createdAt || now,
     updatedAt: now
   };
@@ -155,7 +154,7 @@ function fillForm(job) {
 
   setValue('jobBenefits', job.benefits || '');
 
-  renderSkills(Array.isArray(job.skills) ? job.skills : []);
+  renderSkills(normalizeSkills(job.skills));
 }
 
 // Su kien ky nang
@@ -215,6 +214,18 @@ function getSkills() {
   if (pendingSkill) values.push(pendingSkill);
 
   return Array.from(new Set(values));
+}
+
+function normalizeSkills(value) {
+  if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return normalizeSkills(parsed);
+  } catch {
+    // Accept comma-separated skills from older API rows.
+  }
+  return String(value).split(',').map(item => item.trim()).filter(Boolean);
 }
 
 // Trang thai nut

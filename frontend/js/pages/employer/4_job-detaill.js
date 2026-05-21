@@ -41,13 +41,12 @@ function renderJob(job) {
   setText('jobStatus', getStatusLabel(job.status));
   setText('jobCreatedAt', formatDate(job.createdAt || job.publishedAt));
   setText('jobCandidates', formatNumber(job.count ?? job.cvCount ?? job.applicationCount ?? 0));
-  setText('jobViews', formatNumber(job.views ?? job.viewCount ?? 0));
   setText('jobDescription', job.description || 'Chua cap nhat mo ta cong viec.');
   setText('jobBenefits', job.benefits || 'Chua cap nhat quyen loi.');
 
   renderRequirements(job.requirements);
-  renderSkills(Array.isArray(job.skills) ? job.skills : []);
-  renderLocation(job.location || job.city || 'Chua cap nhat');
+  renderSkills(normalizeSkills(job.skills));
+  renderLocation(job.location || job.company_address || job.companyAddress || job.city || 'Chua cap nhat');
   renderSalary(job.salary, job.salaryMin, job.salary_min, job.salaryMax, job.salary_max);
   renderExperience(job.experienceRequired ?? job.experience_required ?? job.experience ?? 0);
 }
@@ -71,7 +70,7 @@ function renderSkills(skills) {
   const target = document.getElementById('jobSkills');
   if (!target) return;
 
-  const items = skills.length ? skills : ['Chua cap nhat'];
+  const items = skills.length ? skills : ['Chưa cập nhật kỹ năng'];
   target.innerHTML = items.map(skill => `
     <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">${escapeHtml(skill)}</span>
   `).join('');
@@ -141,7 +140,6 @@ function renderMissingJob() {
   setText('jobStatus', 'Khong co du lieu');
   setText('jobCreatedAt', '--');
   setText('jobCandidates', '0');
-  setText('jobViews', '0');
 }
 
 // Chuan hoa danh sach
@@ -166,6 +164,18 @@ function normalizeTextList(value) {
     .split(/\r?\n|-/)
     .map(item => item.trim())
     .filter(Boolean);
+}
+
+function normalizeSkills(value) {
+  if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return normalizeSkills(parsed);
+  } catch {
+    // Accept comma-separated skills from older API rows.
+  }
+  return String(value).split(',').map(item => item.trim()).filter(Boolean);
 }
 
 // Nhan trang thai

@@ -66,6 +66,10 @@ const Job = sequelize.define('Job', {
     requirements: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    skills: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     tableName: 'jobs',

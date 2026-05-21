@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     positions_available INT DEFAULT 1,
     benefits TEXT,
     requirements TEXT,
+    skills TEXT NULL,
     
     posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

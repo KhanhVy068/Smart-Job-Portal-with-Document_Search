@@ -274,7 +274,7 @@ function renderCandidates(candidates) {
       <td class="px-6 py-5">
         <div class="flex items-center justify-end gap-2">
           <button class="btnViewCandidate rounded-lg p-2 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" data-id="${escapeHtml(candidate.id)}" title="Xem chi tiết CV">
-            <span class="material-symbols-outlined">visibility</span>
+            <span class="material-symbols-outlined">article</span>
           </button>
           <button class="btnSaveCandidate rounded-lg p-2 text-slate-400 transition-colors hover:bg-green-50 hover:text-green-600" data-id="${escapeHtml(candidate.applicationId || candidate.id)}" title="Chuyển sang đang xét duyệt">
             <span class="material-symbols-outlined">bookmark</span>

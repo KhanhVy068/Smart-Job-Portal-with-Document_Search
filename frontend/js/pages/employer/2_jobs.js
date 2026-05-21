@@ -36,7 +36,6 @@ function setLoadingState() {
   setText('totalJobs', '--');
   setText('activeJobs', '--');
   setText('totalCandidates', '--');
-  setText('totalViews', '--');
   setText('countActive', '--');
   setText('countClosed', '--');
   setText('countDraft', '--');
@@ -97,12 +96,10 @@ function renderStats(jobs) {
   const closedJobs = jobs.filter(job => job.status === 'closed').length;
   const draftJobs = jobs.filter(job => job.status === 'draft').length;
   const totalCandidates = jobs.reduce((sum, job) => sum + job.count, 0);
-  const totalViews = jobs.reduce((sum, job) => sum + job.views, 0);
 
   setText('totalJobs', formatNumber(totalJobs));
   setText('activeJobs', formatNumber(activeJobs));
   setText('totalCandidates', formatNumber(totalCandidates));
-  setText('totalViews', formatNumber(totalViews));
   setText('countActive', formatNumber(activeJobs));
   setText('countClosed', formatNumber(closedJobs));
   setText('countDraft', formatNumber(draftJobs));
@@ -152,7 +149,7 @@ function renderJobs(jobs) {
       <td class="px-6 py-5">
         <div class="flex justify-end items-center gap-2">
           <button class="btnView p-2 text-slate-400 hover:text-blue-600" data-id="${escapeHtml(job.id)}" title="Xem chi tiết">
-            <span class="material-symbols-outlined">visibility</span>
+            <span class="material-symbols-outlined">article</span>
           </button>
           <button class="btnEdit p-2 text-slate-400 hover:text-blue-600" data-id="${escapeHtml(job.id)}">
             <span class="material-symbols-outlined">edit</span>
@@ -306,8 +303,7 @@ function normalizeJobs(payload) {
       createdAt: formatDate(job.createdAt || job.publishedAt),
       status: normalizedStatus,
       statusLabel: getStatusLabel(normalizedStatus),
-      count: Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.applicationsCount ?? 0),
-      views: Number(job.views ?? job.viewCount ?? 0)
+      count: Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.applicationsCount ?? 0)
     };
   });
 }
