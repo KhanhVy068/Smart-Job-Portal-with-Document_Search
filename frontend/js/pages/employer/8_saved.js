@@ -280,6 +280,7 @@ function renderAvatar(candidate) {
 function bindCandidateActions(candidates) {
   document.querySelectorAll('.btnViewSaved').forEach(button => {
     button.addEventListener('click', () => {
+      // data-id là savedId; data-candidate-id là candidateId riêng biệt mỗi ứng viên
       const candidate = candidates.find(item => String(item.id) === String(button.dataset.id));
       if (candidate) sessionStorage.setItem('selectedCandidate', JSON.stringify(candidate));
       window.appRouter?.navigate('cv-detail') ?? (window.location.hash = '#cv-detail');
@@ -288,6 +289,7 @@ function bindCandidateActions(candidates) {
 
   document.querySelectorAll('.btnRemoveSaved').forEach(button => {
     button.addEventListener('click', async () => {
+      // Dùng savedId (id trong DB saved_candidates) để xoá đúng bản ghi
       await removeSavedCandidate(button.dataset.id, button);
     });
   });

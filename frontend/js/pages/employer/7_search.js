@@ -2,13 +2,10 @@ import { api } from '../../api.js';
 
 const PAGE_SIZE = 8;
 
-// Contract API dự kiến khi backend nối vào:
-// GET  /candidates/search?q=&location=&experience=&skills=&sort=&page=&limit=
-//      -> trả về { items, total, page, totalPages } hoặc mảng ứng viên.
-// POST /candidates/save { id } -> lưu CV/ứng viên vào danh sách quan tâm.
 const endpoints = {
   search: '/candidates/search',
-  save: '/candidates/save'
+  save: '/candidates/save',
+  savedIds: '/candidates/saved-ids'
 };
 
 let currentPage = 1;
@@ -17,11 +14,25 @@ let currentLocation = '';
 let currentExperience = '';
 let currentSort = 'relevance';
 let isLoading = false;
+// IDs (candidateId) đã lưu — dùng để ẩn khỏi kết quả tìm kiếm
+let savedCandidateIds = new Set();
 
 // Khởi tạo trang tìm kiếm CV, chỉ lấy dữ liệu từ API backend.
-export function init() {
+export async function init() {
+  await loadSavedIds();
   bindEvents();
   renderInitialState();
+}
+
+// Tải danh sách ID ứng viên đã lưu để lọc khỏi kết quả tìm kiếm.
+async function loadSavedIds() {
+  try {
+    const payload = await api.get(endpoints.savedIds);
+    const ids = payload?.ids || [];
+    savedCandidateIds = new Set(ids.map(String));
+  } catch {
+    savedCandidateIds = new Set();
+  }
 }
 
 // Gắn sự kiện cho form tìm kiếm và bộ lọc.
@@ -149,7 +160,11 @@ function getSelectedSkills() {
 
 // Chuẩn hóa nhiều kiểu payload để frontend không phụ thuộc cứng vào tên field backend.
 function normalizeSearchResult(payload) {
-  const items = normalizeList(payload, ['items', 'candidates', 'results', 'data']).map(normalizeCandidate);
+  const rawItems = normalizeList(payload, ['items', 'candidates', 'results', 'data']).map(normalizeCandidate);
+  // Lọc ra ứng viên đã lưu — candidateId hoặc id đều có thể khớp
+  const items = rawItems.filter(c =>
+    !savedCandidateIds.has(String(c.candidateId)) && !savedCandidateIds.has(String(c.id))
+  );
   const total = Number(payload?.total ?? payload?.totalItems ?? payload?.count ?? items.length);
   const page = Number(payload?.page ?? payload?.currentPage ?? currentPage);
   const totalPages = Math.max(1, Number(payload?.totalPages ?? Math.ceil(total / PAGE_SIZE) ?? 1));
@@ -315,20 +330,37 @@ function bindCandidateActions(candidates) {
 
   document.querySelectorAll('.btnSaveCandidate').forEach(button => {
     button.addEventListener('click', async () => {
-      await saveCandidate(button.dataset.id, button);
+      const candidate = candidates.find(item => String(item.id) === String(button.dataset.id));
+      await saveCandidate(candidate, button);
     });
   });
 }
 
-// Lưu CV qua backend, không lưu cứng trên frontend.
-async function saveCandidate(id, button) {
+// Lưu CV qua backend — xoá khỏi danh sách ngay lập tức kể cả khi đang lọc.
+async function saveCandidate(candidate, button) {
+  if (!candidate) return;
   const originalText = button.textContent;
   button.disabled = true;
   button.textContent = 'Đang lưu...';
 
   try {
-    await api.post(endpoints.save, { id });
-    button.textContent = 'Đã lưu';
+    await api.post(endpoints.save, {
+      id: candidate.candidateId || candidate.id,
+      candidateId: candidate.candidateId || candidate.id,
+      documentId: candidate.cvDocumentId || candidate.id
+    });
+
+    // Đánh dấu đã lưu để lọc ra ở các lần tìm kiếm tiếp theo
+    savedCandidateIds.add(String(candidate.candidateId || candidate.id));
+    savedCandidateIds.add(String(candidate.id));
+
+    // Xoá thẻ ứng viên khỏi DOM ngay lập tức
+    const card = button.closest('article');
+    if (card) {
+      card.style.transition = 'opacity 0.25s';
+      card.style.opacity = '0';
+      setTimeout(() => card.remove(), 260);
+    }
   } catch (err) {
     console.error('Save candidate error:', err);
     button.disabled = false;

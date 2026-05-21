@@ -97,6 +97,9 @@ function collectFormData(status) {
 
   const now = new Date().toISOString();
   const id = editingJobId || createLocalId();
+  const salaryMin = Number(getValue('jobSalaryMin')) || null;
+  const salaryMax = Number(getValue('jobSalaryMax')) || null;
+  const benefits = getValue('jobBenefits').trim();
 
   return {
     ...(editingJob || {}),
@@ -107,10 +110,17 @@ function collectFormData(status) {
     employmentType: getValue('jobType'),
     category: getValue('jobCategory'),
     specialization: getValue('jobSpecialization'),
+    location: getValue('jobLocation').trim() || 'Chưa cập nhật',
+    salary_min: salaryMin,
+    salary_max: salaryMax,
+    salaryMin,
+    salaryMax,
     skills: getSkills(),
     description: getValue('jobDescription'),
     requirements: getValue('jobRequirements'),
-    benefits: getValue('jobBenefits'),
+    benefits,
+    experience_required: Number(getValue('jobExperience')) || 0,
+    experienceRequired: Number(getValue('jobExperience')) || 0,
     status,
     count: Number(editingJob?.count ?? editingJob?.cvCount ?? editingJob?.applicationCount ?? 0),
     views: Number(editingJob?.views ?? editingJob?.viewCount ?? 0),
@@ -136,9 +146,15 @@ function fillForm(job) {
   setValue('jobType', job.type || job.employmentType);
   setValue('jobCategory', job.category);
   setValue('jobSpecialization', job.specialization);
+  setValue('jobLocation', job.location || '');
+  setValue('jobSalaryMin', job.salaryMin ?? job.salary_min ?? '');
+  setValue('jobSalaryMax', job.salaryMax ?? job.salary_max ?? '');
+  setValue('jobExperience', job.experienceRequired ?? job.experience_required ?? '');
   setValue('jobDescription', job.description);
   setValue('jobRequirements', job.requirements);
-  setValue('jobBenefits', job.benefits);
+
+  setValue('jobBenefits', job.benefits || '');
+
   renderSkills(Array.isArray(job.skills) ? job.skills : []);
 }
 
