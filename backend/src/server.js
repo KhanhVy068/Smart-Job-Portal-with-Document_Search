@@ -23,6 +23,7 @@ const documentWorker = require('./services/documentWorker');
 const searchService = require('./services/searchService');
 const documentQueue = require('./services/documentQueue');
 const performanceLogService = require('./services/performanceLogService');
+const candidateController = require('./controllers/candidateController');
 
 
 const app = express();
@@ -67,6 +68,10 @@ app.listen(PORT, () => {
   performanceLogService.ensurePerformanceLogsTable()
     .then(() => console.log('Performance log table ready.'))
     .catch(err => console.warn('Performance log table warning:', err.message));
+
+  candidateController.ensureSavedCandidatesTable()
+    .then(() => console.log('Saved candidates table ready.'))
+    .catch(err => console.warn('Saved candidates table warning:', err.message));
 
   documentWorker.start();
   documentQueue.enqueuePendingDocuments(db)

@@ -228,7 +228,7 @@ async function searchWithMeili(options = {}) {
       ...hit,
       id: hit.documentId || hit.jobId || hit.uid,
       type: hit.kind,
-      score: Math.round((1 - Number(hit._rankingScore || 0)) * 100) || 90,
+      score: Math.round(Number(hit._rankingScore || 0) * 100) || 50,
       summary: hit._formatted?.content || hit.summary || clip(hit.content, 260)
     }))
   };

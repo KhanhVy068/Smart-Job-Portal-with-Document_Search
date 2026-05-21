@@ -48,6 +48,8 @@ function renderJob(job) {
   renderRequirements(job.requirements);
   renderSkills(Array.isArray(job.skills) ? job.skills : []);
   renderLocation(job.location || job.city || 'Chua cap nhat');
+  renderSalary(job.salary, job.salaryMin, job.salary_min, job.salaryMax, job.salary_max);
+  renderExperience(job.experienceRequired ?? job.experience_required ?? job.experience ?? 0);
 }
 
 // Render yeu cau
@@ -73,6 +75,40 @@ function renderSkills(skills) {
   target.innerHTML = items.map(skill => `
     <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">${escapeHtml(skill)}</span>
   `).join('');
+}
+
+// Render luong
+function renderSalary(salary, salaryMin, salaryMinRaw, salaryMax, salaryMaxRaw) {
+  const target = document.getElementById('jobSalary');
+  if (!target) return;
+
+  const min = salaryMin ?? salaryMinRaw;
+  const max = salaryMax ?? salaryMaxRaw;
+
+  let label;
+  if (salary && salary !== 'Thỏa thuận') {
+    label = salary;
+  } else if (min && max) {
+    label = `${formatMillion(min)} - ${formatMillion(max)} triệu`;
+  } else if (min) {
+    label = `Từ ${formatMillion(min)} triệu`;
+  } else if (max) {
+    label = `Đến ${formatMillion(max)} triệu`;
+  } else {
+    label = 'Thỏa thuận';
+  }
+
+  target.innerHTML = `<span class="material-symbols-outlined text-slate-400">payments</span> ${escapeHtml(label)}`;
+}
+
+// Render kinh nghiem
+function renderExperience(years) {
+  const target = document.getElementById('jobExperience');
+  if (!target) return;
+
+  const num = Number(years) || 0;
+  const label = num > 0 ? `${num}+ năm kinh nghiệm` : 'Không yêu cầu kinh nghiệm';
+  target.innerHTML = `<span class="material-symbols-outlined text-slate-400">work</span> ${escapeHtml(label)}`;
 }
 
 // Render dia diem
@@ -149,6 +185,12 @@ function setText(id, value) {
 // Dinh dang so
 function formatNumber(value) {
   return Number(value || 0).toLocaleString('vi-VN');
+}
+
+// Dinh dang trieu dong
+function formatMillion(value) {
+  const num = Number(value) || 0;
+  return num >= 1_000_000 ? (num / 1_000_000).toLocaleString('vi-VN') : num.toLocaleString('vi-VN');
 }
 
 // Dinh dang ngay
