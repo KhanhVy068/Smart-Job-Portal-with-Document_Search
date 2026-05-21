@@ -9,6 +9,7 @@ CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
 USE job_portal;
+SET NAMES utf8mb4;
 
 -- ==========================================
 -- 1. Bảng JobCategories: Danh mục ngành nghề (có phân cấp)

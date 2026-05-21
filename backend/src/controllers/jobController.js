@@ -34,6 +34,8 @@ function toJobResponse(row = {}) {
     salaryMin: row.salary_min,
     salaryMax: row.salary_max,
     currency: row.currency,
+    experienceRequired: row.experience_required || 0,
+    experience: row.experience_required || 0,
     jobType: row.job_type,
     type: row.job_type,
     category: fixMojibake(row.category_name || ''),
@@ -142,6 +144,11 @@ exports.getJobs = async (req, res) => {
       params.push(normalizeJobType(jobType));
     }
 
+    if (req.query.employer_id) {
+      where.push('j.employer_id = ?');
+      params.push(Number(req.query.employer_id));
+    }
+
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
     const fromSql = `
       FROM jobs j
@@ -203,6 +210,7 @@ exports.getJobs = async (req, res) => {
 };
 
 exports.getMyJobs = async (req, res) => {
+  req.query.employer_id = getUserId(req, 1);
   req.query.limit = req.query.limit || 100;
   return exports.getJobs(req, res);
 };

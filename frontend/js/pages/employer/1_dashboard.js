@@ -5,18 +5,16 @@ export async function init() {
   setDashboardLoading();
 
   try {
-    // Tải dữ liệu nguồn
-    const [jobsData, applicationsData, candidatesData] = await Promise.all([
+    // Tải dữ liệu nguồn — employer dùng /applications/employer để lấy đúng ứng tuyển của mình
+    const [jobsData, applicationsData] = await Promise.all([
       getOptional('/jobs/my', []),
-      getOptional('/applications/my', []),
-      getOptional('/candidates/recent', [])
+      getOptional('/applications/employer', [])
     ]);
 
     // Chuẩn hóa phản hồi API
     const jobs = normalizeList(jobsData, ['items', 'jobs', 'data']);
     const applications = normalizeList(applicationsData, ['items', 'applications', 'data']);
-    const candidates = normalizeList(candidatesData, ['items', 'candidates', 'data']);
-    const dashboard = buildDashboardData({ jobs, applications, candidates });
+    const dashboard = buildDashboardData({ jobs, applications, candidates: applications });
 
     renderStats(dashboard);
     renderApplicationChart(dashboard.applicationTrend);
@@ -30,19 +28,21 @@ export async function init() {
 
 // Tạo dữ liệu dashboard
 function buildDashboardData({ jobs, applications, candidates }) {
-  const candidateRecords = applications.length ? applications : candidates;
-  const totalCandidates = candidateRecords.length || sumJobsCandidateCount(jobs);
-  const processed = countByStatus(candidateRecords, ['processed', 'indexed', 'saved', 'da luu', 'da luu/indexed'], 'cvStatus');
-  const rejected = countByStatus(candidateRecords, ['rejected', 'denied', 'bi loai'], 'cvStatus');
+  const records = applications.length ? applications : candidates;
+  const totalCandidates = records.length || sumJobsCandidateCount(jobs);
 
-  // Dữ liệu tổng hợp
+  // CV đã xử lý xong = cvStatus là completed/indexed/processed
+  const processed = countByStatus(records, ['completed', 'indexed', 'processed'], 'cvStatus');
+  // Ứng tuyển bị từ chối = status là rejected
+  const rejected = countByStatus(records, ['rejected'], 'status');
+
   return {
     jobs: jobs.length,
     candidates: totalCandidates,
     processed,
     rejected,
-    applicationTrend: buildApplicationTrend(candidateRecords),
-    recentActivities: buildRecentActivities(candidateRecords),
+    applicationTrend: buildApplicationTrend(records),
+    recentActivities: buildRecentActivities(records),
     recentJobs: buildRecentJobs(jobs)
   };
 }

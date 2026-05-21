@@ -175,6 +175,33 @@ exports.getApplicationById = async (req, res) => {
   }
 };
 
+exports.getEmployerApplications = async (req, res) => {
+  try {
+    const employerId = getUserId(req, 1);
+    const [rows] = await db.query(
+      `
+      SELECT a.id AS application_id, a.job_id, a.candidate_id, a.cv_document_id,
+             a.status, a.applied_at, a.updated_at,
+             u.full_name AS candidate_name, u.email AS candidate_email, u.phone AS candidate_phone,
+             d.file_url AS cv_link, d.file_name AS cv_name, d.status AS cv_status,
+             j.title AS job_title, j.location
+      FROM applications a
+      JOIN users u ON a.candidate_id = u.id
+      JOIN documents d ON a.cv_document_id = d.id
+      JOIN jobs j ON a.job_id = j.id
+      WHERE a.deleted_at IS NULL AND j.employer_id = ?
+      ORDER BY a.applied_at DESC
+      `,
+      [employerId]
+    );
+    const items = rows.map(toApplicationResponse);
+    res.json({ total: items.length, items, applications: items, data: items });
+  } catch (error) {
+    console.error('Get employer applications error:', error);
+    res.status(500).json({ message: 'Lỗi lấy danh sách ứng tuyển', error: error.message });
+  }
+};
+
 exports.updateApplicationStatus = async (req, res) => {
   try {
     const nextStatus = normalizeApplicationStatus(req.body.status || req.body.applicationStatus || req.body.cvStatus);

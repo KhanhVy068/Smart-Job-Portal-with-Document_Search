@@ -115,9 +115,14 @@ async function findSelectedJob(id) {
 
 // Tải ứng viên từ API. Demo fallback chỉ bật khi chủ động set localStorage.useDemoCandidates = 'true'.
 async function loadCandidates(jobId) {
-  const endpoints = jobId
-    ? [candidateEndpoints.byJob(jobId), candidateEndpoints.byQuery(jobId), candidateEndpoints.allApplications, candidateEndpoints.allCandidates]
+  const jobEndpoints = jobId
+    ? [candidateEndpoints.byJob(jobId), candidateEndpoints.byQuery(jobId)]
+    : [];
+  const genericEndpoints = jobId
+    ? []
     : [candidateEndpoints.allApplications, candidateEndpoints.allCandidates];
+
+  const endpoints = [...jobEndpoints, ...genericEndpoints];
 
   for (const endpoint of endpoints) {
     try {
