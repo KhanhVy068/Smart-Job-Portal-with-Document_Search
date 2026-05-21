@@ -326,13 +326,13 @@ const { isAuth } = require('../middleware/authMiddleware');
 const { isAdmin } = require('../middleware/roleMiddleware');
 const { 
     getMe, getDashboard,
-    getAllUsers, blockUser, unblockUser, 
-    getUserById, createUser, updateUser, deleteUser,
-    getAllJobs, deleteJob,
+    getAllUsers, blockUser, unblockUser, updateUserStatus,
+    getUserById, createUser, updateUser, deleteUser, bulkDeleteUsers, bulkUpdateUsersStatus,
+    getAllJobs, getJobById, updateJobStatus, deleteJob, bulkDeleteJobs,
     getAllCategories, createCategory, updateCategory, deleteCategory,
     getStats,
-    getAdminDocuments, getAdminDocumentById, updateDocumentStatus, deleteDocument,
-    getStorage, getReports, getSettings, getBackgroundJobs, getSearchAnalytics, genericOk, 
+    getAdminDocuments, getAdminDocumentById, viewAdminDocument, updateDocumentStatus, deleteDocument,
+    getStorage, getReports, getReportsSummary, getSettings, getBackgroundJobs, getSearchAnalytics, genericOk, 
     getBackgroundJobById, retryBackgroundJob, deleteBackgroundJob, controlBackgroundQueue,
 
 } = require('../controllers/AdminController');
@@ -348,10 +348,26 @@ router.get('/dashboard', getDashboard);
 // GET /admin/users - Xem danh sách users
 router.get('/users', getAllUsers);
 router.post('/users', createUser);
+router.post('/users/bulk-delete', bulkDeleteUsers);
+router.post('/users/bulk-ban', (req, res) => {
+  req.body = { ...req.body, status: 'locked' };
+  return bulkUpdateUsersStatus(req, res);
+});
+router.post('/users/bulk-unban', (req, res) => {
+  req.body = { ...req.body, status: 'active' };
+  return bulkUpdateUsersStatus(req, res);
+});
 router.get('/users/:id', getUserById);
 router.patch('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
-router.post('/users/bulk/:action', genericOk);
+router.post('/users/bulk/:action', (req, res) => {
+  if (req.params.action === 'delete') return bulkDeleteUsers(req, res);
+  if (['ban', 'lock'].includes(req.params.action)) {
+    req.body = { ...req.body, status: 'locked' };
+    return bulkUpdateUsersStatus(req, res);
+  }
+  return genericOk(req, res);
+});
 router.post('/users/:id/reset-password', genericOk);
 
 // PUT /admin/users/:id/block - Khóa user
@@ -361,29 +377,46 @@ router.put('/users/:id/block', blockUser);
 router.put('/users/:id/unblock', unblockUser);
 router.patch('/users/:id/block', blockUser);
 router.patch('/users/:id/unblock', unblockUser);
+router.patch('/users/:id/ban', blockUser);
+router.patch('/users/:id/unban', unblockUser);
+router.patch('/users/:id/status', updateUserStatus);
 
 // GET /admin/jobs - Xem danh sách jobs
 router.get('/jobs', getAllJobs);
 router.post('/jobs', genericOk);
-router.get('/jobs/:id', (req, res) => res.json({ id: req.params.id }));
+router.post('/jobs/bulk-delete', bulkDeleteJobs);
+router.post('/jobs/bulk-approve', genericOk);
+router.get('/jobs/:id', getJobById);
 router.patch('/jobs/:id', genericOk);
-router.patch('/jobs/:id/:action', genericOk);
-router.post('/jobs/bulk/:action', genericOk);
+router.patch('/jobs/:id/:action', updateJobStatus);
+router.post('/jobs/bulk/:action', (req, res) => {
+  if (req.params.action === 'delete') return bulkDeleteJobs(req, res);
+  return genericOk(req, res);
+});
 
 // DELETE /admin/jobs/:id - Xóa job
 router.delete('/jobs/:id', deleteJob);
 
 router.get('/documents', getAdminDocuments);
 router.get('/documents/:id', getAdminDocumentById);
+router.get('/documents/:id/view', viewAdminDocument);
 router.patch('/documents/:id/:action', updateDocumentStatus);
 router.delete('/documents/:id', deleteDocument);
+
+router.get('/cv-documents', getAdminDocuments);
+router.get('/cv-documents/:id/view', viewAdminDocument);
+router.get('/cv-documents/:id', getAdminDocumentById);
+router.patch('/cv-documents/:id/:action', updateDocumentStatus);
+router.delete('/cv-documents/:id', deleteDocument);
 
 router.get('/storage', getStorage);
 router.patch('/storage/files/:id/move', genericOk);
 router.delete('/storage/files/:id', deleteDocument);
+router.delete('/storage/:id', deleteDocument);
 router.post('/storage/:action', genericOk);
 router.patch('/storage/config', genericOk);
 
+router.get('/reports/summary', getReportsSummary);
 router.get('/reports', getReports);
 router.get('/settings', getSettings);   
 router.patch('/settings/:section', genericOk);  

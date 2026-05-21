@@ -20,11 +20,17 @@
   <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
     <div class="grid grid-cols-1 gap-3 lg:grid-cols-[180px_1fr_1fr_auto]">
       <select id="reportRoleFilter" class="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-        <option value="">Role: Tất cả</option>
-        <option value="user">Users</option>
-        <option value="employer">Employers</option>
+        <option value="">Loại: Tất cả</option>
+        <option value="job">Tin tuyển dụng</option>
+        <option value="cv">CV</option>
+        <option value="user">User</option>
       </select>
-      <input id="reportCategoryFilter" class="h-11 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Danh mục việc làm">
+      <select id="reportCategoryFilter" class="h-11 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+        <option value="">Trạng thái: Tất cả</option>
+        <option value="pending">Chờ xử lý</option>
+        <option value="resolved">Đã xử lý</option>
+        <option value="rejected">Đã từ chối</option>
+      </select>
       <input id="reportLocationFilter" class="h-11 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100" type="search" placeholder="Location">
       <button id="btnReloadReports" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 hover:bg-slate-50" type="button">
         <span class="material-symbols-outlined text-xl">refresh</span>
@@ -137,7 +143,8 @@
         <select id="reportTableType" class="h-10 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
           <option value="users">Users</option>
           <option value="jobs">Jobs</option>
-          <option value="hồ sơ ứng tuyển">Profile ứng tuyển</option>
+          <option value="applications">Profile ứng tuyển</option>
+          <option value="reports">Reports</option>
         </select>
         <button class="reportExportButton rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 hover:bg-slate-50" type="button" data-format="csv">Export CSV</button>
         <button class="reportExportButton rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 hover:bg-slate-50" type="button" data-format="excel">Export Excel</button>

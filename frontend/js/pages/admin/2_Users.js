@@ -386,21 +386,24 @@ async function deleteUsers(user) {
   if (!confirm(`Delete user ${user.name || user.email}?`)) return;
   try {
     await api.delete(`${endpoint}/${encodeURIComponent(user.id)}`);
+    showToast('Đã xóa user thành công.');
     await loadUsers();
   } catch (err) {
     console.error('Delete user error:', err);
-    alert(err.message || 'Không xóa được user.');
+    showToast(err.message || 'Không xóa được user.', 'error');
   }
 }
 
 async function updateUsersStatus(user, nextStatus) {
-  const action = nextStatus === 'banned' ? 'ban' : 'unban';
   try {
-    await api.patch(`${endpoint}/${encodeURIComponent(user.id)}/${action}`, {});
+    await api.patch(`${endpoint}/${encodeURIComponent(user.id)}/status`, {
+      status: nextStatus === 'banned' ? 'locked' : 'active'
+    });
+    showToast(nextStatus === 'banned' ? 'Đã khóa user.' : 'Đã mở khóa user.');
     await loadUsers();
   } catch (err) {
     console.error('Update user status error:', err);
-    alert(err.message || 'Không cập nhật được trạng thái user.');
+    showToast(err.message || 'Không cập nhật được trạng thái user.', 'error');
   }
 }
 
@@ -424,17 +427,18 @@ async function bulkAction(action) {
   try {
     const url = action === 'delete' ? `${endpoint}/bulk-delete` : `${endpoint}/bulk-ban`;
     await api.post(url, { ids });
+    showToast(action === 'delete' ? 'Đã xóa các user đã chọn.' : 'Đã khóa các user đã chọn.');
     await loadUsers();
   } catch (err) {
     console.error('Bulk action error:', err);
-    alert(err.message || 'Không thực hiện được bulk action.');
+    showToast(err.message || 'Không thực hiện được bulk action.', 'error');
   }
 }
 
 function buildQuery() {
   const params = new URLSearchParams();
-  if (state.search) params.set('search', state.search);
-  if (state.role) params.set('role', state.role);
+  if (state.search) params.set('q', state.search);
+  if (state.role) params.set('role', state.role === 'user' ? 'candidate' : state.role);
   if (state.status) params.set('status', state.status);
   params.set('page', String(state.page));
   params.set('limit', String(state.limit));
@@ -538,7 +542,7 @@ function normalizeRole(role = '') {
 
 function normalizeStatus(status = '') {
   const normalized = String(status).toLowerCase();
-  if (['banned', 'ban', 'blocked', 'disabled'].includes(normalized)) return 'banned';
+  if (['banned', 'ban', 'blocked', 'disabled', 'locked', 'lock'].includes(normalized)) return 'banned';
   if (['pending', 'waiting', 'unverified'].includes(normalized)) return 'pending';
   return 'active';
 }
@@ -592,6 +596,14 @@ function setText(id, value) {
 function renderList(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `fixed right-4 top-4 z-[9999] rounded-lg px-4 py-3 text-sm font-black shadow-lg ${type === 'error' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  window.setTimeout(() => toast.remove(), 2500);
 }
 
 function escapeHtml(value = '') {

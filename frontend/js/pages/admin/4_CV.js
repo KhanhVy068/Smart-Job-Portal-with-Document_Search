@@ -8,7 +8,7 @@
 // PATCH  /admin/documents/:id/reject
 // DELETE /admin/documents/:id
 // GET    /admin/documents/:id/download
-const endpoint = '/admin/documents';
+const endpoint = '/admin/cv-documents';
 
 const state = {
   search: '',
@@ -131,7 +131,7 @@ function normalizeDocument(item = {}) {
     fileUrl: file.url || file.fileUrl || item.fileUrl || item.url || '',
     fileType: normalizeFileType(file.type || item.fileType || item.mimeType || item.fileName),
     fileSize: Number(file.size ?? item.fileSize ?? item.size ?? 0) || 0,
-    status: normalizeStatus(item.status || item.cvStatus || item.state || 'pending'),
+    status: normalizeStatus(item.status || item.moderation_status || item.cvStatus || item.state || 'pending'),
     uploadedAt: item.uploadedAt || item.createdAt || item.created_at || item.submittedAt || '',
     applyHistory: normalizeArray(item.applyHistory || item.history || item.activities),
     raw: item
@@ -366,9 +366,9 @@ function downloadDocument(documentItem) {
 
 function buildQuery() {
   const params = new URLSearchParams();
-  if (state.search) params.set('search', state.search);
+  if (state.search) params.set('q', state.search);
   if (state.status) params.set('status', state.status);
-  if (state.fileType) params.set('fileType', state.fileType);
+  if (state.fileType) params.set('type', state.fileType);
   if (state.job) params.set('job', state.job);
   params.set('page', String(state.page));
   params.set('limit', String(state.limit));
@@ -474,8 +474,8 @@ function normalizeArray(value) {
 
 function normalizeStatus(status = '') {
   const normalized = String(status).toLowerCase();
-  if (['approved', 'approve', 'accepted'].includes(normalized)) return 'approved';
-  if (['rejected', 'reject', 'denied'].includes(normalized)) return 'rejected';
+  if (['approved', 'approve', 'accepted', 'completed'].includes(normalized)) return 'approved';
+  if (['rejected', 'reject', 'denied', 'failed'].includes(normalized)) return 'rejected';
   if (['spam'].includes(normalized)) return 'spam';
   if (['reported', 'report'].includes(normalized)) return 'reported';
   return 'pending';

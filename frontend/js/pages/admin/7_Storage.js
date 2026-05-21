@@ -390,7 +390,7 @@ async function saveConfig(event) {
 
 function buildQuery() {
   const params = new URLSearchParams();
-  if (state.search) params.set('search', state.search);
+  if (state.search) params.set('q', state.search);
   if (state.type) params.set('type', state.type);
   if (state.user) params.set('user', state.user);
   if (state.size) params.set('size', state.size);
@@ -426,10 +426,10 @@ function normalizeType(value = '') {
 
 function categoryIcon(label = '') {
   const text = String(label).toLowerCase();
-  if (text.includes('cv') || text.includes('resume')) return '📄';
-  if (text.includes('image')) return '🖼️';
-  if (text.includes('doc')) return '📁';
-  return '📦';
+  if (text.includes('cv') || text.includes('resume')) return 'CV';
+  if (text.includes('image')) return 'IMG';
+  if (text.includes('doc')) return 'DOC';
+  return 'FILE';
 }
 
 function actionButton(action, id, icon, label, extraClass = 'text-slate-500 hover:bg-slate-100 hover:text-slate-950') {

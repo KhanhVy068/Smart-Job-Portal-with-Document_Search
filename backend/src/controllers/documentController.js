@@ -8,6 +8,14 @@ function getUserId(req, fallback = 2) {
   return req.user?.id || fallback;
 }
 
+async function ensureDocumentUploadSchema() {
+  try {
+    await db.query('ALTER TABLE documents ADD COLUMN file_size BIGINT DEFAULT 0 AFTER file_url');
+  } catch (error) {
+    if (error.code !== 'ER_DUP_FIELDNAME') throw error;
+  }
+}
+
 function toDocumentResponse(row = {}) {
   return {
     id: row.id,
@@ -16,6 +24,8 @@ function toDocumentResponse(row = {}) {
     name: row.file_name,
     url: row.file_url,
     fileUrl: row.file_url,
+    fileSize: Number(row.file_size || 0),
+    size: Number(row.file_size || 0),
     storageProvider: row.storage_provider,
     status: row.status,
     docType: row.doc_type,
@@ -29,19 +39,21 @@ exports.uploadCV = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'Vui lòng chọn file CV.' });
 
+    await ensureDocumentUploadSchema();
     const userId = getUserId(req);
     const fileUrl = req.file.secure_url || req.file.path;
     const fileName = req.file.originalname || req.file.filename || 'cv.pdf';
+    const fileSize = Number(req.file.size || req.file.bytes || 0);
     const hashSource = `${fileName}:${fileUrl}:${Date.now()}`;
     const fileHash = crypto.createHash('sha256').update(hashSource).digest('hex');
 
     const [result] = await db.query(
       `
       INSERT INTO documents (
-        user_id, file_name, file_url, storage_provider, file_hash, doc_type, status
-      ) VALUES (?, ?, ?, 'cloudinary', ?, 'cv', 'pending')
+        user_id, file_name, file_url, file_size, storage_provider, file_hash, doc_type, status
+      ) VALUES (?, ?, ?, ?, 'cloudinary', ?, 'cv', 'pending')
       `,
-      [userId, fileName, fileUrl, fileHash]
+      [userId, fileName, fileUrl, fileSize, fileHash]
     );
 
     const [[row]] = await db.query('SELECT * FROM documents WHERE id = ?', [result.insertId]);

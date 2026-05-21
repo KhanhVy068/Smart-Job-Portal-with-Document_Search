@@ -129,12 +129,12 @@ function normalizeJob(job = {}) {
   return {
     id: String(job.id || job._id || job.jobId || ''),
     title: job.title || job.jobTitle || job.name || '',
-    companyName: company.name || company.companyName || job.companyName || job.company || '',
+    companyName: company.name || company.companyName || job.companyName || job.company_name || job.employer_name || job.company || '',
     companyInfo: company,
     location: job.location || job.city || job.address || '',
-    salary: job.salary || job.salaryRange || job.salaryText || '',
-    status: normalizeStatus(job.status || job.state || (job.isBanned ? 'banned' : 'pending')),
-    postedDate: job.postedDate || job.createdAt || job.created_at || job.publishedAt || '',
+    salary: job.salary || job.salaryRange || job.salaryText || salaryText(job),
+    status: normalizeStatus(job.is_reported ? 'reported' : job.review_status || job.status || job.state || (job.isBanned ? 'banned' : 'pending')),
+    postedDate: job.postedDate || job.posted_at || job.createdAt || job.created_at || job.publishedAt || '',
     applicationsCount: Number(job.applicationsCount ?? job.applicationCount ?? job.totalApplications ?? job.count ?? 0) || 0,
     description: job.description || job.jobDescription || '',
     requirements: job.requirements || job.requirement || '',
@@ -404,10 +404,11 @@ async function deleteJob(job) {
   if (!confirm(`Delete job "${job.title}"?`)) return;
   try {
     await api.delete(`${endpoint}/${encodeURIComponent(job.id)}`);
+    showToast('Đã xóa job thành công.');
     await loadJobs();
   } catch (err) {
     console.error('Delete job error:', err);
-    alert(err.message || 'Không xóa được job.');
+    showToast(err.message || 'Không xóa được job.', 'error');
   }
 }
 
@@ -419,16 +420,17 @@ async function bulkAction(action) {
   try {
     const url = action === 'delete' ? `${endpoint}/bulk-delete` : `${endpoint}/bulk-approve`;
     await api.post(url, { ids });
+    showToast(action === 'delete' ? 'Đã xóa các job đã chọn.' : 'Đã duyệt các job đã chọn.');
     await loadJobs();
   } catch (err) {
     console.error('Bulk jobs error:', err);
-    alert(err.message || 'Không thực hiện được bulk action.');
+    showToast(err.message || 'Không thực hiện được bulk action.', 'error');
   }
 }
 
 function buildQuery() {
   const params = new URLSearchParams();
-  if (state.search) params.set('search', state.search);
+  if (state.search) params.set('q', state.search);
   if (state.status) params.set('status', state.status);
   if (state.company) params.set('company', state.company);
   if (state.location) params.set('location', state.location);
@@ -443,6 +445,7 @@ function statusBadge(status) {
     active: 'bg-emerald-50 text-emerald-700',
     pending: 'bg-amber-50 text-amber-700',
     banned: 'bg-red-50 text-red-700',
+    reported: 'bg-orange-50 text-orange-700',
     expired: 'bg-slate-100 text-slate-700'
   };
   return `<span class="rounded-full ${tones[normalized]} px-3 py-1 text-xs font-black">${escapeHtml(statusLabel(normalized))}</span>`;
@@ -517,6 +520,7 @@ function normalizeStatus(status = '') {
   const normalized = String(status).toLowerCase();
   if (['active', 'open', 'published', 'approved'].includes(normalized)) return 'active';
   if (['banned', 'ban', 'rejected', 'blocked'].includes(normalized)) return 'banned';
+  if (['reported', 'report'].includes(normalized)) return 'reported';
   if (['expired', 'closed', 'ended'].includes(normalized)) return 'expired';
   return 'pending';
 }
@@ -524,8 +528,21 @@ function normalizeStatus(status = '') {
 function statusLabel(status) {
   if (status === 'active') return 'Active';
   if (status === 'banned') return 'Banned';
+  if (status === 'reported') return 'Bị báo cáo';
   if (status === 'expired') return 'Hết hạn';
   return 'Pending';
+}
+
+function salaryText(job = {}) {
+  const min = Number(job.salary_min);
+  const max = Number(job.salary_max);
+  const currency = job.currency || 'VND';
+  if (Number.isFinite(min) && Number.isFinite(max) && (min || max)) {
+    return `${formatNumber(min)} - ${formatNumber(max)} ${currency}`;
+  }
+  if (Number.isFinite(min) && min) return `Từ ${formatNumber(min)} ${currency}`;
+  if (Number.isFinite(max) && max) return `Đến ${formatNumber(max)} ${currency}`;
+  return '';
 }
 
 function toDateInput(value) {
@@ -563,6 +580,14 @@ function setText(id, value) {
 function renderList(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `fixed right-4 top-4 z-[9999] rounded-lg px-4 py-3 text-sm font-black shadow-lg ${type === 'error' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  window.setTimeout(() => toast.remove(), 2500);
 }
 
 function escapeHtml(value = '') {

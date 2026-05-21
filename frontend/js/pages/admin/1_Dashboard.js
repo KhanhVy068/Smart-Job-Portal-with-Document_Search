@@ -55,7 +55,7 @@ function normalizeDashboard(payload = {}) {
     overview: {
       totalUsers: numberValue(overview.totalUsers ?? payload.totalUsers),
       totalJobs: numberValue(overview.totalJobs ?? payload.totalJobs),
-      totalApplications: numberValue(overview.totalApplications ?? overview.totalCV ?? payload.totalApplications),
+      totalApplications: numberValue(overview.totalApplications ?? overview.totalCV ?? overview.totalCVs ?? payload.cvs ?? payload.totalApplications),
       totalEmployers: numberValue(overview.totalEmployers ?? payload.totalEmployers),
       activeJobs: numberValue(overview.activeJobs ?? payload.activeJobs)
     },
@@ -73,7 +73,9 @@ function normalizeDashboard(payload = {}) {
     system: {
       serverStatus: system.serverStatus || system.status || payload.serverStatus || '',
       storageUsage: numberValue(system.storageUsage ?? system.storagePercent ?? payload.storageUsage),
-      backgroundJobs: system.backgroundJobs || system.jobs || payload.backgroundJobs || ''
+      storageUsageText: system.storageUsageText || overview.storageUsedText || payload.storageUsedText || '',
+      storageFiles: numberValue(system.storageFiles ?? overview.storageFiles ?? payload.storageFiles),
+      backgroundJobs: system.backgroundJobs || system.jobs || payload.backgroundJobs || payload.backgroundStatus || ''
     },
     alerts: normalizeArray(payload.alerts || payload.notifications),
     recentUsers: normalizeArray(payload.recentUsers || payload.users),
@@ -201,7 +203,7 @@ function renderSystem(system) {
   }
 
   const usage = clamp(system.storageUsage, 0, 100);
-  setText('storageUsageText', Number.isFinite(usage) ? `${usage}%` : '--');
+  setText('storageUsageText', Number.isFinite(usage) ? `${usage}%` : (system.storageUsageText || metricText(system.storageFiles, 'files')));
   const bar = document.getElementById('storageUsageBar');
   if (bar) bar.style.width = Number.isFinite(usage) ? `${usage}%` : '0%';
   setText('backgroundJobsStatus', system.backgroundJobs || '--');
