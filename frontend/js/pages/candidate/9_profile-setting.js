@@ -35,7 +35,7 @@ async function loadProfile() {
     const preview = document.getElementById('psAvatarPreview');
     if (preview) {
       if (user.avatar || user.avatarUrl) {
-        preview.innerHTML = `<img src="${esc(user.avatar || user.avatarUrl)}" class="w-full h-full object-cover"/>`;
+        preview.innerHTML = `<img src="${esc(toAbsoluteUploadUrl(user.avatar || user.avatarUrl))}" class="w-full h-full object-cover"/>`;
       } else {
         const name = user.fullName || user.name || '?';
         preview.textContent = name[0]?.toUpperCase() ?? '?';
@@ -50,7 +50,7 @@ function setupAvatarUpload() {
   const preview = document.getElementById('psAvatarPreview');
 
   btn?.addEventListener('click', () => input?.click());
-  input?.addEventListener('change', () => {
+  input?.addEventListener('change', async () => {
     const file = input.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { alert('Ảnh phải nhỏ hơn 2MB.'); return; }
@@ -59,27 +59,33 @@ function setupAvatarUpload() {
       if (preview) preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover"/>`;
     };
     reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append('avatar', file);
+    try {
+      const payload = await api.upload('/user/profile/avatar', formData);
+      const avatarUrl = payload.avatarUrl || payload.avatar_url || payload.avatar;
+      if (avatarUrl && preview) {
+        preview.innerHTML = `<img src="${esc(toAbsoluteUploadUrl(avatarUrl))}" class="w-full h-full object-cover"/>`;
+      }
+    } catch {
+      alert('Upload avatar thất bại. Vui lòng thử lại.');
+    }
     input.value = '';
   });
 }
 
 function setupSkillInput() {
   const input = document.getElementById('psSkillInput');
-  const addBtn = document.getElementById('psSkillAdd');
-
-  const add = () => {
-    const val = input?.value.trim();
-    if (!val || skills.includes(val)) return;
-    skills.push(val);
-    renderSkillTags();
-    if (input) input.value = '';
-  };
-
-  addBtn?.addEventListener('click', add);
-  input?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+  input?.addEventListener('input', () => {
+    skills.length = 0;
+    parseSkillText(input.value).forEach(skill => skills.push(skill));
+  });
 }
 
 function renderSkillTags() {
+  const input = document.getElementById('psSkillInput');
+  if (input) input.value = skills.join('\n');
+
   const container = document.getElementById('psSkillTags');
   if (!container) return;
   container.innerHTML = skills.map((s, i) => `
@@ -116,7 +122,7 @@ function setupSave() {
       bio: document.getElementById('psBio')?.value.trim() || null,
       education: document.getElementById('psEducation')?.value.trim() || null,
       experience: document.getElementById('psExperience')?.value || null,
-      skills: [...skills],
+      skills: parseSkillText(document.getElementById('psSkillInput')?.value || ''),
     };
 
     try {
@@ -174,4 +180,17 @@ function setVal(id, val) {
 
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function parseSkillText(value = '') {
+  return Array.from(new Set(String(value)
+    .split(/[\n,;]+/)
+    .map(item => item.trim())
+    .filter(Boolean)));
+}
+
+function toAbsoluteUploadUrl(url = '') {
+  if (/^https?:\/\//i.test(url)) return url;
+  const apiBase = (localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
 }

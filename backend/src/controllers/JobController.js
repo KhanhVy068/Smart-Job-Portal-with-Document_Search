@@ -1,6 +1,8 @@
 const db = require('../config/db');
 const searchService = require('../services/searchService');
 const performanceLogService = require('../services/performanceLogService');
+const savedJobController = require('./savedJobController');
+const notificationService = require('../services/notificationService');
 
 function fixMojibake(value) {
   if (typeof value !== 'string') return value;
@@ -49,7 +51,7 @@ function normalizeSkills(value) {
   } catch {
     // Old rows may store comma-separated skills.
   }
-  return String(value).split(',').map(item => item.trim()).filter(Boolean);
+  return String(value).split(/[\n,;]+/).map(item => item.trim()).filter(Boolean);
 }
 
 function serializeSkills(value) {
@@ -107,7 +109,8 @@ function toJobResponse(row = {}) {
     applicationCount: Number(row.application_count || 0),
     views: 0,
     skills: normalizeSkills(row.skills),
-    isApplied: Boolean(row.is_applied)
+    isApplied: Boolean(row.is_applied),
+    isSaved: Boolean(row.is_saved)
   };
 }
 
@@ -173,6 +176,7 @@ function parseSalary(payload = {}) {
 exports.getJobs = async (req, res) => {
   try { 
     await ensureJobColumns();
+    await savedJobController.ensureSavedJobsTable();
     const startedAt = Date.now();
     const page = Math.max(Number(req.query.page || 1), 1);
     const limit = Math.min(Math.max(Number(req.query.limit || 50), 1), 100);
@@ -220,6 +224,7 @@ exports.getJobs = async (req, res) => {
     }
 
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const candidateId = req.user?.id || null;
     const fromSql = `
       FROM jobs j
       LEFT JOIN users u ON u.id = j.employer_id
@@ -233,15 +238,17 @@ exports.getJobs = async (req, res) => {
              COALESCE(ep.company_name, u.full_name) AS company_name,
              ep.address AS company_address,
              COALESCE(ep.logo_url, u.avatar_url) AS company_logo,
-             c.name AS category_name, COUNT(a.id) AS application_count
+             c.name AS category_name, COUNT(a.id) AS application_count,
+             ${candidateId ? 'MAX(CASE WHEN sj.id IS NULL THEN 0 ELSE 1 END)' : '0'} AS is_saved
       ${fromSql}
       LEFT JOIN applications a ON a.job_id = j.id AND a.deleted_at IS NULL
+      ${candidateId ? 'LEFT JOIN saved_jobs sj ON sj.job_id = j.id AND sj.user_id = ?' : ''}
       ${whereSql}
       GROUP BY j.id
       ORDER BY j.posted_at DESC
       LIMIT ? OFFSET ?
       `,
-      [...params, limit, offset]
+      [...(candidateId ? [candidateId] : []), ...params, limit, offset]
     );
 
     const items = rows.map(toJobResponse);
@@ -284,9 +291,51 @@ exports.getJobs = async (req, res) => {
 };
 
 exports.getMyJobs = async (req, res) => {
-  req.query.employer_id = getUserId(req, 1);
-  req.query.limit = req.query.limit || 100;
-  return exports.getJobs(req, res);
+  try {
+    await ensureJobColumns();
+
+    const employerId = getUserId(req, 1);
+    const [rows] = await db.query(
+      `
+      SELECT j.*,
+             u.full_name AS employer_name,
+             COALESCE(ep.company_name, u.full_name) AS company_name,
+             ep.address AS company_address,
+             COALESCE(ep.logo_url, u.avatar_url) AS company_logo,
+             c.name AS category_name,
+             (
+               SELECT COUNT(1)
+               FROM applications a
+               WHERE a.job_id = j.id AND a.deleted_at IS NULL
+             ) AS application_count,
+             0 AS is_saved
+      FROM jobs j
+      LEFT JOIN users u ON u.id = j.employer_id
+      LEFT JOIN employer_profiles ep ON ep.user_id = j.employer_id
+      LEFT JOIN job_categories c ON c.id = j.category_id
+      WHERE j.employer_id = ? AND j.deleted_at IS NULL
+      ORDER BY j.posted_at DESC
+      `,
+      [employerId]
+    );
+
+    const items = rows.map(toJobResponse);
+
+    res.json({
+      total: items.length,
+      items,
+      jobs: items,
+      data: items,
+      activeJobs: items.filter(job => job.status === 'open').length,
+      totalCandidates: items.reduce((sum, job) => sum + job.applicationCount, 0)
+    });
+  } catch (error) {
+    console.error('Get my jobs error:', error);
+    res.status(500).json({
+      message: 'Lỗi lấy danh sách việc làm của tôi',
+      error: error.message
+    });
+  }
 };
 
 exports.getAllJobs = exports.getJobs;
@@ -294,23 +343,27 @@ exports.getAllJobs = exports.getJobs;
 exports.getJobById = async (req, res) => {
   try {
     await ensureJobColumns();
+    await savedJobController.ensureSavedJobsTable();
+    const candidateId = req.user?.id || null;
     const [rows] = await db.query(
       `
       SELECT j.*, u.full_name AS employer_name,
              COALESCE(ep.company_name, u.full_name) AS company_name,
              ep.address AS company_address,
              COALESCE(ep.logo_url, u.avatar_url) AS company_logo,
-             c.name AS category_name, COUNT(a.id) AS application_count
+             c.name AS category_name, COUNT(a.id) AS application_count,
+             ${candidateId ? 'MAX(CASE WHEN sj.id IS NULL THEN 0 ELSE 1 END)' : '0'} AS is_saved
       FROM jobs j
       LEFT JOIN users u ON u.id = j.employer_id
       LEFT JOIN employer_profiles ep ON ep.user_id = j.employer_id
       LEFT JOIN job_categories c ON c.id = j.category_id
       LEFT JOIN applications a ON a.job_id = j.id AND a.deleted_at IS NULL
+      ${candidateId ? 'LEFT JOIN saved_jobs sj ON sj.job_id = j.id AND sj.user_id = ?' : ''}
       WHERE j.id = ? AND j.deleted_at IS NULL
       GROUP BY j.id
       LIMIT 1
       `,
-      [req.params.id]
+      [...(candidateId ? [candidateId] : []), req.params.id]
     );
 
     if (!rows.length) return res.status(404).json({ message: 'Không tìm thấy việc làm' });
@@ -334,9 +387,13 @@ exports.createJob = async (req, res) => {
     const { salaryMin, salaryMax } = parseSalary(req.body);
     const expiryDate = req.body.expiry_date || req.body.deadline || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
     const skills = serializeSkills(req.body.skills || req.body.skillNames || req.body.tags);
+    console.log('CREATE JOB BODY:', req.body);
+    console.log('RAW SKILLS:', req.body.skills);
+    console.log('SAVE SKILLS:', skills);
     const location = firstLocation(req.body.location, await getEmployerAddress(employerId), 'Chưa cập nhật');
 
     const [result] = await db.query(
+      
       `
       INSERT INTO jobs (
         employer_id, category_id, title, description, location,
@@ -444,6 +501,14 @@ exports.applyToJob = async (req, res) => {
       `,
       [req.params.id, candidateId, cvDocumentId, req.body.coverLetter || req.body.cover_letter || null]
     );
+
+    const [[job]] = await db.query('SELECT employer_id, title FROM jobs WHERE id = ? LIMIT 1', [req.params.id]);
+    await notificationService.createNotification({
+      userId: job?.employer_id,
+      type: 'new_cv',
+      title: 'Có CV mới ứng tuyển',
+      message: `Ứng viên mới vừa nộp CV cho vị trí ${job?.title || 'đang tuyển'}.`
+    });
 
     res.status(201).json({ success: true, message: 'Ứng tuyển thành công.' });
   } catch (error) {

@@ -36,6 +36,13 @@ async function submit(event) {
       password: document.getElementById('publicLoginPassword').value,
       role: selectedRole
     });
+
+    const actualRole = payload.user?.role;
+    if (actualRole && actualRole !== 'admin' && actualRole !== selectedRole) {
+      const roleName = actualRole === 'employer' ? 'Nhà tuyển dụng' : 'Ứng viên';
+      throw new Error(`Đăng nhập sai vị trí! Tài khoản của bạn là ${roleName}, vui lòng chọn đúng tab để đăng nhập.`);
+    }
+
     finishAuth(payload);
   } catch (error) {
     message.textContent = error.message || 'Không đăng nhập được.';

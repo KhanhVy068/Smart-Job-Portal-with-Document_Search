@@ -135,6 +135,9 @@ const login = async (req, res) => {
   try {
     const email = req.body.email || req.body.identifier;
     const { password } = req.body;
+    const requestedRole = ['candidate', 'employer'].includes(String(req.body.role || '').trim().toLowerCase())
+      ? String(req.body.role).trim().toLowerCase()
+      : '';
 
     const [[user]] = await db.query('SELECT * FROM users WHERE email = ? AND deleted_at IS NULL', [email]);
     if (!user) return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
@@ -144,6 +147,13 @@ const login = async (req, res) => {
       ? password === '123456'
       : await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+
+    const actualRole = String(user.role || '').trim().toLowerCase();
+    if (requestedRole && actualRole !== 'admin' && actualRole !== requestedRole) {
+      return res.status(403).json({
+        message: 'Đăng nhập sai vị trí! Vui lòng chọn đúng vai trò tài khoản.'
+      });
+    }
 
     const token = signToken(user);
     res.json({

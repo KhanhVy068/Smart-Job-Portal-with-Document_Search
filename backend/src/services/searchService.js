@@ -89,16 +89,29 @@ function buildDocumentSearchItem(row) {
     kind: row.doc_type || 'cv',
     documentId: row.id,
     candidateId: row.user_id,
-    title: row.file_name,
+    title: row.desired_position || row.file_name,
     fileName: row.file_name,
     candidateName: row.candidate_name,
     email: row.email,
     status: row.status,
+    extractionStatus: row.extraction_status,
+    desiredPosition: row.desired_position || '',
+    skills: parseSkills(row.extracted_skills),
     content: row.extracted_text || row.file_name,
-    summary: clip(row.extracted_text || row.file_name, 360),
+    summary: row.extracted_summary || clip(row.extracted_text || row.file_name, 360),
     createdAt: row.created_at,
     score: 0
   };
+}
+
+function parseSkills(value) {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {}
+  return String(value).split(',').map(item => item.trim()).filter(Boolean);
 }
 
 function buildJobSearchItem(row) {
@@ -131,7 +144,7 @@ async function addDocumentsInBatches(items = [], batchSize = 500) {
 async function indexDocument(documentId) {
   const [[row]] = await db.query(
     `
-    SELECT d.*, u.full_name AS candidate_name, u.email
+      SELECT d.*, u.full_name AS candidate_name, u.email
     FROM documents d
     JOIN users u ON u.id = d.user_id
     WHERE d.id = ? AND d.deleted_at IS NULL
@@ -250,8 +263,8 @@ async function searchWithMySql(options = {}) {
     const relevanceSelect = q ? `${relevanceExpr} AS relevance` : '0 AS relevance';
     if (q) {
       selectParams.push(q);
-      where.push(`${relevanceExpr} > 0`);
-      whereParams.push(q);
+      where.push(`(${relevanceExpr} > 0 OR d.extracted_skills LIKE ? OR d.desired_position LIKE ? OR d.extracted_summary LIKE ?)`);
+      whereParams.push(q, `%${q}%`, `%${q}%`, `%${q}%`);
     }
     const [rows] = await db.query(
       `
@@ -272,10 +285,18 @@ async function searchWithMySql(options = {}) {
       name: row.candidate_name,
       candidateName: row.candidate_name,
       email: row.email,
-      title: row.file_name,
+      title: row.desired_position || row.file_name,
+      desiredPosition: row.desired_position || '',
+      desired_position: row.desired_position || '',
       fileName: row.file_name,
+      fileUrl: row.file_url,
+      url: row.file_url,
       status: row.status,
-      summary: clip(row.extracted_text || row.file_name, 360),
+      extractionStatus: row.extraction_status || row.status,
+      summary: row.extracted_summary || clip(row.extracted_text || row.file_name, 360),
+      extractedText: row.extracted_text || '',
+      extractedSkills: parseSkills(row.extracted_skills),
+      skills: parseSkills(row.extracted_skills),
       score: q ? scoreFromRelevance(row.relevance) : 70,
       createdAt: row.created_at,
       updatedAt: row.updated_at

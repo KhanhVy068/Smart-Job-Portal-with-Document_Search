@@ -248,9 +248,9 @@ function renderCandidates(candidates) {
       <td class="px-6 py-5">
         <p class="text-sm font-bold text-slate-800">${escapeHtml(candidate.position)}</p>
         <div class="mt-2 flex max-w-sm flex-wrap gap-2">
-          ${candidate.skills.slice(0, 3).map(skill => `
+          ${candidate.skills.length ? candidate.skills.slice(0, 2).map(skill => `
             <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">${escapeHtml(skill)}</span>
-          `).join('')}
+          `).join('') : '<span class="text-xs font-bold text-slate-400">Chưa cập nhật kỹ năng</span>'}
         </div>
       </td>
 
@@ -306,12 +306,38 @@ function bindCandidateRowEvents() {
   });
 
   document.querySelectorAll('.btnSaveCandidate').forEach(button => {
-    button.onclick = () => updateCandidateStatus(button.dataset.id, 'reviewing');
+    button.onclick = () => saveCandidate(button.dataset.id, button);
   });
 
   document.querySelectorAll('.btnRejectCandidate').forEach(button => {
     button.onclick = () => updateCandidateStatus(button.dataset.id, 'rejected');
   });
+}
+
+async function saveCandidate(id, button) {
+  const candidate = allCandidates.find(item =>
+    String(item.applicationId || item.id) === String(id) || String(item.id) === String(id)
+  );
+  if (!candidate) return;
+
+  const originalHtml = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span class="material-symbols-outlined">progress_activity</span>';
+  try {
+    await api.post('/saved-candidates', {
+      candidateId: candidate.candidateId || null,
+      applicationId: candidate.applicationId,
+      documentId: candidate.cvDocumentId
+    });
+    button.classList.remove('text-slate-400');
+    button.classList.add('text-green-600', 'bg-green-50');
+    button.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1">bookmark</span>';
+  } catch (err) {
+    button.innerHTML = originalHtml;
+    alert(err.message || 'Chưa lưu được ứng viên.');
+  } finally {
+    button.disabled = false;
+  }
 }
 
 // Cập nhật trạng thái tạm trên giao diện
@@ -470,12 +496,11 @@ function normalizeCandidates(payload, selectedJobId) {
       fileName: item.fileName || item.cvFileName || item.resumeName || `${slugify(item.candidateName || item.name || 'ung-vien')}-CV.pdf`,
       cvUrl: item.cvUrl || item.url || item.fileUrl || '',
       coverLetter: item.coverLetter || '',
-      expectedSalary: item.expectedSalary || '',
       availableFrom: item.availableFrom || '',
       extractedText: item.extractedText || '',
-      position: item.position || item.currentPosition || item.jobTitle || 'Chưa cập nhật vị trí',
+      position: item.desiredPosition || item.desired_position || item.position || item.currentPosition || item.jobTitle || 'Chưa cập nhật vị trí mong muốn',
       summary: item.summary || item.note || '',
-      skills: normalizeSkills(item.skills || item.skillNames || item.tags),
+      skills: normalizeSkills(item.skills || item.extractedSkills || item.skillNames || item.tags),
       score: Math.max(0, Math.min(100, score)),
       status,
       statusLabel: getStatusLabel(status),
@@ -507,7 +532,7 @@ function normalizeSkills(value) {
   if (Array.isArray(value) && value.length) return value.map(String);
 
   const text = String(value || '').trim();
-  if (!text) return ['Chưa cập nhật'];
+  if (!text) return [];
 
   return text.split(',').map(item => item.trim()).filter(Boolean);
 }

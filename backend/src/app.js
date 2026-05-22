@@ -16,10 +16,17 @@ const documentRoutes = require('./routes/documentRoutes');       // Quản lý t
 const jobRoutes = require('./routes/jobRoutes');               // Quản lý tin tuyển dụng
 const applicationRoutes = require('./routes/applicationRoutes'); // Quản lý hồ sơ ứng tuyển
 const adminRoutes = require('./routes/adminRoutes');             // Quản lý thống kê Admin
+const savedJobRoutes = require('./routes/savedJobRoutes');
+const savedCandidateRoutes = require('./routes/savedCandidateRoutes');
+const employerRoutes = require('./routes/employerRoutes');
 
 // --- ĐĂNG KÝ CÁC CỔNG API ---
 app.use('/api/documents', documentRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/saved-jobs', savedJobRoutes);
+app.use('/api/saved-candidates', savedCandidateRoutes);
+app.use('/api/candidates/saved', savedCandidateRoutes);
+app.use('/api/employer', employerRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/admin', adminRoutes);
 

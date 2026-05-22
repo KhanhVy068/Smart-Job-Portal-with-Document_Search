@@ -37,13 +37,23 @@ async function enqueueDocument(documentId) {
 }
 
 async function enqueuePendingDocuments(db, limit = 100) {
+  try {
+    await db.query("ALTER TABLE documents ADD COLUMN extraction_status VARCHAR(50) DEFAULT 'pending' AFTER status");
+  } catch (error) {
+    if (error.code !== 'ER_DUP_FIELDNAME') throw error;
+  }
   const [rows] = await db.query(
     `
     SELECT id
     FROM documents
     WHERE deleted_at IS NULL
       AND doc_type = 'cv'
-      AND status IN ('pending', 'failed')
+      AND (
+        status IN ('pending', 'failed')
+        OR extraction_status IN ('pending', 'failed')
+        OR extraction_status IS NULL
+        OR extracted_text IS NULL
+      )
       AND retry_count < 3
     ORDER BY created_at ASC
     LIMIT ?

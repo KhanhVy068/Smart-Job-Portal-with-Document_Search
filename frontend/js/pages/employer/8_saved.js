@@ -8,8 +8,8 @@ const PAGE_SIZE = 8;
 // DELETE /candidates/saved/:id
 //        -> bỏ lưu một ứng viên khỏi danh sách quan tâm.
 const endpoints = {
-  list: '/candidates/saved',
-  remove: (id) => `/candidates/saved/${encodeURIComponent(id)}`
+  list: '/saved-candidates',
+  remove: (id) => `/saved-candidates/${encodeURIComponent(id)}`
 };
 
 let savedCandidates = [];
@@ -141,13 +141,16 @@ function normalizeCandidate(item, index) {
     id: item.id || item._id || item.savedId || source.id || source._id || source.candidateId || `saved-candidate-${index + 1}`,
     candidateId: source.id || source._id || source.candidateId || item.candidateId || '',
     name: source.name || source.fullName || source.candidateName || 'Ứng viên chưa cập nhật tên',
-    title: source.title || source.position || source.currentPosition || source.jobTitle || 'Chưa cập nhật vị trí',
+    title: source.desiredPosition || source.desired_position || source.title || source.position || source.currentPosition || source.jobTitle || 'Chưa cập nhật vị trí mong muốn',
     location: source.location || source.city || source.address || 'Chưa cập nhật địa điểm',
-    skills: normalizeSkills(source.skills || source.skillNames || source.tags),
+    skills: normalizeSkills(source.skills || source.extractedSkills || source.skillNames || source.tags),
     summary: source.summary || source.description || source.cvSummary || '',
+    extractedText: source.extractedText || source.extracted_text || source.summary || '',
     score: Math.max(0, Math.min(100, score)),
     savedAt,
     fileName: source.fileName || source.cvFileName || source.resumeName || 'CV chưa cập nhật tên file',
+    cvDocumentId: source.cvDocumentId || source.documentId || source.cv_document_id || '',
+    cvUrl: source.cvUrl || source.url || source.fileUrl || '',
     email: source.email || source.candidateEmail || '',
     phone: source.phone || source.candidatePhone || '',
     avatarUrl: source.avatarUrl || source.avatar || source.photoUrl || ''

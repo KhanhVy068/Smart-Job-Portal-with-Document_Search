@@ -60,16 +60,39 @@ async function request(url, options = {}) {
 
 // Chuẩn hóa lỗi từ backend thành Error có status và payload.
 function createApiError(res, payload) {
+  const textPayload = typeof payload === 'string' ? payload : '';
+  const cleanText = textPayload ? sanitizeErrorText(textPayload) : '';
   const message =
     payload?.message ||
     payload?.error ||
-    (typeof payload === 'string' && payload) ||
+    cleanText ||
     `Request failed with status ${res.status}`;
 
   const err = new Error(message);
   err.status = res.status;
   err.payload = payload;
   return err;
+}
+
+function sanitizeErrorText(text = '') {
+  const raw = String(text || '').trim();
+  if (!raw) return '';
+  const withoutTags = raw
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (/cannot\s+(get|post|put|patch|delete)\s+/i.test(withoutTags)) {
+    return `API chưa tồn tại hoặc server lỗi: ${resUrlHint(raw)}`;
+  }
+  return withoutTags.slice(0, 240);
+}
+
+function resUrlHint(raw = '') {
+  const match = String(raw).match(/Cannot\s+(?:GET|POST|PUT|PATCH|DELETE)\s+([^\s<]+)/i);
+  return match?.[1] || 'vui lòng kiểm tra endpoint backend';
 }
 
 function fixMojibakeDeep(value) {

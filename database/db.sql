@@ -106,13 +106,19 @@ CREATE TABLE IF NOT EXISTS documents (
     file_hash VARCHAR(64) NOT NULL,
     extracted_text LONGTEXT NULL,
     extracted_text_hash VARCHAR(64) NULL,
+    extracted_skills TEXT NULL,
+    desired_position VARCHAR(255) NULL,
+    experience_years DECIMAL(4,1) NULL,
+    extracted_summary TEXT NULL,
     doc_type ENUM('cv', 'jd') NOT NULL,
     status ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending',
+    extraction_status VARCHAR(50) DEFAULT 'pending',
     error_message TEXT NULL,
     
     -- Metadata cho Background Worker (BullMQ + Redis)
     retry_count INT DEFAULT 0,
     processed_at TIMESTAMP NULL,
+    extracted_at DATETIME NULL,
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -147,6 +153,21 @@ CREATE TABLE IF NOT EXISTS employer_profiles (
     
     INDEX idx_employer_profiles_company (company_name),
     INDEX idx_employer_profiles_industry (industry)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS candidate_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    title VARCHAR(255) NULL,
+    desired_position VARCHAR(255) NULL,
+    location VARCHAR(255) NULL,
+    bio TEXT NULL,
+    skills TEXT NULL,
+    experience INT DEFAULT 0,
+    education TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_candidate_profiles_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
@@ -217,6 +238,40 @@ CREATE TABLE IF NOT EXISTS saved_searches (
     INDEX idx_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS saved_jobs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    job_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_saved_jobs_user_job (user_id, job_id),
+    INDEX idx_saved_jobs_user (user_id),
+    INDEX idx_saved_jobs_job (job_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS saved_candidates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employer_id INT NOT NULL,
+    candidate_id INT NOT NULL,
+    application_id INT NULL,
+    document_id INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_employer_candidate (employer_id, candidate_id),
+    INDEX idx_saved_candidates_employer (employer_id),
+    INDEX idx_saved_candidates_candidate (candidate_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    type VARCHAR(80) NOT NULL DEFAULT 'system',
+    title VARCHAR(255) NOT NULL,
+    message TEXT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_notifications_user_read (user_id, is_read),
+    INDEX idx_notifications_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ==========================================
 -- 9. Bảng PerformanceLogs: Lưu latency search/filter để đánh giá hiệu năng
 -- ==========================================
@@ -261,6 +316,10 @@ ALTER TABLE employer_profiles
 ADD CONSTRAINT fk_employer_profiles_user
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE candidate_profiles
+ADD CONSTRAINT fk_candidate_profiles_user
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
 ALTER TABLE applications 
 ADD CONSTRAINT fk_app_job 
 FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE;
@@ -283,6 +342,26 @@ FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE saved_searches 
 ADD CONSTRAINT fk_saved_user 
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE saved_jobs
+ADD CONSTRAINT fk_saved_jobs_user
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE saved_jobs
+ADD CONSTRAINT fk_saved_jobs_job
+FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE;
+
+ALTER TABLE saved_candidates
+ADD CONSTRAINT fk_saved_candidates_employer
+FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE saved_candidates
+ADD CONSTRAINT fk_saved_candidates_candidate
+FOREIGN KEY (candidate_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE notifications
+ADD CONSTRAINT fk_notifications_user
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE performance_logs

@@ -15,6 +15,7 @@ let currentHeaderData = {
 // Khởi tạo header sau khi component HTML đã được load vào DOM.
 export function initHeader() {
   bindHeaderEvents();
+  setupBrandLogoFallback();
   loadHeaderData();
 }
 
@@ -28,11 +29,7 @@ function bindHeaderEvents() {
   });
 
   document.getElementById('headerNotificationsButton')?.addEventListener('click', () => {
-    toggleHeaderDropdown({
-      icon: 'notifications',
-      title: 'Thông báo',
-      message: 'Chưa có dữ liệu thông báo từ backend. Khi endpoint sẵn sàng, các thông báo mới sẽ hiển thị tại đây.'
-    });
+    toggleNotificationsDropdown();
   });
 
   document.getElementById('headerProfileButton')?.addEventListener('click', () => {
@@ -41,11 +38,7 @@ function bindHeaderEvents() {
 
   document.getElementById('headerMenuNotificationsButton')?.addEventListener('click', () => {
     closeProfileDropdown();
-    toggleHeaderDropdown({
-      icon: 'notifications',
-      title: 'Thông báo',
-      message: 'Chưa có dữ liệu thông báo từ backend. Khi endpoint sẵn sàng, các thông báo mới sẽ hiển thị tại đây.'
-    });
+    toggleNotificationsDropdown();
   });
 
   document.getElementById('headerLogoutButton')?.addEventListener('click', () => {
@@ -146,16 +139,22 @@ function renderEmptyState(err) {
   setBadge('headerNotificationsBadge', 0);
 }
 
-function renderCompanyLogo(url) {
+function renderCompanyLogo() {
   const target = document.getElementById('headerBrandLogo');
   if (!target) return;
 
-  if (!url) {
-    target.innerHTML = '<span class="material-symbols-outlined text-xl">rocket_launch</span>';
-    return;
-  }
+  target.innerHTML = '<img src="./assets/logo.png" alt="Smart Job Portal" class="h-full w-full object-cover" width="48" height="48">';
+  setupBrandLogoFallback();
+}
 
-  target.innerHTML = `<img class="h-full w-full rounded-lg object-cover" src="${escapeHtml(url)}" alt="Logo công ty">`;
+function setupBrandLogoFallback() {
+  const logo = document.querySelector('#headerBrandLogo img');
+  if (!logo || logo.dataset.fallbackBound === 'true') return;
+  logo.dataset.fallbackBound = 'true';
+  logo.addEventListener('error', () => {
+    const wrap = document.getElementById('headerBrandLogo');
+    if (wrap) wrap.innerHTML = '<span class="material-symbols-outlined text-2xl">work</span>';
+  });
 }
 
 function renderAvatar(url, name = '') {
@@ -163,7 +162,7 @@ function renderAvatar(url, name = '') {
   if (!target) return;
 
   if (url) {
-    target.innerHTML = `<img class="h-full w-full object-cover" src="${escapeHtml(url)}" alt="${escapeHtml(name || 'Ảnh đại diện')}">`;
+    target.innerHTML = `<img class="h-full w-full object-cover" src="${escapeHtml(toAbsoluteUploadUrl(url))}" alt="${escapeHtml(name || 'Ảnh đại diện')}">`;
     return;
   }
 
@@ -178,7 +177,7 @@ function renderMenuAvatar(url, name = '') {
   if (!target) return;
 
   if (url) {
-    target.innerHTML = `<img class="h-full w-full object-cover" src="${escapeHtml(url)}" alt="${escapeHtml(name || 'Ảnh đại diện')}">`;
+    target.innerHTML = `<img class="h-full w-full object-cover" src="${escapeHtml(toAbsoluteUploadUrl(url))}" alt="${escapeHtml(name || 'Ảnh đại diện')}">`;
     return;
   }
 
@@ -211,6 +210,43 @@ function toggleHeaderDropdown({ icon, title, message }) {
   setText('headerDropdownMessage', message);
 
   dropdown.classList.remove('hidden');
+}
+
+async function toggleNotificationsDropdown() {
+  const dropdown = document.getElementById('headerDropdown');
+  const iconTarget = document.getElementById('headerDropdownIcon');
+  if (!dropdown) return;
+
+  closeProfileDropdown();
+  if (iconTarget) iconTarget.innerHTML = '<span class="material-symbols-outlined text-xl">notifications</span>';
+  setText('headerDropdownTitle', 'Thông báo');
+  setText('headerDropdownMessage', 'Đang tải thông báo...');
+  dropdown.classList.remove('hidden');
+
+  try {
+    const payload = await api.get('/notifications');
+    const items = payload.items || payload.notifications || [];
+    setBadge('headerNotificationsBadge', payload.unread || 0);
+    const message = document.getElementById('headerDropdownMessage');
+    if (!message) return;
+    message.innerHTML = items.length ? `
+      <div class="mt-2 max-h-80 space-y-2 overflow-auto">
+        ${items.map(item => `
+          <div class="rounded-lg ${item.isRead ? 'bg-white' : 'bg-blue-50'} p-3">
+            <p class="text-sm font-black text-slate-900">${escapeHtml(item.title || 'Thông báo')}</p>
+            <p class="mt-1 text-xs font-semibold leading-5 text-slate-500">${escapeHtml(item.message || '')}</p>
+          </div>
+        `).join('')}
+      </div>
+      <button id="headerMarkReadButton" class="mt-3 text-xs font-black text-blue-600" type="button">Đánh dấu đã đọc</button>
+    ` : '<span class="text-sm font-semibold text-slate-500">Chưa có thông báo.</span>';
+    document.getElementById('headerMarkReadButton')?.addEventListener('click', async () => {
+      await api.patch('/notifications/all/read', {});
+      await toggleNotificationsDropdown();
+    });
+  } catch {
+    setText('headerDropdownMessage', 'Không thể tải thông báo.');
+  }
 }
 
 function toggleProfileDropdown() {
@@ -260,4 +296,10 @@ function escapeHtml(value = '') {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+
+function toAbsoluteUploadUrl(url = '') {
+  if (/^https?:\/\//i.test(url)) return url;
+  const apiBase = (localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
 }

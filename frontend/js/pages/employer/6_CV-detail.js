@@ -35,22 +35,22 @@ function normalizeDetail(item = {}) {
     name: item.candidateName || item.name || item.fullName || 'Ứng viên',
     email: item.email || item.candidateEmail || '',
     phone: item.phone || item.candidatePhone || '',
-    jobTitle: item.jobTitle || item.position || 'Chưa cập nhật vị trí',
+    desiredPosition: item.desiredPosition || item.desired_position || item.jobTitle || item.position || 'Chưa cập nhật vị trí mong muốn',
+    jobTitle: item.jobTitle || item.appliedJobTitle || '',
     companyName: item.companyName || '',
     location: item.location || '',
-    status: item.status || item.applicationStatus || item.cvStatus || item.documentStatus || 'pending',
-    statusLabel: getStatusLabel(item.status || item.applicationStatus || item.cvStatus || item.documentStatus),
+    status: item.extractionStatus || item.extraction_status || item.status || item.applicationStatus || item.cvStatus || item.documentStatus || 'pending',
+    statusLabel: getStatusLabel(item.extractionStatus || item.extraction_status || item.status || item.applicationStatus || item.cvStatus || item.documentStatus),
     appliedAt: item.appliedAt || item.createdAt || '',
     updatedAt: item.updatedAt || '',
     fileName: item.fileName || item.cvFileName || item.name || 'CV.pdf',
     cvUrl: item.cvUrl || item.url || item.fileUrl || '',
     coverLetter: item.coverLetter || '',
-    expectedSalary: item.expectedSalary || '',
     availableFrom: item.availableFrom || '',
     cvDocumentId: item.cvDocumentId || item.documentId || item.cv_document_id || '',
     extractedText: item.extractedText || '',
     score: Number(item.score ?? item.matchScore ?? item.fitScore ?? 0),
-    skills: normalizeSkills(item.skills || item.skillNames || item.tags)
+    skills: normalizeSkills(item.skills || item.extractedSkills || item.skillNames || item.tags)
   };
 }
 
@@ -150,13 +150,13 @@ function renderDetail(candidate, note = '') {
 
           <div class="grid grid-cols-1 gap-4">
             ${infoCard('Họ và tên', candidate.name)}
-            ${infoCard('Vị trí ứng tuyển', candidate.jobTitle)}
+            ${infoCard('CV mong muốn', candidate.desiredPosition)}
+            ${candidate.jobTitle ? infoCard('Vị trí ứng tuyển', candidate.jobTitle) : ''}
             ${infoCard('Email', candidate.email || 'Chưa cập nhật')}
             ${infoCard('Số điện thoại', candidate.phone || 'Chưa cập nhật')}
             ${infoCard('Công ty', candidate.companyName || 'Chưa cập nhật')}
             ${infoCard('Địa điểm job', candidate.location || 'Chưa cập nhật')}
             ${infoCard('Ngày ứng tuyển', formatDateTime(candidate.appliedAt))}
-            ${infoCard('Lương kỳ vọng', candidate.expectedSalary ? formatMoney(candidate.expectedSalary) : 'Chưa cập nhật')}
           </div>
 
           <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -218,8 +218,8 @@ function normalizeSkills(value) {
 
 function getStatusLabel(status = '') {
   const normalized = String(status).toLowerCase();
-  if (['completed', 'processed', 'indexed', 'saved', 'reviewed'].includes(normalized)) return 'Đã xử lý';
-  if (['failed', 'error', 'rejected'].includes(normalized)) return 'Có lỗi / bị loại';
+  if (['completed', 'processed', 'indexed', 'saved', 'reviewed'].includes(normalized)) return 'Đã trích xuất';
+  if (['failed', 'error', 'rejected'].includes(normalized)) return 'Trích xuất thất bại';
   if (['interview', 'interviewed'].includes(normalized)) return 'Mời phỏng vấn';
   return 'Đang xử lý';
 }
@@ -240,12 +240,6 @@ function formatDateTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'Chưa cập nhật';
   return date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
-}
-
-function formatMoney(value) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return String(value);
-  return amount.toLocaleString('vi-VN');
 }
 
 function escapeHtml(value = '') {

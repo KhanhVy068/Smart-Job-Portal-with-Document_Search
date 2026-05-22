@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const notificationService = require('../services/notificationService');
 
 function fixMojibake(value) {
   if (typeof value !== 'string') return value;
@@ -15,6 +16,11 @@ function getUserId(req, fallback = 2) {
 }
 
 function toApplicationResponse(row = {}) {
+  const extractedSkills = normalizeSkills(row.extracted_skills);
+  const profileSkills = normalizeSkills(row.profile_skills);
+  const skills = profileSkills.length ? profileSkills : extractedSkills;
+  const desiredPosition = row.desired_position || inferDesiredPosition(row.extracted_text) || '';
+  const extractionStatus = row.extraction_status || row.cv_status || row.document_status || 'pending';
   return {
     id: row.id || row.application_id,
     applicationId: row.id || row.application_id,
@@ -38,9 +44,71 @@ function toApplicationResponse(row = {}) {
     cvUrl: row.cv_link,
     url: row.cv_link,
     cvStatus: row.cv_status,
+    extractionStatus,
+    extraction_status: extractionStatus,
     extractedText: fixMojibake(row.extracted_text),
+    extractedSkills,
+    skills,
+    desiredPosition: desiredPosition || row.job_title || '',
+    desired_position: desiredPosition,
+    summary: row.extracted_summary || '',
     documentStatus: row.cv_status
   };
+}
+
+function normalizeSkills(value) {
+  if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return normalizeSkills(parsed);
+  } catch {}
+  return String(value).split(',').map(item => item.trim()).filter(Boolean);
+}
+
+function inferDesiredPosition(text = '') {
+  const firstLine = String(text || '').split(/\r?\n| {2,}/).map(line => line.trim()).find(Boolean);
+  return firstLine && firstLine.length <= 80 ? firstLine : '';
+}
+
+async function ensureApplicationReadSchema() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS candidate_profiles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL UNIQUE,
+        title VARCHAR(255) NULL,
+        desired_position VARCHAR(255) NULL,
+        location VARCHAR(255) NULL,
+        bio TEXT NULL,
+        skills TEXT NULL,
+        experience INT DEFAULT 0,
+        education TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_candidate_profiles_user (user_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+  } catch (error) {
+    if (error.code !== 'ER_TABLE_EXISTS_ERROR') throw error;
+  }
+  try {
+    await db.query('ALTER TABLE documents ADD COLUMN extracted_skills TEXT NULL AFTER extracted_text_hash');
+  } catch (error) {
+    if (error.code !== 'ER_DUP_FIELDNAME') throw error;
+  }
+  for (const sql of [
+    'ALTER TABLE documents ADD COLUMN desired_position VARCHAR(255) NULL AFTER extracted_skills',
+    'ALTER TABLE documents ADD COLUMN extracted_summary TEXT NULL AFTER desired_position',
+    "ALTER TABLE documents ADD COLUMN extraction_status VARCHAR(50) DEFAULT 'pending' AFTER status",
+    'ALTER TABLE documents ADD COLUMN extracted_at DATETIME NULL AFTER processed_at'
+  ]) {
+    try {
+      await db.query(sql);
+    } catch (error) {
+      if (error.code !== 'ER_DUP_FIELDNAME') throw error;
+    }
+  }
 }
 
 function normalizeApplicationStatus(status = '') {
@@ -79,6 +147,14 @@ exports.applyJob = async (req, res) => {
       [jobId, candidateId, cvDocumentId, req.body.coverLetter || req.body.cover_letter || null]
     );
 
+    const [[job]] = await db.query('SELECT employer_id, title FROM jobs WHERE id = ? LIMIT 1', [jobId]);
+    await notificationService.createNotification({
+      userId: job?.employer_id,
+      type: 'new_cv',
+      title: 'Có CV mới ứng tuyển',
+      message: `Ứng viên mới vừa nộp CV cho vị trí ${job?.title || 'đang tuyển'}.`
+    });
+
     res.status(201).json({ success: true, message: 'Nộp đơn ứng tuyển thành công.' });
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
@@ -91,6 +167,7 @@ exports.applyJob = async (req, res) => {
 
 exports.getMyApplications = async (req, res) => {
   try {
+    await ensureApplicationReadSchema();
     const [rows] = await db.query(
       `
       SELECT a.*, j.title AS job_title, j.location, u.full_name AS employer_name,
@@ -114,6 +191,7 @@ exports.getMyApplications = async (req, res) => {
 
 exports.getApplicantsByJob = async (req, res) => {
   try {
+    await ensureApplicationReadSchema();
     const params = [];
     let whereSql = 'a.deleted_at IS NULL';
     if (req.params.jobId || req.query.jobId) {
@@ -123,12 +201,15 @@ exports.getApplicantsByJob = async (req, res) => {
 
     const [rows] = await db.query(
       `
-      SELECT a.id AS application_id, a.job_id, a.status, a.applied_at, a.updated_at,
+      SELECT a.id AS application_id, a.job_id, a.candidate_id, a.cv_document_id, a.status, a.applied_at, a.updated_at,
              u.full_name AS candidate_name, u.email AS candidate_email,
+             cp.skills AS profile_skills, cp.desired_position,
              d.file_url AS cv_link, d.file_name AS cv_name, d.status AS cv_status,
+             d.extraction_status, d.extracted_text, d.extracted_skills, d.desired_position, d.extracted_summary,
              j.title AS job_title
       FROM applications a
       JOIN users u ON a.candidate_id = u.id
+      LEFT JOIN candidate_profiles cp ON cp.user_id = u.id
       JOIN documents d ON a.cv_document_id = d.id
       JOIN jobs j ON a.job_id = j.id
       WHERE ${whereSql}
@@ -147,17 +228,21 @@ exports.getApplicantsByJob = async (req, res) => {
 
 exports.getApplicationById = async (req, res) => {
   try {
+    await ensureApplicationReadSchema();
     const [[row]] = await db.query(
       `
       SELECT a.id AS application_id, a.job_id, a.candidate_id, a.cv_document_id,
              a.cover_letter, a.expected_salary, a.available_from, a.status,
              a.applied_at, a.updated_at,
              u.full_name AS candidate_name, u.email AS candidate_email, u.phone AS candidate_phone,
-             d.file_url AS cv_link, d.file_name AS cv_name, d.status AS cv_status, d.extracted_text,
+             cp.skills AS profile_skills, cp.desired_position,
+             d.file_url AS cv_link, d.file_name AS cv_name, d.status AS cv_status,
+             d.extraction_status, d.extracted_text, d.extracted_skills, d.desired_position, d.extracted_summary,
              j.title AS job_title, j.location,
              employer.full_name AS employer_name
       FROM applications a
       JOIN users u ON a.candidate_id = u.id
+      LEFT JOIN candidate_profiles cp ON cp.user_id = u.id
       JOIN documents d ON a.cv_document_id = d.id
       JOIN jobs j ON a.job_id = j.id
       LEFT JOIN users employer ON j.employer_id = employer.id
@@ -177,16 +262,20 @@ exports.getApplicationById = async (req, res) => {
 
 exports.getEmployerApplications = async (req, res) => {
   try {
+    await ensureApplicationReadSchema();
     const employerId = getUserId(req, 1);
     const [rows] = await db.query(
       `
       SELECT a.id AS application_id, a.job_id, a.candidate_id, a.cv_document_id,
              a.status, a.applied_at, a.updated_at,
              u.full_name AS candidate_name, u.email AS candidate_email, u.phone AS candidate_phone,
+             cp.skills AS profile_skills, cp.desired_position,
              d.file_url AS cv_link, d.file_name AS cv_name, d.status AS cv_status,
+             d.extraction_status, d.extracted_text, d.extracted_skills, d.desired_position, d.extracted_summary,
              j.title AS job_title, j.location
       FROM applications a
       JOIN users u ON a.candidate_id = u.id
+      LEFT JOIN candidate_profiles cp ON cp.user_id = u.id
       JOIN documents d ON a.cv_document_id = d.id
       JOIN jobs j ON a.job_id = j.id
       WHERE a.deleted_at IS NULL AND j.employer_id = ?
@@ -226,7 +315,8 @@ exports.updateApplicationStatus = async (req, res) => {
       `
       SELECT a.*, j.title AS job_title, j.location, employer.full_name AS employer_name,
              u.full_name AS candidate_name, u.email AS candidate_email, u.phone AS candidate_phone,
-             d.file_name AS cv_name, d.file_url AS cv_link, d.status AS cv_status, d.extracted_text
+             d.file_name AS cv_name, d.file_url AS cv_link, d.status AS cv_status,
+             d.extraction_status, d.extracted_text, d.extracted_skills, d.desired_position, d.extracted_summary
       FROM applications a
       JOIN jobs j ON a.job_id = j.id
       LEFT JOIN users employer ON j.employer_id = employer.id
@@ -236,6 +326,13 @@ exports.updateApplicationStatus = async (req, res) => {
       `,
       [req.params.id]
     );
+
+    await notificationService.createNotification({
+      userId: row?.candidate_id,
+      type: 'application_status',
+      title: 'Trạng thái ứng tuyển đã cập nhật',
+      message: `Hồ sơ ứng tuyển ${row?.job_title || ''} chuyển sang trạng thái ${nextStatus}.`
+    });
 
     res.json({ success: true, message: 'Đã cập nhật trạng thái hồ sơ.', application: toApplicationResponse(row) });
   } catch (error) {

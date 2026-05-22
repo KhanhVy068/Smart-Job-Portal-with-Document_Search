@@ -71,9 +71,17 @@ function renderJob(job) {
   if (saveBtn) {
     let saved = !!job.isSaved;
     renderSaveBtn(saveBtn, saved);
-    saveBtn.addEventListener('click', () => {
-      saved = !saved;
-      renderSaveBtn(saveBtn, saved);
+    saveBtn.addEventListener('click', async () => {
+      const next = !saved;
+      renderSaveBtn(saveBtn, next);
+      try {
+        if (saved) await api.delete(`/saved-jobs/${encodeURIComponent(job.id)}`);
+        else await api.post('/saved-jobs', { jobId: job.id });
+        saved = next;
+      } catch (err) {
+        renderSaveBtn(saveBtn, saved);
+        alert(err?.status === 401 ? 'Vui lòng đăng nhập Candidate để lưu việc.' : 'Chưa lưu được việc. Vui lòng thử lại.');
+      }
     });
   }
 

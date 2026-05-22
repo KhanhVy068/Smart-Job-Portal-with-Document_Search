@@ -9,8 +9,8 @@ export async function init() {
 async function fetchSaved() {
   showSkeleton();
   try {
-    const res = await api.get('/jobs');
-    const jobs = (res?.items ?? (Array.isArray(res) ? res : [])).filter(j => j.isSaved);
+    const res = await api.get('/saved-jobs');
+    const jobs = res?.items ?? res?.jobs ?? (Array.isArray(res) ? res : []);
     jobs.forEach(j => saved.add(String(j.id)));
     render(jobs);
   } catch {
@@ -69,14 +69,19 @@ function render(jobs) {
   });
 
   list.querySelectorAll('.unsave-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation();
       const id = btn.dataset.id;
-      saved.delete(String(id));
-      btn.closest('article')?.remove();
-      const remaining = list.querySelectorAll('article').length;
-      if (count) count.textContent = `${remaining} việc làm đã lưu`;
-      if (!remaining) empty?.classList.remove('hidden');
+      try {
+        await api.delete(`/saved-jobs/${encodeURIComponent(id)}`);
+        saved.delete(String(id));
+        btn.closest('article')?.remove();
+        const remaining = list.querySelectorAll('article').length;
+        if (count) count.textContent = `${remaining} việc làm đã lưu`;
+        if (!remaining) empty?.classList.remove('hidden');
+      } catch {
+        alert('Chưa bỏ lưu được việc. Vui lòng thử lại.');
+      }
     });
   });
 }

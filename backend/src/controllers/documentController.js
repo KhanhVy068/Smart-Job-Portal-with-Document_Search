@@ -3,6 +3,7 @@ const https = require('https');
 const db = require('../config/db');
 const documentQueue = require('../services/documentQueue');
 const searchService = require('../services/searchService');
+const documentWorker = require('../services/documentWorker');
 
 function getUserId(req, fallback = 2) {
   return req.user?.id || fallback;
@@ -14,6 +15,17 @@ async function ensureDocumentUploadSchema() {
   } catch (error) {
     if (error.code !== 'ER_DUP_FIELDNAME') throw error;
   }
+  await documentWorker.ensureExtractionSchema();
+}
+
+function normalizeSkills(value) {
+  if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return normalizeSkills(parsed);
+  } catch {}
+  return String(value).split(',').map(item => item.trim()).filter(Boolean);
 }
 
 function toDocumentResponse(row = {}) {
@@ -28,10 +40,21 @@ function toDocumentResponse(row = {}) {
     size: Number(row.file_size || 0),
     storageProvider: row.storage_provider,
     status: row.status,
+    extractionStatus: row.extraction_status || row.status || 'pending',
+    extraction_status: row.extraction_status || row.status || 'pending',
     docType: row.doc_type,
+    extractedText: row.extracted_text || '',
+    extractedSkills: normalizeSkills(row.extracted_skills),
+    skills: normalizeSkills(row.extracted_skills),
+    desiredPosition: row.desired_position || '',
+    desired_position: row.desired_position || '',
+    experienceYears: row.experience_years ?? null,
+    experience_years: row.experience_years ?? null,
+    summary: row.extracted_summary || '',
     uploadedAt: row.created_at,
     createdAt: row.created_at,
-    processedAt: row.processed_at
+    processedAt: row.processed_at,
+    extractedAt: row.extracted_at
   };
 }
 
@@ -50,14 +73,19 @@ exports.uploadCV = async (req, res) => {
     const [result] = await db.query(
       `
       INSERT INTO documents (
-        user_id, file_name, file_url, file_size, storage_provider, file_hash, doc_type, status
-      ) VALUES (?, ?, ?, ?, 'cloudinary', ?, 'cv', 'pending')
+        user_id, file_name, file_url, file_size, storage_provider, file_hash, doc_type, status, extraction_status
+      ) VALUES (?, ?, ?, ?, 'cloudinary', ?, 'cv', 'pending', 'pending')
       `,
       [userId, fileName, fileUrl, fileSize, fileHash]
     );
 
     const [[row]] = await db.query('SELECT * FROM documents WHERE id = ?', [result.insertId]);
-    await documentQueue.enqueueDocument(result.insertId);
+    documentQueue.enqueueDocument(result.insertId).catch(error => {
+      console.warn('Queue unavailable, extracting document directly:', error.message);
+      documentWorker.processDocument(result.insertId).catch(err => {
+        console.warn('Direct document extraction warning:', err.message);
+      });
+    });
     res.status(201).json(toDocumentResponse(row));
   } catch (error) {
     console.error('Upload CV error:', error);

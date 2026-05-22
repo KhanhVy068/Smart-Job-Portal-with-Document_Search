@@ -12,6 +12,7 @@ let currentAdmin = {
 
 export function initAdminHeader() {
   bindEvents();
+  setupBrandLogoFallback();
   renderAdmin(normalizeAdmin(getUser() || {}));
   loadAdmin();
 }
@@ -35,6 +36,7 @@ function bindEvents() {
   document.getElementById('adminNotificationsButton')?.addEventListener('click', () => {
     closeProfile();
     document.getElementById('adminNotificationDropdown')?.classList.toggle('hidden');
+    loadNotifications();
   });
 
   document.getElementById('adminHeaderSearchForm')?.addEventListener('submit', (event) => {
@@ -115,7 +117,7 @@ function renderAvatar(id, url, name = '') {
   if (!target) return;
 
   if (url) {
-    target.innerHTML = `<img class="h-full w-full object-cover" src="${escapeHtml(url)}" alt="${escapeHtml(name || 'Ảnh đại diện quản trị')}">`;
+    target.innerHTML = `<img class="h-full w-full object-cover" src="${escapeHtml(toAbsoluteUploadUrl(url))}" alt="${escapeHtml(name || 'Ảnh đại diện quản trị')}">`;
     return;
   }
 
@@ -139,6 +141,34 @@ function logout() {
   localStorage.removeItem('user');
   sessionStorage.clear();
   window.location.href = './index.html';
+}
+
+function setupBrandLogoFallback() {
+  const logo = document.querySelector('#adminBrandLogo img');
+  if (!logo || logo.dataset.fallbackBound === 'true') return;
+  logo.dataset.fallbackBound = 'true';
+  logo.addEventListener('error', () => {
+    const wrap = document.getElementById('adminBrandLogo');
+    if (wrap) wrap.innerHTML = '<span class="material-symbols-outlined text-2xl">work</span>';
+  });
+}
+
+async function loadNotifications() {
+  try {
+    const payload = await api.get('/notifications');
+    const items = payload.items || payload.notifications || [];
+    setBadge(payload.unread || 0);
+    const message = document.getElementById('adminNotificationMessage');
+    if (!message) return;
+    message.innerHTML = items.length ? items.map(item => `
+      <span class="mb-2 block rounded-lg ${item.isRead ? 'bg-white' : 'bg-blue-50'} p-3">
+        <span class="block text-sm font-black text-slate-900">${escapeHtml(item.title || 'Thông báo')}</span>
+        <span class="mt-1 block text-xs font-semibold leading-5 text-slate-500">${escapeHtml(item.message || '')}</span>
+      </span>
+    `).join('') : 'Không có thông báo mới.';
+  } catch {
+    setText('adminNotificationMessage', 'Không thể tải thông báo.');
+  }
 }
 
 function formatRole(role = '') {
@@ -166,6 +196,12 @@ function escapeHtml(value = '') {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+
+function toAbsoluteUploadUrl(url = '') {
+  if (/^https?:\/\//i.test(url)) return url;
+  const apiBase = (localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
 

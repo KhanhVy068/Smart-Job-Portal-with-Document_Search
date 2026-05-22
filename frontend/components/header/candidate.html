@@ -1,13 +1,16 @@
 <header id="headerEl" class="fixed left-64 right-0 top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 shadow-sm transition-all duration-300 sm:px-6">
   <div class="flex min-w-0 flex-1 items-center gap-4">
-    <div class="hidden min-w-0 items-center gap-2 sm:flex">
-      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
-        <span class="material-symbols-outlined text-xl">rocket_launch</span>
+    <div class="flex min-w-0 shrink-0 items-center gap-3">
+      <div id="candidateBrandLogo" class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-600 text-white shadow-sm">
+        <img src="./assets/logo.png" alt="Smart Job Portal" class="h-full w-full object-cover" width="48" height="48">
       </div>
-      <p class="truncate text-lg font-black tracking-tight text-slate-950">Smart Job Portal</p>
+      <div class="min-w-0">
+        <p class="truncate text-[22px] font-bold leading-tight text-slate-950 sm:text-[28px]">Smart Job Portal</p>
+        <p id="candidateBrandUserName" class="mt-0.5 max-w-[160px] truncate text-xs font-semibold leading-tight text-slate-500 sm:max-w-[240px] sm:text-sm">Ứng viên</p>
+      </div>
     </div>
 
-    <label class="relative hidden min-w-0 flex-1 max-w-lg lg:block">
+    <label class="relative hidden min-w-0 flex-1 max-w-lg xl:block">
       <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-lg text-slate-400">search</span>
       <input id="headerSearchInput" type="text" placeholder="Tìm kiếm công việc..."
         class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10" />

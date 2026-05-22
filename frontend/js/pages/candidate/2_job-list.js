@@ -148,14 +148,26 @@ function renderJobs(jobs) {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.id;
       const saved = btn.dataset.saved === 'true';
-      // Toggle saved state locally (no dedicated API in spec, use apply as proxy)
-      btn.dataset.saved = !saved;
-      const icon = btn.querySelector('.material-symbols-outlined');
-      if (icon) icon.style.fontVariationSettings = `'FILL' ${saved ? 0 : 1}`;
-      btn.classList.toggle('text-blue-900', !saved);
-      btn.classList.toggle('bg-blue-50', !saved);
+      setSaveButton(btn, !saved);
+      try {
+        if (saved) await api.delete(`/saved-jobs/${encodeURIComponent(id)}`);
+        else await api.post('/saved-jobs', { jobId: id });
+      } catch (err) {
+        setSaveButton(btn, saved);
+        alert(err?.status === 401 ? 'Vui lòng đăng nhập Candidate để lưu việc.' : 'Chưa lưu được việc. Vui lòng thử lại.');
+      }
     });
   });
+}
+
+function setSaveButton(btn, saved) {
+  btn.dataset.saved = String(saved);
+  btn.title = saved ? 'Bỏ lưu' : 'Lưu việc';
+  const icon = btn.querySelector('.material-symbols-outlined');
+  if (icon) icon.style.fontVariationSettings = `'FILL' ${saved ? 1 : 0}`;
+  btn.classList.toggle('text-blue-900', saved);
+  btn.classList.toggle('bg-blue-50', saved);
+  btn.classList.toggle('text-slate-300', !saved);
 }
 
 function renderPagination() {

@@ -1,5 +1,7 @@
 const db = require('../config/db');
+const notificationService = require('../services/notificationService');
 const { documentQueue, DOCUMENT_QUEUE_NAME } = require('../services/documentQueue');
+const documentWorker = require('../services/documentWorker');
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -187,6 +189,7 @@ async function ensureAdminSchema() {
       await ignoreDuplicateDDL('ALTER TABLE jobs ADD COLUMN is_reported BOOLEAN DEFAULT FALSE AFTER review_status');
       await ignoreDuplicateDDL("ALTER TABLE documents ADD COLUMN moderation_status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending' AFTER status");
       await ignoreDuplicateDDL('ALTER TABLE documents ADD COLUMN file_size BIGINT DEFAULT 0 AFTER file_url');
+      await documentWorker.ensureExtractionSchema();
       await db.query(`
         CREATE TABLE IF NOT EXISTS reports (
           id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -505,6 +508,12 @@ exports.blockUser = async (req, res) => {
     }
     await ensureAdminSchema();
     await db.query('UPDATE users SET is_blocked = TRUE WHERE id = ? AND deleted_at IS NULL', [req.params.id]);
+    await notificationService.createNotification({
+      userId: req.params.id,
+      type: 'account_locked',
+      title: 'Tài khoản đã bị khóa',
+      message: 'Tài khoản của bạn đã bị quản trị viên khóa.'
+    });
     res.json({ success: true, message: 'Đã khóa người dùng' });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi khóa người dùng', error: error.message });
@@ -515,6 +524,12 @@ exports.unblockUser = async (req, res) => {
   try {
     await ensureAdminSchema();
     await db.query('UPDATE users SET is_blocked = FALSE, is_verified = TRUE WHERE id = ? AND deleted_at IS NULL', [req.params.id]);
+    await notificationService.createNotification({
+      userId: req.params.id,
+      type: 'account_unlocked',
+      title: 'Tài khoản đã được mở khóa',
+      message: 'Tài khoản của bạn đã được quản trị viên mở khóa.'
+    });
     res.json({ success: true, message: 'Đã mở khóa người dùng' });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi mở khóa người dùng', error: error.message });
@@ -788,7 +803,8 @@ exports.getAdminDocuments = async (req, res) => {
     const [docs] = await db.query(
       `
       SELECT
-        d.id, d.file_name, d.file_url, d.file_size, d.doc_type, d.status, d.moderation_status, d.created_at,
+        d.id, d.file_name, d.file_url, d.file_size, d.doc_type, d.status, d.extraction_status,
+        d.desired_position, d.extracted_summary, d.extracted_skills, d.moderation_status, d.created_at,
         u.full_name AS candidateName, u.email,
         MAX(j.title) AS jobTitle
       FROM documents d
@@ -796,7 +812,8 @@ exports.getAdminDocuments = async (req, res) => {
       LEFT JOIN applications a ON a.cv_document_id = d.id AND a.deleted_at IS NULL
       LEFT JOIN jobs j ON j.id = a.job_id
       ${whereSql}
-      GROUP BY d.id, d.file_name, d.file_url, d.file_size, d.doc_type, d.status, d.moderation_status, d.created_at, u.full_name, u.email
+      GROUP BY d.id, d.file_name, d.file_url, d.file_size, d.doc_type, d.status, d.extraction_status,
+               d.desired_position, d.extracted_summary, d.extracted_skills, d.moderation_status, d.created_at, u.full_name, u.email
       ORDER BY d.created_at DESC
       LIMIT ? OFFSET ?
       `,
@@ -815,6 +832,9 @@ exports.getAdminDocuments = async (req, res) => {
       size: Number(doc.file_size || 0),
       status: doc.moderation_status || doc.status,
       processingStatus: doc.status,
+      extractionStatus: doc.extraction_status || doc.status,
+      desiredPosition: doc.desired_position || '',
+      summary: doc.extracted_summary || '',
       type: doc.doc_type,
       fileType: String(doc.file_name || '').split('.').pop(),
       jobApplied: doc.jobTitle,
@@ -898,6 +918,54 @@ exports.updateDocumentStatus = async (req, res) => {
   const status = req.params.action === 'approve' ? 'approved' : 'rejected';
   await db.query('UPDATE documents SET moderation_status = ? WHERE id = ? AND deleted_at IS NULL', [status, req.params.id]);
   res.json({ success: true });
+};
+
+exports.reextractCvs = async (req, res) => {
+  try {
+    await ensureAdminSchema();
+    const includeFailed = req.body?.includeFailed !== false;
+    const limit = Math.min(Math.max(Number(req.body?.limit || req.query.limit || 50), 1), 200);
+    const statuses = includeFailed ? ['pending', 'processing', 'failed'] : ['pending', 'processing'];
+    const placeholders = statuses.map(() => '?').join(',');
+    const [rows] = await db.query(
+      `SELECT id
+       FROM documents
+       WHERE deleted_at IS NULL
+         AND doc_type = 'cv'
+         AND (
+           extraction_status IN (${placeholders})
+           OR extraction_status IS NULL
+           OR extracted_text IS NULL
+         )
+       ORDER BY created_at ASC
+       LIMIT ?`,
+      [...statuses, limit]
+    );
+
+    let enqueued = 0;
+    const directResults = [];
+    for (const row of rows) {
+      try {
+        await documentQueue.enqueueDocument(row.id);
+        enqueued += 1;
+      } catch (error) {
+        const result = await documentWorker.processDocument(row.id).catch(err => ({ id: row.id, status: 'failed', error: err.message }));
+        directResults.push(result);
+      }
+    }
+
+    res.json({
+      success: true,
+      total: rows.length,
+      enqueued,
+      processedDirectly: directResults.length,
+      results: directResults,
+      message: rows.length ? 'Đã gửi CV vào hàng đợi trích xuất.' : 'Không có CV pending cần trích xuất.'
+    });
+  } catch (error) {
+    console.error('Re-extract CVs error:', error);
+    res.status(500).json({ message: 'Lỗi re-extract CV', error: error.message });
+  }
 };
 
 exports.deleteDocument = async (req, res) => {

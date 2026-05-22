@@ -1,6 +1,7 @@
 import { api } from '../../api.js';
 
 let pendingDeleteId = null;
+let refreshTimer = null;
 
 export async function init() {
   await fetchCvs();
@@ -8,6 +9,10 @@ export async function init() {
 }
 
 async function fetchCvs() {
+  if (refreshTimer) {
+    window.clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
   showSkeleton();
   try {
     const res = await api.get('/candidate/cv');
@@ -37,14 +42,19 @@ function render(cvs) {
   const statusBadge = {
     indexed:    { label: 'Đã lập chỉ mục', color: 'bg-teal-100 text-teal-700' },
     processing: { label: 'Đang xử lý',     color: 'bg-blue-100 text-blue-700' },
-    pending:    { label: 'Chờ xử lý',       color: 'bg-amber-100 text-amber-700' },
+    pending:    { label: 'Đang xử lý',       color: 'bg-amber-100 text-amber-700' },
     completed:  { label: 'Đã trích xuất',   color: 'bg-teal-100 text-teal-700' },
-    failed:     { label: 'Lỗi xử lý',       color: 'bg-red-100 text-red-600' },
-    error:      { label: 'Lỗi',            color: 'bg-red-100 text-red-600' },
+    failed:     { label: 'Trích xuất thất bại', color: 'bg-red-100 text-red-600' },
+    error:      { label: 'Trích xuất thất bại', color: 'bg-red-100 text-red-600' },
   };
 
+  const hasRunningExtraction = cvs.some(cv => ['pending', 'processing'].includes(getExtractionStatus(cv)));
+  if (hasRunningExtraction) refreshTimer = window.setTimeout(fetchCvs, 3500);
+
   list.innerHTML = cvs.map(cv => {
-    const s = statusBadge[cv.status] ?? { label: cv.status ?? 'Không rõ', color: 'bg-slate-100 text-slate-600' };
+    const extractionStatus = getExtractionStatus(cv);
+    const s = statusBadge[extractionStatus] ?? { label: extractionStatus || 'Không rõ', color: 'bg-slate-100 text-slate-600' };
+    const skills = normalizeSkills(cv.extractedSkills || cv.skills);
     return `
     <div class="bg-white border border-slate-100 rounded-xl p-5 shadow-sm" data-cv-id="${cv.id}">
       <div class="flex items-start gap-4">
@@ -60,6 +70,8 @@ function render(cvs) {
             <span class="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${s.color}">${s.label}</span>
           </div>
           ${cv.size ? `<p class="text-xs text-slate-400 mt-1">${formatSize(cv.size)}</p>` : ''}
+          ${cv.desiredPosition ? `<p class="mt-2 text-xs font-bold text-slate-600">CV mong muốn: ${esc(cv.desiredPosition)}</p>` : ''}
+          ${skills.length ? `<div class="mt-2 flex flex-wrap gap-1.5">${skills.slice(0, 4).map(skill => `<span class="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">${esc(skill)}</span>`).join('')}</div>` : ''}
         </div>
       </div>
       <div class="flex gap-2 mt-4">
@@ -82,6 +94,21 @@ function render(cvs) {
       document.getElementById('cvDeleteModal')?.classList.remove('hidden');
     });
   });
+}
+
+function getExtractionStatus(cv = {}) {
+  return String(cv.extractionStatus || cv.extraction_status || cv.status || 'pending').toLowerCase();
+}
+
+function normalizeSkills(value) {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  const text = String(value || '').trim();
+  if (!text) return [];
+  try {
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+  } catch {}
+  return text.split(',').map(item => item.trim()).filter(Boolean);
 }
 
 function setupDeleteModal() {

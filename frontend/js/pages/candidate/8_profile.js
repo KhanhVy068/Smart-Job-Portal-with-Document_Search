@@ -25,7 +25,7 @@ async function loadProfile() {
     const wrap = document.getElementById('profileAvatarWrap');
     if (wrap) {
       if (user.avatar || user.avatarUrl) {
-        wrap.innerHTML = `<img src="${esc(user.avatar || user.avatarUrl)}" class="w-full h-full object-cover"/>`;
+        wrap.innerHTML = `<img src="${esc(toAbsoluteUploadUrl(user.avatar || user.avatarUrl))}" class="w-full h-full object-cover"/>`;
       } else {
         wrap.textContent = name[0]?.toUpperCase() ?? '?';
       }
@@ -103,4 +103,10 @@ function setText(id, val) {
 
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toAbsoluteUploadUrl(url = '') {
+  if (/^https?:\/\//i.test(url)) return url;
+  const apiBase = (localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
 }

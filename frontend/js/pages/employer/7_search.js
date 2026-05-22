@@ -3,9 +3,9 @@ import { api } from '../../api.js';
 const PAGE_SIZE = 8;
 
 const endpoints = {
-  search: '/candidates/search',
-  save: '/candidates/save',
-  savedIds: '/candidates/saved-ids'
+  search: '/employer/cv-search',
+  save: '/saved-candidates',
+  savedIds: '/saved-candidates/ids'
 };
 
 let currentPage = 1;
@@ -14,7 +14,7 @@ let currentLocation = '';
 let currentExperience = '';
 let currentSort = 'relevance';
 let isLoading = false;
-// IDs (candidateId) đã lưu — dùng để ẩn khỏi kết quả tìm kiếm
+// IDs (candidateId) đã lưu — dùng để đổi trạng thái nút, không ẩn kết quả tìm kiếm.
 let savedCandidateIds = new Set();
 
 // Khởi tạo trang tìm kiếm CV, chỉ lấy dữ liệu từ API backend.
@@ -161,10 +161,7 @@ function getSelectedSkills() {
 // Chuẩn hóa nhiều kiểu payload để frontend không phụ thuộc cứng vào tên field backend.
 function normalizeSearchResult(payload) {
   const rawItems = normalizeList(payload, ['items', 'candidates', 'results', 'data']).map(normalizeCandidate);
-  // Lọc ra ứng viên đã lưu — candidateId hoặc id đều có thể khớp
-  const items = rawItems.filter(c =>
-    !savedCandidateIds.has(String(c.candidateId)) && !savedCandidateIds.has(String(c.id))
-  );
+  const items = rawItems;
   const total = Number(payload?.total ?? payload?.totalItems ?? payload?.count ?? items.length);
   const page = Number(payload?.page ?? payload?.currentPage ?? currentPage);
   const totalPages = Math.max(1, Number(payload?.totalPages ?? Math.ceil(total / PAGE_SIZE) ?? 1));
@@ -176,18 +173,29 @@ function normalizeSearchResult(payload) {
 function normalizeCandidate(item, index) {
   const score = Number(item.score ?? item.matchScore ?? item.fitScore ?? 0);
   const experience = item.experienceYears ?? item.yearsOfExperience ?? item.experience ?? '';
+  const applicationId = item.applicationId || item.application_id || item.id || '';
+  const documentId = item.documentId || item.document_id || item.cvDocumentId || item.cv_document_id || '';
+  const candidateId = item.candidateId || item.candidate_id || '';
 
   return {
-    id: item.id || item._id || item.candidateId || `api-candidate-${index + 1}`,
+    id: applicationId || `${candidateId}-${documentId}` || item._id || `api-candidate-${index + 1}`,
+    applicationId,
+    documentId,
     name: item.name || item.fullName || item.candidateName || 'Ứng viên chưa cập nhật tên',
-    title: item.title || item.position || item.currentPosition || item.jobTitle || 'Chưa cập nhật vị trí',
+    candidateId,
+    cvDocumentId: documentId,
+    title: item.desiredPosition || item.desired_position || item.title || item.position || item.currentPosition || item.jobTitle || 'Chưa cập nhật vị trí mong muốn',
     location: item.location || item.city || item.address || 'Chưa cập nhật địa điểm',
     experience,
-    skills: normalizeSkills(item.skills || item.skillNames || item.tags),
-    summary: item.summary || item.description || item.cvSummary || '',
+    skills: normalizeSkills(item.skills || item.extractedSkills || item.skillNames || item.tags),
+    summary: item.previewText || item.summary || item.description || item.cvSummary || item.extractedText || '',
+    extractedText: item.extractedText || '',
+    desiredPosition: item.desiredPosition || item.desired_position || '',
+    jobTitle: item.jobTitle || '',
     score: Math.max(0, Math.min(100, score)),
     lastActive: item.lastActive || item.updatedAt || item.createdAt || '',
     fileName: item.fileName || item.cvFileName || item.resumeName || 'CV chưa cập nhật tên file',
+    cvUrl: item.cvUrl || item.url || item.fileUrl || '',
     email: item.email || item.candidateEmail || '',
     phone: item.phone || item.candidatePhone || ''
   };
@@ -209,6 +217,10 @@ function normalizeSkills(value) {
   if (Array.isArray(value)) return value.map(String).filter(Boolean);
   const text = String(value || '').trim();
   if (!text) return [];
+  try {
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed)) return normalizeSkills(parsed);
+  } catch {}
   return text.split(',').map(item => item.trim()).filter(Boolean);
 }
 
@@ -305,8 +317,8 @@ function renderCandidates(candidates) {
               <button class="btnViewCandidate rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50" data-id="${escapeHtml(candidate.id)}">
                 Xem chi tiết
               </button>
-              <button class="btnSaveCandidate rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700" data-id="${escapeHtml(candidate.id)}">
-                Lưu CV
+              <button class="btnSaveCandidate rounded-lg ${isCandidateSaved(candidate) ? 'bg-slate-500' : 'bg-blue-600 hover:bg-blue-700'} px-4 py-2 text-sm font-bold text-white transition" data-id="${escapeHtml(candidate.id)}" ${isCandidateSaved(candidate) ? 'disabled' : ''}>
+                ${isCandidateSaved(candidate) ? 'Đã lưu' : 'Lưu CV'}
               </button>
             </div>
           </div>
@@ -324,6 +336,10 @@ function bindCandidateActions(candidates) {
     button.addEventListener('click', () => {
       const candidate = candidates.find(item => String(item.id) === String(button.dataset.id));
       if (candidate) sessionStorage.setItem('selectedCandidate', JSON.stringify(candidate));
+      if (candidate?.applicationId) sessionStorage.setItem('selectedApplicationId', candidate.applicationId);
+      if (candidate?.documentId || candidate?.cvDocumentId) {
+        sessionStorage.setItem('selectedDocumentId', candidate.documentId || candidate.cvDocumentId);
+      }
       window.appRouter?.navigate('cv-detail') ?? (window.location.hash = '#cv-detail');
     });
   });
@@ -339,34 +355,38 @@ function bindCandidateActions(candidates) {
 // Lưu CV qua backend — xoá khỏi danh sách ngay lập tức kể cả khi đang lọc.
 async function saveCandidate(candidate, button) {
   if (!candidate) return;
+  if (!candidate.candidateId) {
+    alert('Kết quả tìm kiếm thiếu candidateId, vui lòng tải lại trang.');
+    return;
+  }
   const originalText = button.textContent;
   button.disabled = true;
   button.textContent = 'Đang lưu...';
 
   try {
     await api.post(endpoints.save, {
-      id: candidate.candidateId || candidate.id,
-      candidateId: candidate.candidateId || candidate.id,
-      documentId: candidate.cvDocumentId || candidate.id
+      candidateId: candidate.candidateId,
+      applicationId: candidate.applicationId,
+      documentId: candidate.documentId || candidate.cvDocumentId
     });
 
     // Đánh dấu đã lưu để lọc ra ở các lần tìm kiếm tiếp theo
     savedCandidateIds.add(String(candidate.candidateId || candidate.id));
     savedCandidateIds.add(String(candidate.id));
 
-    // Xoá thẻ ứng viên khỏi DOM ngay lập tức
-    const card = button.closest('article');
-    if (card) {
-      card.style.transition = 'opacity 0.25s';
-      card.style.opacity = '0';
-      setTimeout(() => card.remove(), 260);
-    }
+    button.textContent = 'Đã lưu';
+    button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    button.classList.add('bg-slate-500');
   } catch (err) {
     console.error('Save candidate error:', err);
     button.disabled = false;
     button.textContent = originalText;
     alert('Chưa lưu được CV. Vui lòng kiểm tra backend.');
   }
+}
+
+function isCandidateSaved(candidate) {
+  return savedCandidateIds.has(String(candidate?.candidateId)) || savedCandidateIds.has(String(candidate?.id));
 }
 
 // Render phân trang dựa trên metadata backend.
@@ -416,7 +436,7 @@ function renderPagination(page, totalPages) {
 // Hiển thị lỗi khi backend chưa sẵn sàng hoặc API trả lỗi.
 function renderErrorState(err) {
   const message = err?.status === 404
-    ? 'Backend chưa có endpoint /candidates/search.'
+    ? 'Backend chưa có endpoint /employer/cv-search.'
     : 'Không thể tải kết quả tìm kiếm CV từ backend.';
 
   setText('resultSummary', 'Chưa tải được dữ liệu');

@@ -331,7 +331,7 @@ const {
     getAllJobs, getJobById, updateJobStatus, deleteJob, bulkDeleteJobs,
     getAllCategories, createCategory, updateCategory, deleteCategory,
     getStats,
-    getAdminDocuments, getAdminDocumentById, viewAdminDocument, updateDocumentStatus, deleteDocument,
+    getAdminDocuments, getAdminDocumentById, viewAdminDocument, updateDocumentStatus, deleteDocument, reextractCvs,
     getStorage, getReports, getReportsSummary, getSettings, getBackgroundJobs, getSearchAnalytics, genericOk, 
     getBackgroundJobById, retryBackgroundJob, deleteBackgroundJob, controlBackgroundQueue,
 
@@ -398,6 +398,8 @@ router.post('/jobs/bulk/:action', (req, res) => {
 router.delete('/jobs/:id', deleteJob);
 
 router.get('/documents', getAdminDocuments);
+router.post('/reextract-cvs', reextractCvs);
+router.post('/documents/reextract', reextractCvs);
 router.get('/documents/:id', getAdminDocumentById);
 router.get('/documents/:id/view', viewAdminDocument);
 router.patch('/documents/:id/:action', updateDocumentStatus);

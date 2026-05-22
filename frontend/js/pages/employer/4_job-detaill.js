@@ -21,8 +21,12 @@ export async function init() {
 async function findJob(id) {
   if (!id) return null;
 
-  const localJob = findLocalJob(id);
-  if (localJob) return localJob;
+  try {
+    const job = await api.get(`/jobs/${id}`);
+    if (job) return job;
+  } catch (err) {
+    console.warn('Load job detail API error:', err);
+  }
 
   try {
     const payload = await api.get('/jobs/my');
@@ -33,6 +37,8 @@ async function findJob(id) {
     return null;
   }
 }
+
+
 
 // Render chi tiet
 function renderJob(job) {
@@ -70,9 +76,12 @@ function renderSkills(skills) {
   const target = document.getElementById('jobSkills');
   if (!target) return;
 
-  const items = skills.length ? skills : ['Chưa cập nhật kỹ năng'];
+  const items = normalizeTextList(skills, 'Chưa cập nhật kỹ năng');
   target.innerHTML = items.map(skill => `
-    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">${escapeHtml(skill)}</span>
+    <p class="flex gap-3">
+      <span class="material-symbols-outlined text-blue-600">check_circle</span>
+      ${escapeHtml(skill)}
+    </p>
   `).join('');
 }
 
@@ -154,11 +163,11 @@ function normalizeList(payload, keys) {
 }
 
 // Chuan hoa text
-function normalizeTextList(value) {
+function normalizeTextList(value, fallback = 'Chua cap nhat yeu cau cong viec.') {
   if (Array.isArray(value)) return value.filter(Boolean);
 
   const text = String(value || '').trim();
-  if (!text) return ['Chua cap nhat yeu cau cong viec.'];
+  if (!text) return [fallback];
 
   return text
     .split(/\r?\n|-/)
@@ -175,7 +184,7 @@ function normalizeSkills(value) {
   } catch {
     // Accept comma-separated skills from older API rows.
   }
-  return String(value).split(',').map(item => item.trim()).filter(Boolean);
+  return String(value).split(/[\n,;]+/).map(item => item.trim()).filter(Boolean);
 }
 
 // Nhan trang thai

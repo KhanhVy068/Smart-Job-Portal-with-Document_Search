@@ -83,14 +83,14 @@
                 <span class="text-xs font-semibold text-slate-400">Tối thiểu (VND)</span>
                 <div class="relative">
                   <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">payments</span>
-                  <input id="jobSalaryMin" name="salary_min" type="number" min="0" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ: 15000000">
+                  <input id="jobSalaryMin" name="salary_min" type="text" inputmode="numeric" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ: 15000000">
                 </div>
               </label>
               <label class="block space-y-2">
                 <span class="text-xs font-semibold text-slate-400">Tối đa (VND)</span>
                 <div class="relative">
                   <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">payments</span>
-                  <input id="jobSalaryMax" name="salary_max" type="number" min="0" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ: 30000000">
+                  <input id="jobSalaryMax" name="salary_max" type="text" inputmode="numeric" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ: 30000000">
                 </div>
               </label>
             </div>
@@ -100,7 +100,7 @@
             <span class="text-xs font-black uppercase tracking-wider text-slate-500">Số năm kinh nghiệm</span>
             <div class="relative">
               <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">work</span>
-              <input id="jobExperience" name="experience_required" type="number" min="0" max="50" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ: 2 (nhập 0 nếu không yêu cầu)">
+              <input id="jobExperience" name="experience_required" type="text" inputmode="numeric" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ: 2 (nhập 0 nếu không yêu cầu)">
             </div>
           </label>
         </div>
@@ -114,15 +114,9 @@
           <h2 class="text-2xl font-black text-slate-950">Kỹ năng cần thiết</h2>
         </div>
         <div class="space-y-4">
-          <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">add</span>
-            <input id="jobSkillInput" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Thêm kỹ năng..." type="text">
-          </div>
-          <div id="jobSkills" class="flex flex-wrap gap-2">
-            <span data-skill="React" class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600">React <button type="button" class="material-symbols-outlined text-sm">close</button></span>
-            <span data-skill="TypeScript" class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600">TypeScript <button type="button" class="material-symbols-outlined text-sm">close</button></span>
-            <span data-skill="Tailwind" class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600">Tailwind <button type="button" class="material-symbols-outlined text-sm">close</button></span>
-          </div>
+          <textarea id="jobSkillInput" name="skills" class="h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10" placeholder="Ví dụ:&#10;React&#10;TypeScript&#10;NodeJS&#10;Docker"></textarea>
+          <p class="text-xs font-semibold text-slate-400">Mỗi dòng là một kỹ năng, hoặc có thể phân tách bằng dấu phẩy.</p>
+          <div id="jobSkills" class="hidden"></div>
         </div>
       </section>
 

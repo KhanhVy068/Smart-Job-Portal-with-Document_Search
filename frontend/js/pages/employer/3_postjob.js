@@ -97,9 +97,10 @@ function collectFormData(status) {
 
   const now = new Date().toISOString();
   const id = editingJobId || createLocalId();
-  const salaryMin = Number(getValue('jobSalaryMin')) || null;
-  const salaryMax = Number(getValue('jobSalaryMax')) || null;
+  const salaryMin = parseNumericInput(getValue('jobSalaryMin')) || null;
+  const salaryMax = parseNumericInput(getValue('jobSalaryMax')) || null;
   const benefits = getValue('jobBenefits').trim();
+  const experienceRequired = parseNumericInput(getValue('jobExperience')) || 0;
 
   return {
     ...(editingJob || {}),
@@ -119,8 +120,8 @@ function collectFormData(status) {
     description: getValue('jobDescription'),
     requirements: getValue('jobRequirements'),
     benefits,
-    experience_required: Number(getValue('jobExperience')) || 0,
-    experienceRequired: Number(getValue('jobExperience')) || 0,
+    experience_required: experienceRequired,
+    experienceRequired,
     status,
     count: Number(editingJob?.count ?? editingJob?.cvCount ?? editingJob?.applicationCount ?? 0),
     createdAt: editingJob?.createdAt || now,
@@ -161,15 +162,7 @@ function fillForm(job) {
 function bindSkillEvents() {
   const input = document.getElementById('jobSkillInput');
   if (!input) return;
-
-  input.addEventListener('keydown', event => {
-    if (event.key !== 'Enter') return;
-    event.preventDefault();
-    addSkill(input.value);
-    input.value = '';
-  });
-
-  bindRemoveSkillEvents();
+  input.addEventListener('blur', () => renderSkills(getSkills()));
 }
 
 // Them ky nang
@@ -184,10 +177,13 @@ function addSkill(skill) {
 
 // Render ky nang
 function renderSkills(skills) {
+  const input = document.getElementById('jobSkillInput');
+  if (input) input.value = normalizeSkills(skills).join('\n');
+
   const target = document.getElementById('jobSkills');
   if (!target) return;
 
-  target.innerHTML = skills.map(skill => `
+  target.innerHTML = normalizeSkills(skills).map(skill => `
     <span data-skill="${escapeHtml(skill)}" class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600">
       ${escapeHtml(skill)}
       <button type="button" class="material-symbols-outlined text-sm">close</button>
@@ -210,8 +206,7 @@ function getSkills() {
     .map(item => item.dataset.skill)
     .filter(Boolean);
 
-  const pendingSkill = getValue('jobSkillInput').trim();
-  if (pendingSkill) values.push(pendingSkill);
+  values.push(...parseSkillText(getValue('jobSkillInput')));
 
   return Array.from(new Set(values));
 }
@@ -225,7 +220,14 @@ function normalizeSkills(value) {
   } catch {
     // Accept comma-separated skills from older API rows.
   }
-  return String(value).split(',').map(item => item.trim()).filter(Boolean);
+  return parseSkillText(value);
+}
+
+function parseSkillText(value = '') {
+  return String(value)
+    .split(/[\n,;]+/)
+    .map(item => item.trim())
+    .filter(Boolean);
 }
 
 // Trang thai nut
@@ -259,6 +261,12 @@ function clearEditState() {
 // Lay gia tri
 function getValue(id) {
   return document.getElementById(id)?.value || '';
+}
+
+function parseNumericInput(value = '') {
+  const normalized = String(value).replace(/[^\d.]/g, '');
+  const number = Number(normalized);
+  return Number.isFinite(number) ? number : 0;
 }
 
 // Gan gia tri
