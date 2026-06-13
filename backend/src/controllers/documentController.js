@@ -1,5 +1,7 @@
 const crypto = require('crypto');
+const fs = require('fs');
 const https = require('https');
+const path = require('path');
 const db = require('../config/db');
 const documentQueue = require('../services/documentQueue');
 const searchService = require('../services/searchService');
@@ -171,6 +173,23 @@ exports.viewDocument = async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(fileName)}"`);
     res.setHeader('Cache-Control', 'private, max-age=300');
+
+    if (document.storage_provider === 'local' || String(document.file_url || '').startsWith('/uploads/')) {
+      const relativePath = String(document.file_url || '').replace(/^\/+/, '');
+      const uploadsRoot = path.resolve(__dirname, '..', '..', '..', 'uploads');
+      const filePath = path.resolve(__dirname, '..', '..', '..', relativePath);
+
+      if (!filePath.startsWith(uploadsRoot) || !fs.existsSync(filePath)) {
+        return res.status(404).end('KhÃ´ng tÃ¬m tháº¥y file CV.');
+      }
+
+      return fs.createReadStream(filePath)
+        .on('error', (error) => {
+          console.error('Read local CV error:', error);
+          if (!res.headersSent) res.status(500).end('KhÃ´ng táº£i Ä‘Æ°á»£c file CV.');
+        })
+        .pipe(res);
+    }
 
     https.get(document.file_url, (upstream) => {
       if (upstream.statusCode >= 300 && upstream.statusCode < 400 && upstream.headers.location) {
