@@ -6,6 +6,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const db = require('../src/config/db');
 const searchService = require('../src/services/searchService');
+const { cloudinary } = require('../src/config/cloudinary');
 
 const EMPLOYER_EMAIL = 'BNguyenVan@gmail.com';
 const CANDIDATE_COUNT = 50;
@@ -60,6 +61,23 @@ function listCvFiles() {
 
 function fileHash(filePath) {
   return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+async function uploadCvToCloudinary(cvPath, candidateId, fileName) {
+  const publicId = `demo-candidate-${candidateId}-${fileName
+    .replace(/\.pdf$/i, '')
+    .replace(/[^a-zA-Z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'cv'}`;
+
+  const result = await cloudinary.uploader.upload(cvPath, {
+    folder: 'smart-job-portal/cv',
+    resource_type: 'raw',
+    format: 'pdf',
+    public_id: publicId,
+    overwrite: true
+  });
+
+  return result.secure_url || result.url;
 }
 
 function cvText(profile, fileName) {
@@ -151,12 +169,12 @@ async function upsertCandidate(profile, passwordHash) {
 async function upsertDocument(candidateId, profile, cvPath) {
   const fileName = path.basename(cvPath);
   const hash = fileHash(cvPath);
-  const publicUrl = `/uploads/demo-cvs/${fileName}`;
+  const publicUrl = await uploadCvToCloudinary(cvPath, candidateId, fileName);
   const extractedText = cvText(profile, fileName);
   const summary = `${profile.title} with ${profile.experience} years of experience. Skills: ${profile.skills.join(', ')}.`;
 
   const [[existing]] = await db.query(
-    `SELECT id FROM documents
+    `SELECT id, file_url, storage_provider FROM documents
      WHERE user_id = ? AND file_name = ? AND doc_type = 'cv' AND deleted_at IS NULL
      LIMIT 1`,
     [candidateId, fileName]
@@ -166,7 +184,7 @@ async function upsertDocument(candidateId, profile, cvPath) {
     await db.query(
       `UPDATE documents
        SET file_url = ?,
-           storage_provider = 'local',
+           storage_provider = 'cloudinary',
            file_hash = ?,
            extracted_text = ?,
            extracted_text_hash = ?,
@@ -198,13 +216,13 @@ async function upsertDocument(candidateId, profile, cvPath) {
   }
 
   const [result] = await db.query(
-    `INSERT INTO documents (
+     `INSERT INTO documents (
        user_id, file_name, file_url, storage_provider, file_hash,
        extracted_text, extracted_text_hash, extracted_skills, desired_position,
        experience_years, extracted_summary, doc_type, status, extraction_status,
        retry_count, processed_at, extracted_at
      )
-     VALUES (?, ?, ?, 'local', ?, ?, ?, ?, ?, ?, ?, 'cv', 'completed', 'completed', 0, NOW(), NOW())`,
+     VALUES (?, ?, ?, 'cloudinary', ?, ?, ?, ?, ?, ?, ?, 'cv', 'completed', 'completed', 0, NOW(), NOW())`,
     [
       candidateId,
       fileName,
