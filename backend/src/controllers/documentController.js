@@ -193,8 +193,15 @@ exports.viewDocument = async (req, res) => {
 
     if (/^https?:\/\//i.test(document.file_url)) {
         return res.redirect(document.file_url);
-      }
+    }
 
+    const fileUrl = String(document.file_url || '').trim();
+    if (/^https?:\/\//i.test(fileUrl)) {
+      return res.redirect(fileUrl);
+    }
+
+
+      
     https.get(document.file_url, (upstream) => {
       if (upstream.statusCode >= 300 && upstream.statusCode < 400 && upstream.headers.location) {
         https.get(upstream.headers.location, (redirected) => redirected.pipe(res))
