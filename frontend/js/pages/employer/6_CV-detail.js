@@ -270,5 +270,5 @@ function getCvEmbedUrl(url = '') {
 }
 
 function getApiBaseUrl() {
-  return (localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api').replace(/\/$/, '');
+  return (localStorage.getItem('apiBaseUrl') || `${window.location.origin}/api`).replace(/\/$/, '');
 }

@@ -1,5 +1,5 @@
 // Cấu hình URL API và chế độ mock từ localStorage.
-const API_BASE_URL = localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api';
+export const API_BASE_URL = localStorage.getItem('apiBaseUrl') || `${window.location.origin}/api`;
 const USE_MOCK = localStorage.getItem('useMockApi') === 'true';
 
 // Gom các hàm gọi API thường dùng để các trang import lại.

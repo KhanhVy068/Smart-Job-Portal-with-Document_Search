@@ -191,6 +191,6 @@ function parseSkillText(value = '') {
 
 function toAbsoluteUploadUrl(url = '') {
   if (/^https?:\/\//i.test(url)) return url;
-  const apiBase = (localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  const apiBase = (localStorage.getItem('apiBaseUrl') || `${window.location.origin}/api`).replace(/\/api\/?$/, '');
   return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
 }

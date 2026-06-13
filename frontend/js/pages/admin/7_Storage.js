@@ -496,7 +496,7 @@ function formatNumber(value) {
 }
 
 function apiBaseUrl() {
-  return localStorage.getItem('apiBaseUrl') || 'http://localhost:5000/api';
+  return localStorage.getItem('apiBaseUrl') || `${window.location.origin}/api`;
 }
 
 function setValue(id, value) {
