@@ -64,12 +64,12 @@ async function loadSettings() {
     fillCompanyForm(settings.company);
     fillAccountForm(settings.account);
     fillNotificationForm(settings.notifications);
-    setSectionStatus('Dữ liệu đã được tải từ backend.');
-    showAlert('success', 'Đã tải cài đặt từ backend.');
+    setSectionStatus('Cài đặt đã được tải.');
+    showAlert('success', 'Đã tải cài đặt.');
   } catch (err) {
     console.error('Load settings error:', err);
     clearForms();
-    setSectionStatus('Chưa có dữ liệu backend, form đang để trống.');
+    setSectionStatus('Chưa có dữ liệu cài đặt.');
     showAlert('error', getLoadErrorMessage(err));
   } finally {
     isLoading = false;
@@ -129,7 +129,7 @@ async function saveCompanySettings() {
     description: getInputValue('companyDescriptionInput')
   };
 
-  await submitSettings(endpoints.company, payload, 'btnSaveCompany', 'Đã gửi hồ sơ công ty lên backend.');
+  await submitSettings(endpoints.company, payload, 'btnSaveCompany', 'Đã lưu hồ sơ công ty.');
 }
 
 // Gửi thông tin tài khoản người liên hệ lên backend.
@@ -140,7 +140,7 @@ async function saveAccountSettings() {
     phone: getInputValue('accountPhoneInput')
   };
 
-  await submitSettings(endpoints.account, payload, 'btnSaveAccount', 'Đã gửi thông tin tài khoản lên backend.');
+  await submitSettings(endpoints.account, payload, 'btnSaveAccount', 'Đã lưu thông tin tài khoản.');
 }
 
 // Gửi tùy chọn thông báo lên backend.
@@ -151,7 +151,7 @@ async function saveNotificationSettings() {
     systemAlert: getChecked('notifySystemAlertInput')
   };
 
-  await submitSettings(endpoints.notifications, payload, 'btnSaveNotifications', 'Đã gửi tùy chọn thông báo lên backend.');
+  await submitSettings(endpoints.notifications, payload, 'btnSaveNotifications', 'Đã lưu tùy chọn thông báo.');
 }
 
 async function submitSettings(url, payload, buttonId, successMessage) {
@@ -212,13 +212,13 @@ function hideAlert() {
 }
 
 function getLoadErrorMessage(err) {
-  if (err?.status === 404) return 'Backend chưa có endpoint /employer/settings. Frontend không dùng dữ liệu giả nên form đang để trống.';
-  return 'Không tải được cài đặt từ backend. Vui lòng kiểm tra API.';
+  if (err?.status === 404) return 'Chưa có dữ liệu cài đặt.';
+  return 'Không tải được cài đặt. Vui lòng thử lại.';
 }
 
 function getSaveErrorMessage(err) {
-  if (err?.status === 404) return 'Backend chưa có endpoint lưu cài đặt tương ứng.';
-  return err?.message || 'Không lưu được cài đặt. Vui lòng kiểm tra backend.';
+  if (err?.status === 404) return 'Chưa lưu được cài đặt.';
+  return err?.message || 'Không lưu được cài đặt. Vui lòng thử lại.';
 }
 
 function setFormDisabled(disabled) {

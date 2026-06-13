@@ -18,7 +18,7 @@ function bindEvents() {
 }
 
 async function loadDashboard() {
-  setText('adminDashboardSubtitle', 'Loading dữ liệu thật từ backend...');
+  setText('adminDashboardSubtitle', 'Đang tải dữ liệu dashboard...');
 
   try {
     const payload = await api.get(endpoint);
@@ -30,8 +30,8 @@ async function loadDashboard() {
     setText(
       'adminDashboardSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/dashboard. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được dữ liệu dashboard admin từ backend.'
+        ? 'Chưa có dữ liệu dashboard.'
+        : 'Không tải được dữ liệu dashboard.'
     );
   }
 }

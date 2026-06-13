@@ -85,14 +85,14 @@ function sanitizeErrorText(text = '') {
     .trim();
 
   if (/cannot\s+(get|post|put|patch|delete)\s+/i.test(withoutTags)) {
-    return `API chưa tồn tại hoặc server lỗi: ${resUrlHint(raw)}`;
+    return 'Chức năng chưa sẵn sàng hoặc hệ thống đang bận.';
   }
   return withoutTags.slice(0, 240);
 }
 
 function resUrlHint(raw = '') {
   const match = String(raw).match(/Cannot\s+(?:GET|POST|PUT|PATCH|DELETE)\s+([^\s<]+)/i);
-  return match?.[1] || 'vui lòng kiểm tra endpoint backend';
+  return match?.[1] || 'vui lòng thử lại sau';
 }
 
 function fixMojibakeDeep(value) {

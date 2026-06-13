@@ -279,7 +279,7 @@ function renderLoginScreen() {
               </div>
               <h1 class="mt-8 text-4xl font-black tracking-tight">Smart Job Portal</h1>
               <p class="mt-4 max-w-md text-base font-semibold leading-7 text-slate-300">
-                Cổng tuyển dụng cho nhà tuyển dụng, ứng viên và quản trị viên. Dữ liệu được lấy từ backend MySQL.
+                Cổng tuyển dụng cho nhà tuyển dụng, ứng viên và quản trị viên.
               </p>
             </div>
             <div class="grid grid-cols-3 gap-3 text-sm font-bold text-slate-300">

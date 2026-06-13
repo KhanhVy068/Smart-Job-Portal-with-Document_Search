@@ -53,7 +53,21 @@ export function mergeJobs(remoteJobs = []) {
 
   getLocalJobs().forEach(job => {
     const id = job.id || job._id;
-    if (id) jobsById.set(String(id), job);
+    if (!id) return;
+
+    const remoteJob = jobsById.get(String(id));
+    if (!remoteJob) {
+      jobsById.set(String(id), job);
+      return;
+    }
+
+    jobsById.set(String(id), {
+      ...remoteJob,
+      ...job,
+      count: remoteJob.count ?? remoteJob.applicationCount ?? remoteJob.application_count ?? job.count ?? 0,
+      applicationCount: remoteJob.applicationCount ?? remoteJob.count ?? remoteJob.application_count ?? job.applicationCount ?? 0,
+      applicationsCount: remoteJob.applicationsCount ?? remoteJob.applicationCount ?? remoteJob.count ?? job.applicationsCount ?? 0
+    });
   });
 
   return Array.from(jobsById.values());

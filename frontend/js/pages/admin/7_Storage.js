@@ -66,7 +66,7 @@ function debounceFilter(key) {
 }
 
 async function loadStorage() {
-  setText('storagePageSubtitle', 'Loading storage data từ backend...');
+  setText('storagePageSubtitle', 'Đang tải dữ liệu lưu trữ...');
   renderLoading();
 
   try {
@@ -84,8 +84,8 @@ async function loadStorage() {
     setText(
       'storagePageSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/storage. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được dữ liệu lưu trữ từ backend.'
+        ? 'Chưa có dữ liệu lưu trữ.'
+        : 'Không tải được dữ liệu lưu trữ.'
     );
   }
 }
@@ -326,7 +326,7 @@ function handleActions(event) {
 
 function viewFile(file) {
   if (!file.url) {
-    alert('Backend chưa trả file URL để view.');
+    alert('Chưa có đường dẫn tệp để xem.');
     return;
   }
   window.open(file.url, '_blank', 'noopener');

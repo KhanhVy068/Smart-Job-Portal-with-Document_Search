@@ -82,7 +82,7 @@ function bindEvents() {
 }
 
 async function loadUsers() {
-  setText('usersPageSubtitle', 'Loading danh sách người dùng từ backend...');
+  setText('usersPageSubtitle', 'Đang tải danh sách người dùng...');
   renderLoading();
 
   try {
@@ -102,8 +102,8 @@ async function loadUsers() {
     setText(
       'usersPageSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/users. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được danh sách người dùng từ backend.'
+        ? 'Chưa có danh sách người dùng.'
+        : 'Không tải được danh sách người dùng.'
     );
   }
 }

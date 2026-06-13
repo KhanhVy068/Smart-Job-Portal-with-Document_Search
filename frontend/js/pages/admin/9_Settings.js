@@ -51,13 +51,13 @@ function bindEvents() {
 }
 
 async function loadSettings() {
-  setText('settingsPageSubtitle', 'Loading cài đặt từ backend...');
+  setText('settingsPageSubtitle', 'Đang tải cài đặt...');
 
   try {
     const payload = await api.get(endpoint);
     state.settings = normalizeSettings(payload);
     fillActiveSection();
-    setText('settingsPageSubtitle', 'Settings đã được tải từ backend theo section hiện tại.');
+    setText('settingsPageSubtitle', 'Cài đặt đã được tải.');
   } catch (err) {
     console.error('Settings quản trị error:', err);
     state.settings = normalizeSettings({});
@@ -65,8 +65,8 @@ async function loadSettings() {
     setText(
       'settingsPageSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/settings. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được cài đặt từ backend.'
+        ? 'Chưa có dữ liệu cài đặt.'
+        : 'Không tải được cài đặt.'
     );
   }
 }
@@ -130,7 +130,7 @@ async function saveActiveSection() {
   try {
     await api.patch(`${endpoint}/${encodeURIComponent(state.activeSection)}`, payload);
     state.settings[state.activeSection] = payload;
-    setText('settingsPageSubtitle', `Đã lưu ${sectionMeta[state.activeSection]?.[0] || 'settings'} lên backend.`);
+    setText('settingsPageSubtitle', `Đã lưu ${sectionMeta[state.activeSection]?.[0] || 'settings'}.`);
   } catch (err) {
     console.error('Save settings error:', err);
     alert(err.message || 'Không lưu được settings.');

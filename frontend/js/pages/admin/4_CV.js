@@ -70,7 +70,7 @@ function debounceFilter(key) {
 }
 
 async function loadDocuments() {
-  setText('documentsPageSubtitle', 'Loading danh sách CV từ backend...');
+  setText('documentsPageSubtitle', 'Đang tải danh sách CV...');
   renderLoading();
 
   try {
@@ -88,8 +88,8 @@ async function loadDocuments() {
     setText(
       'documentsPageSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/documents. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được danh sách CV từ backend.'
+        ? 'Chưa có danh sách CV.'
+        : 'Không tải được danh sách CV.'
     );
   }
 }
@@ -422,7 +422,7 @@ function buildPageList(totalPages) {
 
 function renderPreview(documentItem) {
   if (!documentItem.fileUrl) {
-    return '<div class="flex h-full items-center justify-center p-6 text-center text-sm font-bold text-slate-400">Backend chưa trả fileUrl nên chưa thể preview CV.</div>';
+    return '<div class="flex h-full items-center justify-center p-6 text-center text-sm font-bold text-slate-400">Chưa có file để xem trước CV.</div>';
   }
 
   if (documentItem.fileType === 'pdf') {

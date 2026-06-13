@@ -227,12 +227,12 @@ function normalizeSkills(value) {
 // Trạng thái ban đầu khi chưa tìm kiếm.
 function renderInitialState() {
   setText('resultSummary', 'Nhập điều kiện để tìm CV');
-  setText('resultHint', 'Dữ liệu sẽ được tải từ backend, không dùng dữ liệu mẫu trên frontend.');
+  setText('resultHint', 'Nhập từ khóa hoặc chọn bộ lọc để bắt đầu.');
   setHtml('candidateList', `
     <div class="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
       <span class="material-symbols-outlined text-4xl text-slate-300">description</span>
       <h2 class="mt-3 text-lg font-black text-slate-800">Chưa có kết quả tìm kiếm</h2>
-      <p class="mt-2 text-sm font-semibold text-slate-500">Nhấn “Tìm kiếm” để gọi API tìm kiếm CV.</p>
+      <p class="mt-2 text-sm font-semibold text-slate-500">Nhấn “Tìm kiếm” để xem danh sách CV phù hợp.</p>
     </div>
   `);
   setHtml('pagination', '');
@@ -241,12 +241,12 @@ function renderInitialState() {
 // Trạng thái đang tải trong lúc chờ API.
 function renderLoadingState() {
   setText('resultSummary', 'Đang tìm kiếm CV...');
-  setText('resultHint', 'Vui lòng chờ phản hồi từ backend.');
+  setText('resultHint', 'Vui lòng chờ trong giây lát.');
   setHtml('candidateList', `
     <div class="rounded-xl border border-slate-200 bg-white p-10 text-center">
       <span class="material-symbols-outlined animate-spin text-4xl text-blue-500">progress_activity</span>
       <h2 class="mt-3 text-lg font-black text-slate-800">Đang tải dữ liệu</h2>
-      <p class="mt-2 text-sm font-semibold text-slate-500">Frontend đang gọi API tìm kiếm CV.</p>
+      <p class="mt-2 text-sm font-semibold text-slate-500">Đang xử lý yêu cầu tìm kiếm.</p>
     </div>
   `);
   setHtml('pagination', '');
@@ -255,7 +255,7 @@ function renderLoadingState() {
 // Hiển thị tổng số kết quả trả về từ backend.
 function renderSummary(total) {
   setText('resultSummary', `${formatNumber(total)} CV phù hợp`);
-  setText('resultHint', 'Kết quả bên dưới được render từ phản hồi API.');
+  setText('resultHint', 'Kết quả phù hợp với điều kiện tìm kiếm.');
 }
 
 // Render danh sách CV tìm thấy.
@@ -381,7 +381,7 @@ async function saveCandidate(candidate, button) {
     console.error('Save candidate error:', err);
     button.disabled = false;
     button.textContent = originalText;
-    alert('Chưa lưu được CV. Vui lòng kiểm tra backend.');
+    alert('Chưa lưu được CV. Vui lòng thử lại.');
   }
 }
 
@@ -436,16 +436,16 @@ function renderPagination(page, totalPages) {
 // Hiển thị lỗi khi backend chưa sẵn sàng hoặc API trả lỗi.
 function renderErrorState(err) {
   const message = err?.status === 404
-    ? 'Backend chưa có endpoint /employer/cv-search.'
-    : 'Không thể tải kết quả tìm kiếm CV từ backend.';
+    ? 'Chưa có dữ liệu tìm kiếm CV.'
+    : 'Không thể tải kết quả tìm kiếm CV.';
 
   setText('resultSummary', 'Chưa tải được dữ liệu');
-  setText('resultHint', 'Frontend không dùng dữ liệu giả, nên cần backend trả dữ liệu thật.');
+  setText('resultHint', 'Vui lòng thử lại sau hoặc đổi điều kiện tìm kiếm.');
   setHtml('candidateList', `
     <div class="rounded-xl border border-red-200 bg-red-50 p-10 text-center text-red-700">
       <span class="material-symbols-outlined text-4xl">error</span>
       <h2 class="mt-3 text-lg font-black">${escapeHtml(message)}</h2>
-      <p class="mt-2 text-sm font-semibold">${escapeHtml(err?.message || 'Vui lòng kiểm tra API và thử lại.')}</p>
+      <p class="mt-2 text-sm font-semibold">${escapeHtml(err?.message || 'Vui lòng thử lại.')}</p>
     </div>
   `);
   setHtml('pagination', '');

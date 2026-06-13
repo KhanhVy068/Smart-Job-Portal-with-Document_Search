@@ -80,7 +80,7 @@ function debounceFilter(key) {
 }
 
 async function loadReports() {
-  setText('reportsPageSubtitle', 'Loading dữ liệu report từ backend...');
+  setText('reportsPageSubtitle', 'Đang tải dữ liệu báo cáo...');
 
   try {
     const payload = await api.get(`${endpoint}?${buildQuery()}`);
@@ -97,8 +97,8 @@ async function loadReports() {
     setText(
       'reportsPageSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/reports. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được dữ liệu báo cáo từ backend.'
+        ? 'Chưa có dữ liệu báo cáo.'
+        : 'Không tải được dữ liệu báo cáo.'
     );
   }
 }

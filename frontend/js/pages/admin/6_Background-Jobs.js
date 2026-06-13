@@ -64,7 +64,7 @@ function debounceFilter(key) {
 }
 
 async function loadBackgroundJobs() {
-  setText('backgroundJobsSubtitle', 'Loading background jobs từ backend...');
+  setText('backgroundJobsSubtitle', 'Đang tải tác vụ nền...');
 
   try {
     const payload = await api.get(`${endpoint}?${buildQuery()}`);
@@ -79,8 +79,8 @@ async function loadBackgroundJobs() {
     setText(
       'backgroundJobsSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/background-jobs. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được tác vụ nền từ backend.'
+        ? 'Chưa có tác vụ nền.'
+        : 'Không tải được tác vụ nền.'
     );
   }
 }

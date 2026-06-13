@@ -24,7 +24,7 @@ function bindHeaderEvents() {
     toggleHeaderDropdown({
       icon: 'mail',
       title: 'Tin nhắn',
-      message: 'Chưa có dữ liệu tin nhắn từ backend. Khi endpoint sẵn sàng, danh sách tin nhắn chưa đọc sẽ hiển thị tại đây.'
+      message: 'Chưa có tin nhắn mới.'
     });
   });
 
@@ -124,8 +124,8 @@ function renderEmptyState(err) {
     userAvatarUrl: ''
   };
   const message = err?.status === 404
-    ? 'Backend chưa có endpoint /employer/header'
-    : 'Chưa tải được dữ liệu header';
+    ? 'Chưa có thông tin công ty'
+    : 'Chưa tải được thông tin';
 
   setText('headerCompanyName', message);
   setText('headerUserName', 'Chưa có dữ liệu');

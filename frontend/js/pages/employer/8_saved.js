@@ -176,12 +176,12 @@ function normalizeSkills(value) {
 
 function renderLoadingState() {
   setText('savedSummary', 'Đang tải ứng viên đã lưu...');
-  setText('savedHint', 'Frontend đang gọi API danh sách ứng viên đã lưu.');
+  setText('savedHint', 'Vui lòng chờ trong giây lát.');
   setHtml('savedCandidateList', `
     <div class="col-span-full rounded-xl border border-slate-200 bg-white p-10 text-center shadow-sm">
       <span class="material-symbols-outlined animate-spin text-4xl text-blue-500">progress_activity</span>
       <h2 class="mt-3 text-lg font-black text-slate-800">Đang tải dữ liệu</h2>
-      <p class="mt-2 text-sm font-semibold text-slate-500">Vui lòng chờ phản hồi từ backend.</p>
+      <p class="mt-2 text-sm font-semibold text-slate-500">Đang tải danh sách ứng viên đã lưu.</p>
     </div>
   `);
   setHtml('savedPagination', '');
@@ -199,7 +199,7 @@ function renderStats(candidates, total) {
 
 function renderSummary(total, visibleCount) {
   setText('savedSummary', `${formatNumber(total)} ứng viên đã lưu`);
-  setText('savedHint', `Đang hiển thị ${formatNumber(visibleCount)} hồ sơ từ dữ liệu backend.`);
+  setText('savedHint', `Đang hiển thị ${formatNumber(visibleCount)} hồ sơ.`);
 }
 
 function renderSavedCandidates(candidates) {
@@ -210,7 +210,7 @@ function renderSavedCandidates(candidates) {
         <span class="material-symbols-outlined text-4xl text-slate-300">${hasFilter ? 'search_off' : 'bookmark'}</span>
         <h2 class="mt-3 text-lg font-black text-slate-800">${hasFilter ? 'Không tìm thấy ứng viên phù hợp' : 'Chưa có ứng viên đã lưu'}</h2>
         <p class="mt-2 text-sm font-semibold text-slate-500">
-          ${hasFilter ? 'Thử đổi từ khóa tìm kiếm hoặc xóa bộ lọc.' : 'Khi backend trả dữ liệu từ endpoint ứng viên đã lưu, danh sách sẽ hiển thị tại đây.'}
+          ${hasFilter ? 'Thử đổi từ khóa tìm kiếm hoặc xóa bộ lọc.' : 'Danh sách ứng viên đã lưu sẽ hiển thị tại đây.'}
         </p>
       </div>
     `);
@@ -311,7 +311,7 @@ async function removeSavedCandidate(id, button) {
     console.error('Remove saved candidate error:', err);
     button.disabled = false;
     button.innerHTML = originalHtml;
-    alert('Chưa bỏ lưu được ứng viên. Vui lòng kiểm tra backend.');
+    alert('Chưa bỏ lưu được ứng viên. Vui lòng thử lại.');
   }
 }
 
@@ -360,16 +360,16 @@ function renderPagination(page, pages) {
 
 function renderErrorState(err) {
   const message = err?.status === 404
-    ? 'Backend chưa có endpoint /candidates/saved.'
-    : 'Không thể tải danh sách ứng viên đã lưu từ backend.';
+    ? 'Chưa có danh sách ứng viên đã lưu.'
+    : 'Không thể tải danh sách ứng viên đã lưu.';
 
   setText('savedSummary', 'Chưa tải được dữ liệu');
-  setText('savedHint', 'Frontend không dùng dữ liệu giả, nên cần backend trả dữ liệu thật.');
+  setText('savedHint', 'Vui lòng thử lại sau.');
   setHtml('savedCandidateList', `
     <div class="col-span-full rounded-xl border border-red-200 bg-red-50 p-10 text-center text-red-700">
       <span class="material-symbols-outlined text-4xl">error</span>
       <h2 class="mt-3 text-lg font-black">${escapeHtml(message)}</h2>
-      <p class="mt-2 text-sm font-semibold">${escapeHtml(err?.message || 'Vui lòng kiểm tra API và thử lại.')}</p>
+      <p class="mt-2 text-sm font-semibold">${escapeHtml(err?.message || 'Vui lòng thử lại.')}</p>
     </div>
   `);
   setHtml('savedPagination', '');

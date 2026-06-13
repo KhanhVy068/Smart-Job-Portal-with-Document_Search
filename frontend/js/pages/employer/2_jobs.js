@@ -303,7 +303,7 @@ function normalizeJobs(payload) {
       createdAt: formatDate(job.createdAt || job.publishedAt),
       status: normalizedStatus,
       statusLabel: getStatusLabel(normalizedStatus),
-      count: Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.applicationsCount ?? 0),
+      count: Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.application_count ?? job.applicationsCount ?? 0),
       skills: job.skills || []
     };
   });

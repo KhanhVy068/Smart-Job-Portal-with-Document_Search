@@ -78,7 +78,7 @@ function debounceFilter(key) {
 }
 
 async function loadJobs() {
-  setText('jobsPageSubtitle', 'Loading danh sách việc làm từ backend...');
+  setText('jobsPageSubtitle', 'Đang tải danh sách việc làm...');
   renderLoading();
 
   try {
@@ -98,8 +98,8 @@ async function loadJobs() {
     setText(
       'jobsPageSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/jobs. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được danh sách việc làm từ backend.'
+        ? 'Chưa có danh sách việc làm.'
+        : 'Không tải được danh sách việc làm.'
     );
   }
 }
@@ -506,7 +506,7 @@ function renderApplications(items) {
 }
 
 function companyInfoText(company = {}) {
-  return company.description || company.industry || company.website || company.email || 'Chưa có info công ty từ backend.';
+  return company.description || company.industry || company.website || company.email || 'Chưa có thông tin công ty.';
 }
 
 function normalizeArray(value) {

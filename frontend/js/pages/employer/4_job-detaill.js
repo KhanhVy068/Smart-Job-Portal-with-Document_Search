@@ -46,7 +46,7 @@ function renderJob(job) {
   setText('jobMeta', `${job.type || job.employmentType || 'Chua cap nhat'} - ${job.location || job.city || 'Chua cap nhat'}`);
   setText('jobStatus', getStatusLabel(job.status));
   setText('jobCreatedAt', formatDate(job.createdAt || job.publishedAt));
-  setText('jobCandidates', formatNumber(job.count ?? job.cvCount ?? job.applicationCount ?? 0));
+  setText('jobCandidates', formatNumber(job.count ?? job.cvCount ?? job.applicationCount ?? job.application_count ?? 0));
   setText('jobDescription', job.description || 'Chua cap nhat mo ta cong viec.');
   setText('jobBenefits', job.benefits || 'Chua cap nhat quyen loi.');
 

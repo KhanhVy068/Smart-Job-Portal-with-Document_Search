@@ -316,7 +316,7 @@ function buildRecentJobs(jobs) {
       shortName: job.shortName || getShortName(job.title || job.name),
       type: job.type || job.employmentType || 'Toan thoi gian',
       location: job.location || job.city || 'Chua cap nhat',
-      count: Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.applicationsCount ?? 0),
+      count: Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.application_count ?? job.applicationsCount ?? 0),
       createdAt: formatDate(job.createdAt || job.publishedAt),
       status: normalizeJobStatus(job.status),
       statusLabel: getJobStatusLabel(job.status),
@@ -338,7 +338,7 @@ function normalizeList(payload, keys) {
 // Tổng ứng viên theo tin
 function sumJobsCandidateCount(jobs) {
   return jobs.reduce((sum, job) => (
-    sum + Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.applicationsCount ?? 0)
+    sum + Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.application_count ?? job.applicationsCount ?? 0)
   ), 0);
 }
 

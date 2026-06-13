@@ -40,7 +40,7 @@ function bindEvents() {
 }
 
 async function loadAnalytics() {
-  setText('searchAnalyticsSubtitle', 'Loading dữ liệu phân tích tìm kiếm từ backend...');
+  setText('searchAnalyticsSubtitle', 'Đang tải dữ liệu phân tích tìm kiếm...');
 
   try {
     const payload = await api.get(`${endpoint}?${buildQuery()}`);
@@ -52,8 +52,8 @@ async function loadAnalytics() {
     setText(
       'searchAnalyticsSubtitle',
       err?.status === 404
-        ? 'Backend chưa có endpoint /admin/search-analytics. Frontend đã sẵn sàng để nối dữ liệu thật.'
-        : 'Không tải được dữ liệu phân tích tìm kiếm từ backend.'
+        ? 'Chưa có dữ liệu phân tích tìm kiếm.'
+        : 'Không tải được dữ liệu phân tích tìm kiếm.'
     );
   }
 }

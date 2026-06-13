@@ -215,7 +215,7 @@ function renderCandidates(candidates) {
 
   if (!candidates.length) {
     const message = lastLoadError
-      ? 'Chưa kết nối được backend ứng viên. Khi backend sẵn sàng, trang sẽ đọc dữ liệu từ API.'
+      ? 'Chưa có dữ liệu ứng viên cho tin tuyển dụng này.'
       : 'Không tìm thấy ứng viên phù hợp với bộ lọc hiện tại.';
 
     target.innerHTML = `
@@ -386,12 +386,12 @@ async function syncCandidateStatus(candidate, nextStatus) {
     const updated = await api.get(`/applications/${encodeURIComponent(applicationId)}`);
     const savedStatus = normalizeCandidateStatus(updated.status || updated.applicationStatus);
     if (savedStatus !== nextStatus) {
-      throw new Error('Backend chưa lưu trạng thái mới vào database.');
+      throw new Error('Chưa lưu được trạng thái mới.');
     }
   } catch (err) {
     throw new Error(
       err.status === 404
-        ? 'Backend đang chạy bản cũ. Hãy restart backend để bật API lưu trạng thái thật.'
+        ? 'Chưa cập nhật được trạng thái ứng viên.'
         : err.message || 'Không xác minh được trạng thái vừa cập nhật.'
     );
   }

@@ -32,7 +32,9 @@ build/
 *.db
 
 # Uploads
-uploads/
+uploads/*
+!uploads/demo-cvs/
+!uploads/demo-cvs/*.pdf
 temp/
 storage/
 

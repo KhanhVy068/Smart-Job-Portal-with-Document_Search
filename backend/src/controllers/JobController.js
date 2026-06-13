@@ -140,6 +140,30 @@ function normalizeStatus(value = '') {
   return 'open';
 }
 
+function stripVietnameseLocation(value = '') {
+  return String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+}
+
+function getLocationFilterKeywords(value = '') {
+  const normalized = stripVietnameseLocation(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[._-]+/g, ' ')
+    .replace(/\s+/g, ' ');
+  if (!normalized) return [];
+  if (['hcm', 'hochiminh', 'ho chi minh', 'tp hcm', 'tphcm', 'sai gon', 'saigon'].includes(normalized)) {
+    return ['ho chi minh', 'hcm', 'tp hcm', 'tphcm', 'sai gon', 'saigon'];
+  }
+  if (['hanoi', 'ha noi'].includes(normalized)) return ['ha noi', 'hanoi'];
+  if (['danang', 'da nang'].includes(normalized)) return ['da nang', 'danang'];
+  if (['remote', 'tu xa'].includes(normalized)) return ['remote', 'tu xa'];
+  return [value, normalized].filter((item, index, items) => item && items.indexOf(item) === index);
+}
+
 async function getDefaultCategoryId() {
   const [[category]] = await db.query('SELECT id FROM job_categories ORDER BY id LIMIT 1');
   return category?.id || 1;
@@ -202,8 +226,14 @@ exports.getJobs = async (req, res) => {
     }
 
     if (req.query.location) {
-      const locationKeywords = getLocationKeywords(req.query.location);
-      where.push(`(${locationKeywords.map(() => '(j.location LIKE ? OR ep.address LIKE ?)').join(' OR ')})`);
+      const locationKeywords = getLocationFilterKeywords(req.query.location);
+      where.push(`(${locationKeywords.map(() => `(
+        j.location LIKE ? OR
+        (
+          (j.location IS NULL OR TRIM(j.location) = '' OR LOWER(j.location) IN ('chua cap nhat', 'chÆ°a cáº­p nháº­t', 'dang cap nhat', 'Ä‘ang cáº­p nháº­t'))
+          AND ep.address LIKE ?
+        )
+      )`).join(' OR ')})`);
       params.push(...locationKeywords.flatMap(item => [`%${item}%`, `%${item}%`]));
     }
 

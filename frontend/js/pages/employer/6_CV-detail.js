@@ -11,7 +11,7 @@ export async function init() {
   } catch (err) {
     console.error('Load CV detail error:', err);
     if (fallback) {
-      renderDetail(fallback, 'Không tải được API chi tiết, đang hiển thị dữ liệu từ danh sách ứng viên.');
+      renderDetail(fallback, 'Không tải được chi tiết, đang hiển thị thông tin có sẵn.');
     } else {
       renderError(err);
     }
@@ -87,7 +87,7 @@ function renderDetail(candidate, note = '') {
     ? `
       ${isLegacyCloudinaryPdf(candidate.cvUrl) ? `
         <div class="border-b border-amber-200 bg-amber-50 px-6 py-4 text-sm font-semibold text-amber-800">
-          File này được upload bằng cấu hình Cloudinary cũ dưới dạng image PDF nên trình duyệt có thể không mở được. Hãy xóa CV cũ và upload lại PDF sau khi restart backend.
+          File này có thể không mở được trong trình duyệt. Hãy xóa CV cũ và upload lại PDF.
         </div>
       ` : ''}
       <iframe title="CV ${escapeHtml(candidate.name)}" src="${escapeAttr(embedUrl)}" class="w-full bg-white" style="height: calc(100vh - 190px); min-height: 900px;"></iframe>

@@ -7,6 +7,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "benchmark:search": "node scripts/benchmark-search.js",
+    "seed:company-b": "node scripts/seed-company-b-candidates.js",
+    "seed:demo-companies": "node scripts/seed-demo-companies-jobs.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

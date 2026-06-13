@@ -52,7 +52,7 @@ function bindEvents() {
 
   document.getElementById('adminHelpButton')?.addEventListener('click', () => {
     closeProfile();
-    document.getElementById('adminNotificationMessage').textContent = 'Nội dung trợ giúp sẽ hiển thị khi backend hỗ trợ được kết nối.';
+    document.getElementById('adminNotificationMessage').textContent = 'Chưa có nội dung trợ giúp để hiển thị.';
     document.getElementById('adminNotificationDropdown')?.classList.remove('hidden');
   });
 
