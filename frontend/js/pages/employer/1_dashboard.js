@@ -13,11 +13,7 @@ export async function init() {
 
     // Chuẩn hóa phản hồi API
     const jobs = normalizeList(jobsData, ['items', 'jobs', 'data']);
-    let applications = normalizeList(applicationsData, ['items', 'applications', 'data']);
-    if (!applications.length) {
-      applications = await loadApplicationsForJobs(jobs);
-    }
-
+    const applications = normalizeList(applicationsData, ['items', 'applications', 'data']);
     const dashboard = buildDashboardData({ jobs, applications, candidates: applications });
 
     renderStats(dashboard);
@@ -28,33 +24,6 @@ export async function init() {
     console.error('Dashboard error:', err);
     renderDashboardError(err);
   }
-}
-
-async function loadApplicationsForJobs(jobs) {
-  const jobsWithApplications = jobs.filter(job => {
-    const count = Number(job.count ?? job.cvCount ?? job.applicationCount ?? job.application_count ?? job.applicationsCount ?? 0);
-    return getJobId(job) && count > 0;
-  });
-
-  if (!jobsWithApplications.length) return [];
-
-  const results = await Promise.all(
-    jobsWithApplications.map(async (job) => {
-      try {
-        const payload = await getOptional(`/jobs/${encodeURIComponent(getJobId(job))}/applications`, null);
-        return normalizeList(payload, ['items', 'applications', 'candidates', 'data']).map(item => ({
-          ...item,
-          jobId: item.jobId || item.job_id || getJobId(job),
-          jobTitle: item.jobTitle || item.job_title || job.title || job.name
-        }));
-      } catch (error) {
-        console.warn('Khong tai duoc ung vien cho tin tuyen dung:', getJobId(job), error);
-        return [];
-      }
-    })
-  );
-
-  return results.flat();
 }
 
 // Tạo dữ liệu dashboard
@@ -269,7 +238,7 @@ function buildApplicationTrend(records) {
   const buckets = getLastSevenDayBuckets();
 
   records.forEach((record) => {
-    const timestamp = toTime(getApplicationTime(record));
+    const timestamp = toTime(record.createdAt || record.appliedAt || record.submittedAt);
     if (!timestamp) return;
 
     const key = toDateKey(new Date(timestamp));
@@ -285,17 +254,17 @@ function buildApplicationTrend(records) {
 function buildRecentActivities(records) {
   return records
     .slice()
-    .sort((a, b) => toTime(getApplicationTime(b)) - toTime(getApplicationTime(a)))
+    .sort((a, b) => toTime(b.createdAt || b.appliedAt) - toTime(a.createdAt || a.appliedAt))
     .slice(0, 4)
     .map((item, index) => {
-      const name = item.candidateName || item.candidate_name || item.name || item.fullName || item.full_name || 'Ung vien';
+      const name = item.candidateName || item.name || item.fullName || 'Ung vien';
       const status = normalizeActivityStatus(item.status);
 
       return {
         name,
         initials: getInitials(name),
-        position: item.jobTitle || item.job_title || item.position || item.currentPosition || 'Ung vien',
-        time: formatRelativeTime(getApplicationTime(item)),
+        position: item.jobTitle || item.position || item.currentPosition || 'Ung vien',
+        time: formatRelativeTime(item.createdAt || item.appliedAt),
         status,
         avatarClass: getAvatarClass(index)
       };
@@ -353,14 +322,6 @@ function buildRecentJobs(jobs) {
       statusLabel: getJobStatusLabel(job.status),
       iconClass: getJobIconClass(index)
     }));
-}
-
-function getJobId(job = {}) {
-  return job.id || job._id || job.jobId || job.job_id;
-}
-
-function getApplicationTime(record = {}) {
-  return record.appliedAt || record.applied_at || record.createdAt || record.created_at || record.submittedAt || record.submitted_at || record.updatedAt || record.updated_at;
 }
 
 // Chuẩn hóa danh sách
